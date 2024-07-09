@@ -21,6 +21,7 @@ enum Role {
 
 model Account {
   id        String    @id @default(cuid())
+  userName  String
   name      String
   password  String
   role      Role      @default(STUDENT)
@@ -28,8 +29,8 @@ model Account {
   updatedAt DateTime  @updatedAt
   projects  Project[] @relation("ProjectAccount")
 
-  @@unique([name, password])
-  @@index([name])
+  @@unique([userName, password])
+  @@index([userName])
   @@index([role])
 }
 

@@ -1,11 +1,12 @@
 "use client"
-import { Check, ChevronsUpDown, Search } from "lucide-react"
+import { Check, ChevronsUpDown, Search, X } from "lucide-react"
 import { Input } from "../ui/input"
 import { DropdownMenu, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "../ui/select"
@@ -23,15 +24,19 @@ import {
   CommandList,
 } from "../ui/command"
 import { cn } from "@/lib/utils"
+import { queryTeachers } from "@/lib/actions/queries/accounts"
 
 const ProjectsHeader = () => {
   const { search, setSearch } = useAppState()
-  const [teachers, setTeachers] = useState<Partial<Account>[]>([
-    { id: "1", name: "Herr Müller" },
-    { id: "2", name: "Frau Schmidt" },
-    { id: "3", name: "Herr Meier" },
-  ])
+  const [teachers, setTeachers] = useState<Partial<Account>[]>([])
   const [teachersOpen, setTeachersOpen] = useState(false)
+  const [dayRenderKey, setDayRenderKey] = useState(+new Date())
+  useEffect(() => {
+    const fetchData = async () => {
+      setTeachers(await queryTeachers())
+    }
+    fetchData()
+  }, [])
   return (
     <div className="w-full h-16 bg-slate-50 border-b-2 border-slate-100 sticky top-0 flex items-center px-6 gap-4">
       <div className="relative flex items-center">
@@ -85,12 +90,28 @@ const ProjectsHeader = () => {
       </Select>
       <Select
         onValueChange={(value) => setSearch({ ...search, day: value as Day })}
-        // value={search.day}
+        value={search.day}
+        key={dayRenderKey}
       >
         <SelectTrigger className="w-[250px] focus:ring-0 bg-slate-200 border-slate-300">
           <SelectValue placeholder="Tag" />
         </SelectTrigger>
         <SelectContent className="bg-white border-slate-200 cursor-pointer">
+          {search.day && (
+            <>
+              <div
+                className="flex gap-2 text-sm items-center"
+                onClick={(e) => {
+                  setSearch({ ...search, day: undefined })
+                  setDayRenderKey(+new Date())
+                }}
+              >
+                <X className="w-6 h-6 p-1" />
+                Alle Tage
+              </div>
+              <SelectSeparator />
+            </>
+          )}
           <SelectItem value="MON" className="cursor-pointer">
             Montag
           </SelectItem>
