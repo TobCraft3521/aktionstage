@@ -1,6 +1,6 @@
 # Aktionstage Webseite
-This is the new version of the "ASG Aktionstage Webseite" built in Typescript/Next.js
-Das ist die neue Version der "ASG Aktionstage Webseite" diesmal mit Typescript/Next.js
+This is the new version of the "ASG Aktionstage Webseite" built in Typescript/Next.js.
+Das ist die neue Version der "ASG Aktionstage Webseite" diesmal mit Typescript/Next.js.
 
 ## Features and improvements
 It uses an improved search featuring 
