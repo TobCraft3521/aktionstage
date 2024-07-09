@@ -16,7 +16,9 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
     router.push("/login")
   }
   return (
-    <div className="p-6 w-screen flex justify-between items-center pb-4">
+    <div className={cn("p-6 w-screen flex justify-between items-center pb-4",
+      variant === "main" && "border-b-2 border-slate-100 bg-white"
+    )}>
       <div className="z-10 flex gap-8 items-center">
         <Link
           href="/projects"
