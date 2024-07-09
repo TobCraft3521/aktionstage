@@ -59,7 +59,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
               styles.link
             )}
           >
-            Einstellungen
+            Passwort ändern
           </Link>
         </div>
       </div>
