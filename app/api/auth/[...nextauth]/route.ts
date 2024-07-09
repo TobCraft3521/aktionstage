@@ -20,8 +20,8 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.username || !credentials?.password) return null
         const user = await db.account.findUnique({
           where: {
-            name_password: {
-              name: credentials.username,
+            userName_password: {
+              userName: credentials.username,
               password: md5(credentials.password),
             },
           },
