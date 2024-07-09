@@ -5,7 +5,7 @@ Das ist die neue Version der "ASG Aktionstage Webseite" diesmal mit Typescript/N
 ## Features and improvements
 It uses an improved search featuring 
 - Only one grade can be selected
-- Only one day can be selected
+- Only one day can be selected, but also deselected
 - You can search for teachers (NEW) in a dropdown select
 - LIVE search
 
