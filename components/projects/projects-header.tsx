@@ -30,7 +30,7 @@ const ProjectsHeader = () => {
   const { search, setSearch } = useAppState()
   const [teachers, setTeachers] = useState<Partial<Account>[]>([])
   const [teachersOpen, setTeachersOpen] = useState(false)
-  const [dayRenderKey, setDayRenderKey] = useState(+new Date())
+  const [rerenderKey, setRerenderKey] = useState(+new Date())
   useEffect(() => {
     const fetchData = async () => {
       setTeachers(await queryTeachers())
@@ -38,7 +38,10 @@ const ProjectsHeader = () => {
     fetchData()
   }, [])
   return (
-    <div className="w-full h-16 bg-slate-50 border-b-2 border-slate-100 sticky top-0 flex items-center px-6 gap-4">
+    <div
+      key={rerenderKey}
+      className="w-full h-16 bg-slate-50 border-b-2 border-slate-100 sticky top-0 flex items-center px-6 gap-4 drop-shadow-xl z-10"
+    >
       <div className="relative flex items-center">
         <Search className="absolute left-2 h-5 w-5 text-gray-500" />
         <input
@@ -74,6 +77,7 @@ const ProjectsHeader = () => {
           <SelectItem value="7" className="cursor-pointer">
             7. Klasse
           </SelectItem>
+          <SelectSeparator />
           <SelectItem value="8" className="cursor-pointer">
             8. Klasse
           </SelectItem>
@@ -83,6 +87,7 @@ const ProjectsHeader = () => {
           <SelectItem value="10" className="cursor-pointer">
             10. Klasse
           </SelectItem>
+          <SelectSeparator />
           <SelectItem value="11" className="cursor-pointer">
             11. Klasse
           </SelectItem>
@@ -91,7 +96,6 @@ const ProjectsHeader = () => {
       <Select
         onValueChange={(value) => setSearch({ ...search, day: value as Day })}
         value={search.day}
-        key={dayRenderKey}
       >
         <SelectTrigger className="w-[250px] focus:ring-0 bg-slate-200 border-slate-300">
           <SelectValue placeholder="Tag" />
@@ -103,7 +107,7 @@ const ProjectsHeader = () => {
                 className="flex gap-2 text-sm items-center"
                 onClick={(e) => {
                   setSearch({ ...search, day: undefined })
-                  setDayRenderKey(+new Date())
+                  setRerenderKey(+new Date())
                 }}
               >
                 <X className="w-6 h-6 p-1" />
@@ -173,6 +177,15 @@ const ProjectsHeader = () => {
           </Command>
         </PopoverContent>
       </Popover>
+      <Button
+        className="bg-black/75"
+        onClick={() => {
+          setSearch({})
+          setRerenderKey(+new Date())
+        }}
+      >
+        Reset
+      </Button>
     </div>
   )
 }

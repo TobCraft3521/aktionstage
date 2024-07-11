@@ -1,0 +1,38 @@
+/* normal card css*/
+.normal-card {
+  width: 200px;
+  height: 200px;
+  display: grid;
+  place-items: end center;
+  margin: 10px;
+}
+.normal-card h1 {
+  font-size: 18px;
+  color: var(--fg);
+  padding: 5px;
+  text-align: center;
+}
+
+/* expand card css*/
+.expanded-card {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+}
+.expanded-card-h {
+  font-size: 27px;
+  color: var(--fg);
+  width: 300px;
+  padding: 5px;
+  place-self: end center;
+}
+.expanded-card p {
+  width: 300px;
+  padding: 5px;
+  place-self: start center;
+}

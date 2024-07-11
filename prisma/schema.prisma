@@ -41,12 +41,15 @@ enum Day {
 }
 
 model Project {
-  id          String @id @default(cuid())
-  name        String
-  description String
-  imageUrl    String
-  studentsMax Int
-  day         Day    @default(MON)
+  id            String @id @default(cuid())
+  name          String
+  description   String
+  imageUrl      String
+  studentsCount Int
+  studentsMax   Int
+  day           Day    @default(MON)
+  minGrade      Int    @default(5)
+  maxGrade      Int    @default(11)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

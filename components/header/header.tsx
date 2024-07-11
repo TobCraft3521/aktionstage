@@ -33,7 +33,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
           />
           Aktionstage
         </Link>
-        <div className="flex items-center justify-center gap-4 font-semibold">
+        <div className="flex items-center justify-center gap-4 font-medium">
           <Link
             href="/projects"
             className={cn(
@@ -73,7 +73,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
                 </div>
                 <div
                   onClick={logout}
-                  className="flex cursor-pointer hover:bg-slate-100 transition-all gap-4 font-medium items-center px-2 border-2 border-slate-200 p-1 rounded-lg"
+                  className="flex cursor-pointer hover:bg-slate-100 transition-all gap-4 font-medium items-center px-2 border border-slate-200 p-1 rounded-lg"
                 >
                   Abmelden
                   <LogOut size={20} />
