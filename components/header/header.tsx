@@ -1,5 +1,5 @@
 "use client"
-import { LogOut } from "lucide-react"
+import { LogOut, Menu } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -10,19 +10,21 @@ import { useRouter } from "next/navigation"
 const Header = ({ variant }: { variant: "main" | "login" }) => {
   const user = useSession().data?.user
   const router = useRouter()
-  console.log(user)
   const logout = () => {
     signOut()
     router.push("/login")
   }
   return (
-    <div className={cn("p-6 w-screen flex justify-between items-center pb-4",
-      variant === "main" && "border-b-2 border-slate-100 bg-white"
-    )}>
+    <div
+      className={cn(
+        "p-6 w-screen flex justify-between items-center pb-4",
+        variant === "main" && "border-b-2 border-slate-100 bg-white"
+      )}
+    >
       <div className="z-10 flex gap-8 items-center">
         <Link
           href="/projects"
-          className="bg-black/75 rounded-lg z-10 flex items-center gap-2 p-2 text-white text-lg font-semibold cursor-pointer hover:bg-black/90 transition-all"
+          className="bg-black/75 rounded-lg z-10 flex items-center gap-2 p-2 text-white xs:text-lg font-semibold cursor-pointer hover:bg-black/90 transition-all"
         >
           <Image
             src="/imgs/asg-logo.jpg"
@@ -33,7 +35,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
           />
           Aktionstage
         </Link>
-        <div className="flex items-center justify-center gap-4 font-medium">
+        <div className="md:flex items-center justify-center gap-4 font-medium hidden">
           <Link
             href="/projects"
             className={cn(
@@ -75,13 +77,16 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
                   onClick={logout}
                   className="flex cursor-pointer hover:bg-slate-100 transition-all gap-4 font-medium items-center px-2 border border-slate-200 p-1 rounded-lg"
                 >
-                  Abmelden
+                  <p className="hidden md:block">Abmelden</p>
                   <LogOut size={20} />
                 </div>
               </>
             )}
           </div>
         )}
+      </div>
+      <div className="z-10 md:hidden">
+        <Menu size={24} />
       </div>
     </div>
   )

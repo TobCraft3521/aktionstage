@@ -1,0 +1,15 @@
+.loadAni {
+  animation: fadein 0.5s ease-in-out normal backwards;
+}
+
+@keyframes fadein {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

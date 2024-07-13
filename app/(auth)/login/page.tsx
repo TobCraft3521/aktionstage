@@ -8,7 +8,7 @@ const LoginPage = async () => {
   const user = (await auth())?.user
   if (user) return redirect("/projects")
   return (
-    <div className="w-screen h-screen relative">
+    <div className="w-screen h-screen relative flex flex-col">
       <div className="absolute w-screen h-screen">
         <Image
           src="/imgs/asg.jpg "
@@ -18,7 +18,7 @@ const LoginPage = async () => {
           className="hidden -z-10 object-cover pointer-events-none w-full h-full md:block"
         />
       </div>
-      <div className="w-full h-32">
+      <div className="w-full h-44">
         <Image
           src="/imgs/asg-mobile.jpg "
           alt="asg"
@@ -30,7 +30,7 @@ const LoginPage = async () => {
       <div className="absolute top-0">
         <Header variant="login" />
       </div>
-      <div className="md:absolute top-16 right-0 w-full md:w-[700px] drop-shadow-2xl bg-white h-screen md:top-0">
+      <div className="md:absolute top-16 right-0 w-full md:w-[700px] drop-shadow-2xl bg-white flex-1 md:h-screen md:top-0">
         <LoginForm />
       </div>
     </div>

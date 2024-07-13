@@ -4,6 +4,7 @@ const nextConfig = {
     remotePatterns: [
       { hostname: "tobcraft.xyz" },
       { hostname: "aktionstage.asg-passau.de" },
+      { hostname: "images.pexels.com" },
     ],
   },
 }
