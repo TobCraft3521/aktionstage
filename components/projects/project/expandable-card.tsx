@@ -23,21 +23,14 @@ export const ExpandableCard = ({
 }) => {
   const [isSelected, setIsSelected] = useState(false)
   const appState = useAppState()
-  const onClose = () => {
-    setIsSelected(false)
-    appState.setSelectedProject(null)
-  }
-  const inverted = useInvertedBorderRadius(15)
 
   return (
     <div className="w-full h-64">
-      <Overlay isEnabled={isSelected} onClose={onClose} />
       <div className={isSelected ? "fixed top-0 right-0 left-0 z-20" : ""}>
         <motion.div
           layoutId={animationId}
           style={{
             animationDelay: `${i * 35}ms`,
-            ...inverted,
           }}
           className={cn(
             !isSelected
