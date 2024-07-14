@@ -26,7 +26,11 @@ function springTo(value: any, from: number, to: number) {
       velocity: value.getVelocity(),
       stiffness: 400,
       damping: 40,
+    }).start({
+      update: (v: number) => value.set(v),
+      complete,
     })
+
   })
 }
 

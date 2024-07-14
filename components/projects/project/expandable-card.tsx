@@ -1,14 +1,16 @@
 "use client"
 import { cn } from "@/lib/utils"
-import { LayoutGroup, motion, useMotionValue } from "framer-motion"
+import { LayoutGroup, motion, MotionValue, useMotionValue } from "framer-motion"
 import Image from "next/image"
 import { useRef, useState } from "react"
 import styles from "./styles.module.css"
 import { Project } from "@prisma/client"
 import Overlay from "@/components/global/overlay"
-import { useScrollConstraints } from "@/lib/utils/use-scroll-constraints"
-import { useWheelScroll } from "@/lib/utils/use-wheel-scroll"
 import { useAppState } from "@/hooks/use-app-state"
+import { useWheelScroll } from "@/lib/utils/use-wheel-scroll"
+import { useScrollConstraints } from "@/lib/utils/use-scroll-constraints"
+import { closeSpring, openSpring } from "@/lib/utils/animations"
+import { useInvertedBorderRadius } from "@/lib/utils/use-inverted-border-radius"
 const dismissDistance = 75
 export const ExpandableCard = ({
   animationId,
@@ -23,53 +25,24 @@ export const ExpandableCard = ({
   const appState = useAppState()
   const onClose = () => {
     setIsSelected(false)
+    appState.setSelectedProject(null)
   }
-  const y = useMotionValue(0)
-  const zIndex = useMotionValue(isSelected ? 2 : 0)
+  const inverted = useInvertedBorderRadius(15)
 
-  // We'll use the opened card element to calculate the scroll constraints
-  const cardRef = useRef(null)
-  const constraints = useScrollConstraints(cardRef, isSelected)
-
-  function checkSwipeToDismiss() {
-    if (y.get() > dismissDistance) {
-      setIsSelected(false)
-      appState.setSelectedProject(null)
-      y.set(0)
-    }
-  }
-
-  function checkZIndex(latest: any) {
-    if (isSelected) {
-      zIndex.set(2)
-    } else if (!isSelected && latest.scaleX < 1.01) {
-      zIndex.set(0)
-    }
-  }
-
-  // When this card is selected, attach a wheel event listener
-  const containerRef = useRef(null)
-  useWheelScroll(containerRef, y, constraints, checkSwipeToDismiss, isSelected)
   return (
-    <div className="w-full h-64" ref={containerRef}>
+    <div className="w-full h-64">
       <Overlay isEnabled={isSelected} onClose={onClose} />
       <div className={isSelected ? "fixed top-0 right-0 left-0 z-20" : ""}>
         <motion.div
           layoutId={animationId}
-          ref={cardRef}
           style={{
             animationDelay: `${i * 35}ms`,
-            zIndex,
-            y,
+            ...inverted,
           }}
-          drag={isSelected ? "y" : false}
-          dragConstraints={constraints}
-          onDrag={checkSwipeToDismiss}
-          onUpdate={checkZIndex}
           className={cn(
             !isSelected
-              ? "w-full overflow-hidden flex items-center h-64 justify-center rounded-lg cursor-pointer drop-shadow-lg group"
-              : "",
+              ? "w-full overflow-hidden flex items-center h-64 justify-center rounded-xl cursor-pointer drop-shadow-lg group"
+              : "rounded-lg",
             styles.loadAni
           )}
         >
@@ -80,7 +53,7 @@ export const ExpandableCard = ({
                 setIsSelected(true)
                 appState.setSelectedProject(project)
               }}
-              className={isSelected ? "h-64 w-full" : "h-full w-full"}
+              className={!isSelected ? "h-64 w-full" : ""}
             >
               <Image
                 src={project.imageUrl || "/imgs/asg-logo.jpg"}
@@ -98,12 +71,20 @@ export const ExpandableCard = ({
               <div
                 className="absolute top-full bg-white w-full h-[5000px] z-20 font-thin"
                 style={{
-                  filter: "drop-shadow(0 -96px 32px rgb(0 0 0 / 0.6))",
+                  filter: "drop-shadow(0 -96px 32px rgb(0 0 0 / 0.7))",
                 }}
               ></div>
             </div>
           ) : (
-            <div className="h-screen bg-black w-screen">test</div>
+            <div
+              className="h-screen bg-black w-screen md:rounded-lg"
+              onClick={() => {
+                setIsSelected(false)
+                appState.setSelectedProject(null)
+              }}
+            >
+              test
+            </div>
           )}
         </motion.div>
       </div>

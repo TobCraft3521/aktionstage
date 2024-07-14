@@ -47,7 +47,7 @@ const ProjectsComp = () => {
           <Loader />
         </div>
       ) : (
-        <div className="w-full p-2 rounded-lg mt-6 gap-4 px-8 xl:px-0 lg:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+        <div className="w-full p-2 rounded-lg mt-6 gap-6 px-8 xl:px-0 lg:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
           {searchedProjects.length > 0 ? (
             <>
               {searchedProjects.map((project, i) => (
