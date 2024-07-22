@@ -42,6 +42,7 @@ const LoginForm = () => {
       password: formData.password,
       redirect: false,
     })
+    form.reset()
 
     if (response?.ok) {
       router.push("/projects")

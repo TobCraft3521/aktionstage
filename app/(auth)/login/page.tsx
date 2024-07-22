@@ -30,7 +30,7 @@ const LoginPage = async () => {
       <div className="absolute top-0">
         <Header variant="login" />
       </div>
-      <div className="md:absolute top-16 right-0 w-full md:w-[700px] drop-shadow-2xl bg-white flex-1 md:h-screen md:top-0">
+      <div className="md:absolute top-16 px-8 md:px-0 right-0 w-full md:w-[700px] drop-shadow-2xl bg-white flex-1 md:h-screen md:top-0">
         <LoginForm />
       </div>
     </div>

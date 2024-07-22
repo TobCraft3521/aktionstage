@@ -20,14 +20,15 @@ enum Role {
 }
 
 model Account {
-  id        String    @id @default(cuid())
-  userName  String
-  name      String
-  password  String
-  role      Role      @default(STUDENT)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  projects  Project[] @relation("ProjectAccount")
+  id          String    @id @default(cuid())
+  userName    String
+  name        String
+  password    String
+  role        Role      @default(STUDENT)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projects    Project[] @relation("ProjectAccount")
+  ownProjects Project[] @relation("ProjectTeacher")
 
   @@unique([userName, password])
   @@index([userName])
@@ -55,6 +56,9 @@ model Project {
   updatedAt DateTime  @updatedAt
   // non students cant sign in
   students  Account[] @relation("ProjectAccount")
+
+  // max 3 teachers
+  teachers Account[] @relation("ProjectTeacher")
 
   @@index([id])
   @@index([name])

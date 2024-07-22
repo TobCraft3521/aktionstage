@@ -1,3 +1,5 @@
+// pages/ProjectsComp.tsx
+
 "use client"
 import React, { useEffect, useMemo, useState } from "react"
 import { useAppState } from "@/hooks/use-app-state" // Update the path as per your project structure
@@ -15,15 +17,14 @@ import Link from "next/link"
 import styles from "./project/styles.module.css"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 
-const ProjectsComp = () => {
+const ProjectsComp = ({ id }: { id?: string }) => {
   const [loading, setLoading] = useState(true)
   const [projects, setProjects] = useState<Partial<Project>[]>([])
   const appState = useAppState() // Make sure to import useAppState from the correct path
   const [filtering, setFiltering] = useState(false)
-  const [selectedProject, setSelectedProject] =
-    useState<Partial<Project> | null>()
-
+  const router = useRouter()
   useEffect(() => {
     const fetchData = async () => {
       setProjects(await queryProjects())
@@ -51,15 +52,28 @@ const ProjectsComp = () => {
     return filtered
   }, [projects, appState.search])
 
-  // Check if projects are still loading or being filtered
   const noProjectsFound =
     !loading &&
     !filtering &&
     searchedProjects.length === 0 &&
     projects.length > 0
 
+  let swipeDismissDistance = 0 // Default value for SSR
+
+  if (typeof window !== "undefined") {
+    swipeDismissDistance = (10 * window.innerHeight) / 100 // Calculate the swipe dismiss distance in pixels
+  }
   const y = useMotionValue(0)
-  const scale = useTransform(y, [-200, 0, 200], [0.5, 1, 0.5])
+  const scale = useTransform(
+    y,
+    [-swipeDismissDistance, 0, swipeDismissDistance],
+    [0.2, 1, 0.2]
+  )
+  const borderRadius = useTransform(
+    y,
+    [-swipeDismissDistance, 0, swipeDismissDistance],
+    [96, 0, 96]
+  )
 
   return (
     <div className="flex flex-col flex-1">
@@ -71,7 +85,7 @@ const ProjectsComp = () => {
         <div className="flex flex-1">
           {searchedProjects.length > 0 && projects.length > 0 ? (
             <div className="w-full">
-              <div className="w-full p-2 rounded-lg mt-6 gap-6 px-8 xl:px-0 lg:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+              <div className="w-full p-2 rounded-lg mt-6 gap-4 md:gap-6 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                 {searchedProjects.map((project, i) => (
                   <div className="w-full h-64" key={project.id}>
                     <motion.div
@@ -81,9 +95,21 @@ const ProjectsComp = () => {
                       )}
                       key={project.id}
                       layoutId={`card-container-${project.id}`}
-                      onClick={() => setSelectedProject(project)}
+                      onClick={() => router.push("/projects/" + project.id)}
                       style={{
-                        animationDelay: `${i * 35}ms`,
+                        animationDelay: `${i * 50}ms`,
+                        borderRadius: "20px",
+                      }}
+                      drag={id === project.id ? "y" : false}
+                      dragConstraints={{ top: 0, bottom: 0 }}
+                      dragElastic={0.3}
+                      onDragEnd={(event, info) => {
+                        if (
+                          info.offset.y > swipeDismissDistance ||
+                          info.offset.y < -swipeDismissDistance
+                        ) {
+                          router.push("/projects")
+                        }
                       }}
                     >
                       <Image
@@ -114,7 +140,6 @@ const ProjectsComp = () => {
               </div>
             </div>
           ) : (
-            // Show message only if no projects were found and initial fetch is completed
             noProjectsFound && (
               <div className="flex-1 flex-col flex items-center justify-center text-lg drop-shadow-xl">
                 😜 Nichts gefunden{" "}
@@ -128,30 +153,33 @@ const ProjectsComp = () => {
             )
           )}
           <AnimatePresence>
-            {selectedProject && (
+            {id && (
               <div className="">
                 <motion.div
-                  className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-white rounded-lg shadow-lg p-8 z-30"
-                  layoutId={`card-container-${selectedProject.id}`}
-                  onClick={() => setSelectedProject(null)}
+                  className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-white shadow-lg p-8 z-50"
+                  layoutId={`card-container-${id}`}
                   drag="y"
-                  style={{ y, scale }}
+                  style={{ y, scale, borderRadius }}
                   dragConstraints={{ top: 0, bottom: 0 }}
-                  dragElastic={0.2}
+                  dragElastic={0.3}
                   onDrag={(event, info) => {
-                    if (info.offset.y > 200 || info.offset.y < -200) {
-                      setSelectedProject(null)
+                    if (
+                      info.offset.y > swipeDismissDistance ||
+                      info.offset.y < -swipeDismissDistance
+                    ) {
+                      router.push("/projects")
                     }
                   }}
                 >
                   <motion.h2
                     className="text-2xl font-bold"
-                    layoutId={`title-${selectedProject.id}`}
+                    layoutId={`title-${id}`}
                   >
-                    {selectedProject.name}
+                    {projects.find((p) => p.id === id)?.name}
                   </motion.h2>
-                  <motion.p layoutId={`description-${selectedProject.id}`}>
-                    {selectedProject.description}
+                  <button>test</button>
+                  <motion.p layoutId={`description-${id}`}>
+                    {projects.find((p) => p.id === id)?.description}
                   </motion.p>
                 </motion.div>
               </div>

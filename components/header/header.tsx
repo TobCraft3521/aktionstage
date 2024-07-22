@@ -55,7 +55,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
             Meine Projekte
           </Link>
           <Link
-            href="/projects"
+            href="/settings"
             className={cn(
               "flex cursor-pointer hover:bg-slate-100 transition-all gap-4 items-center p-2 rounded-lg",
               styles.link
@@ -70,9 +70,10 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
           <div className="flex gap-4 items-center">
             {user && (
               <>
-                <div className="font-medium">
-                  {user.name?.split(".").join(" ")}
+                <div className="font-medium hidden md:inline">
+                  {user.name}
                 </div>
+                <div className="font-medium md:hidden">{user.name?.split(" ")[0]}</div>
                 <div
                   onClick={logout}
                   className="flex cursor-pointer hover:bg-slate-100 transition-all gap-4 font-medium items-center px-2 border border-slate-200 p-1 rounded-lg"
