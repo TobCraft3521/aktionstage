@@ -20,7 +20,12 @@ export default function RootLayout({
 }>) {
   return (
     <html suppressHydrationWarning lang="en">
-      <body className={cn(inter.className, "max-w-[100vw] overflow-x-hidden zoom-in-100")}>
+      <body
+        className={cn(
+          inter.className,
+          "max-w-[100vw] overflow-x-hidden"
+        )}
+      >
         <NextAuthProvider>
           <ThemeProvider defaultTheme="light" enableSystem attribute="class">
             <Toaster />

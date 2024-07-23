@@ -8,7 +8,7 @@ import { useParams } from "next/navigation"
 const Layout = () => {
   const id = useParams().id as string
   return (
-    <ScrollArea className="flex flex-col flex-1 h-screen">
+    <ScrollArea className="flex flex-1 h-screen">
       <Header variant="main" />
       <ProjectsHeader />
       <ProjectsComp id={id} />

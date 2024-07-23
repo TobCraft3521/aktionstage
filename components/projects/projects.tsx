@@ -1,6 +1,4 @@
-// pages/ProjectsComp.tsx
-
-"use client"
+// "use client"
 import React, { useEffect, useMemo, useState } from "react"
 import { useAppState } from "@/hooks/use-app-state" // Update the path as per your project structure
 import { queryProjects } from "@/lib/actions/queries/projects"
@@ -18,10 +16,16 @@ import styles from "./project/styles.module.css"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import ProjectComp from "./project/project"
 
 const ProjectsComp = ({ id }: { id?: string }) => {
   const [loading, setLoading] = useState(true)
-  const [projects, setProjects] = useState<Partial<Project>[]>([])
+  const [projects, setProjects] = useState<Partial<Project>[]>([
+    // {
+    //   name: "Projekt 1",
+    //   description: "Beschreibung 1",
+    // },
+  ])
   const appState = useAppState() // Make sure to import useAppState from the correct path
   const [filtering, setFiltering] = useState(false)
   const router = useRouter()
@@ -78,14 +82,14 @@ const ProjectsComp = ({ id }: { id?: string }) => {
   return (
     <div className="flex flex-col flex-1">
       {loading || filtering ? (
-        <div className="flex items-center justify-center flex-1">
+        <div className="absolute top-0 bottom-0 w-screen h-screen flex items-center justify-center">
           <Loader />
         </div>
       ) : (
         <div className="flex flex-1">
           {searchedProjects.length > 0 && projects.length > 0 ? (
             <div className="w-full">
-              <div className="w-full p-2 rounded-lg mt-6 gap-4 md:gap-6 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+              <div className="w-full p-2 overflow-hidden rounded-lg mt-6 gap-4 md:gap-6 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                 {searchedProjects.map((project, i) => (
                   <div className="w-full h-64" key={project.id}>
                     <motion.div
@@ -99,6 +103,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
                       style={{
                         animationDelay: `${i * 50}ms`,
                         borderRadius: "20px",
+                        willChange: "transform",
                       }}
                       drag={id === project.id ? "y" : false}
                       dragConstraints={{ top: 0, bottom: 0 }}
@@ -156,10 +161,10 @@ const ProjectsComp = ({ id }: { id?: string }) => {
             {id && (
               <div className="">
                 <motion.div
-                  className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-white shadow-lg p-8 z-50"
+                  className="absolute top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white shadow-lg z-[100]"
                   layoutId={`card-container-${id}`}
                   drag="y"
-                  style={{ y, scale, borderRadius }}
+                  style={{ y, scale, borderRadius, willChange: "transform" }}
                   dragConstraints={{ top: 0, bottom: 0 }}
                   dragElastic={0.3}
                   onDrag={(event, info) => {
@@ -171,16 +176,12 @@ const ProjectsComp = ({ id }: { id?: string }) => {
                     }
                   }}
                 >
-                  <motion.h2
-                    className="text-2xl font-bold"
-                    layoutId={`title-${id}`}
-                  >
-                    {projects.find((p) => p.id === id)?.name}
-                  </motion.h2>
-                  <button>test</button>
-                  <motion.p layoutId={`description-${id}`}>
-                    {projects.find((p) => p.id === id)?.description}
-                  </motion.p>
+                  <ProjectComp
+                    project={
+                      projects.find((project) => project.id === id) || {}
+                    }
+                    borderRadius={borderRadius}
+                  />
                 </motion.div>
               </div>
             )}

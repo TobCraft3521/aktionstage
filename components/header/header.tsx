@@ -17,7 +17,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
   return (
     <div
       className={cn(
-        "p-6 w-screen flex justify-between items-center pb-4",
+        "p-6 w-screen flex justify-between items-center pb-4 z-50 relative",
         variant === "main" && "border-b-2 border-slate-100 bg-white"
       )}
     >

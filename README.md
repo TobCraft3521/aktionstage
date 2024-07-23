@@ -8,6 +8,7 @@ It uses an improved search featuring
 - Only one day can be selected, but also deselected
 - You can search for teachers (NEW) in a dropdown select
 - LIVE search
+- sharable link even though the detail view happens on the same component -> layout
 
 The login page was redesigned.
 UX fixes such as

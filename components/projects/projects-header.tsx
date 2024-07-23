@@ -100,7 +100,13 @@ const ProjectsHeader = () => {
         <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 border-slate-300">
           <SelectValue placeholder="Tag" />
         </SelectTrigger>
-        <SelectContent className="bg-white border-slate-200 cursor-pointer">
+        <SelectContent
+          className="bg-white border-slate-200 cursor-pointer z-[60]"
+          onClick={(event) => {
+            console.log("test")
+            event.stopPropagation()
+          }}
+        >
           {search.day && (
             <>
               <div
