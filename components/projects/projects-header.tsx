@@ -47,7 +47,7 @@ const ProjectsHeader = () => {
     fetchData()
   }, [])
   return (
-    <motion.div
+    <motion.div 
       layoutId="projects-header"
       transition={{ duration: 0.1 }}
       key={rerenderKey}
