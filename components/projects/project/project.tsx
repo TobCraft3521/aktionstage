@@ -12,7 +12,6 @@ interface ProjectCompProps {
       teachers: Account[]
     }
   >
-  borderRadius: any
 }
 
 const istokWeb = Istok_Web({
@@ -20,19 +19,17 @@ const istokWeb = Istok_Web({
   subsets: ["latin"],
 })
 
-const ProjectComp = ({ project, borderRadius }: ProjectCompProps) => {
-  console.log(borderRadius)
-
+const ProjectComp = ({ project }: ProjectCompProps) => {
   return (
     <>
-      <div className="relative h-full w-full" style={{ borderRadius }}>
+      <div className="relative h-full w-full" style={{}}>
         <Image
           src={project?.imageUrl || "/imgs/asg-logo.jpg"}
           alt={project?.name || "project-image"}
-          width={4400}
-          height={2000}
-          className="object-cover w-full h-full pointer-events-none"
-          style={{ borderRadius }}
+          width={2000}
+          height={1200}
+          className="object-cover w-full h-full pointer-events-none brightness"
+          style={{}}
         />
         <div className="top-64 md:top-[50%] left-[5%] h-48 w-96 blur-[100px] bg-black absolute"></div>
         <div className="absolute bottom-8 md:bottom-16 w-full">

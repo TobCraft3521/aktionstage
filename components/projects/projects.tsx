@@ -77,12 +77,6 @@ const ProjectsComp = ({ id }: { id?: string }) => {
     [-swipeDismissDistance, 0, swipeDismissDistance],
     [0.2, 1, 0.2]
   )
-  const borderRadius = useTransform(
-    y,
-    [-swipeDismissDistance, 0, swipeDismissDistance],
-    [96, 0, 96]
-  )
-
   return (
     <div className="flex flex-col flex-1">
       {loading || filtering ? (
@@ -93,7 +87,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
         <div className="flex flex-1">
           {searchedProjects.length > 0 && projects.length > 0 ? (
             <div className="w-full">
-              <div className="w-full p-2 overflow-hidden rounded-lg mt-6 gap-4 md:gap-8 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+              <div className="w-full p-2 rounded-lg mt-6 gap-4 md:gap-8 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                 {searchedProjects.map((project, i) => (
                   <div className="w-full h-64" key={project.id}>
                     <motion.div
@@ -105,9 +99,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
                       layoutId={`card-container-${project.id}`}
                       onClick={() => router.push("/projects/" + project.id)}
                       style={{
-                        animationDelay: `${i * 50}ms`,
                         borderRadius: "24px",
-                        willChange: "transform",
                       }}
                       drag={id === project.id ? "y" : false}
                       dragConstraints={{ top: 0, bottom: 0 }}
@@ -168,11 +160,9 @@ const ProjectsComp = ({ id }: { id?: string }) => {
                   className="absolute top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white shadow-lg z-[100]"
                   layoutId={`card-container-${id}`}
                   drag="y"
-                  dragControls={controls}
                   style={{
                     y,
                     scale,
-                    borderRadius,
                     willChange: "transform",
                   }}
                   dragConstraints={{ top: 0, bottom: 0 }}
@@ -190,7 +180,6 @@ const ProjectsComp = ({ id }: { id?: string }) => {
                     project={
                       projects.find((project) => project.id === id) || {}
                     }
-                    borderRadius={borderRadius}
                   />
                 </motion.div>
               </div>
