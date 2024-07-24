@@ -48,6 +48,9 @@ model Project {
   imageUrl      String
   studentsCount Int
   studentsMax   Int
+  cost          Float
+  time          String
+  location      String
   day           Day    @default(MON)
   minGrade      Int    @default(5)
   maxGrade      Int    @default(11)
