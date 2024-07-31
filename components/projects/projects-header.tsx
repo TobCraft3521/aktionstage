@@ -7,7 +7,7 @@ import {
   Search,
   X,
 } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 import { Input } from "../ui/input"
 import { DropdownMenu, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import {
@@ -46,8 +46,9 @@ const ProjectsHeader = () => {
     }
     fetchData()
   }, [])
+
   return (
-    <motion.div 
+    <motion.div
       layoutId="projects-header"
       transition={{ duration: 0.1 }}
       key={rerenderKey}

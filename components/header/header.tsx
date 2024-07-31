@@ -6,6 +6,7 @@ import Link from "next/link"
 import styles from "./header.module.css"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import AsgLogo from "../global/asg-logo"
 
 const Header = ({ variant }: { variant: "main" | "login" }) => {
   const user = useSession().data?.user
@@ -22,19 +23,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
       )}
     >
       <div className="z-10 flex gap-8 items-center">
-        <Link
-          href="/projects"
-          className="bg-black/75 rounded-lg z-10 flex items-center gap-2 p-2 text-white xs:text-lg font-semibold cursor-pointer hover:bg-black/90 transition-all"
-        >
-          <Image
-            src="/imgs/asg-logo.jpg"
-            alt="asg-logo"
-            width={512}
-            height={512}
-            className="w-12 h-12 rounded-lg"
-          />
-          Aktionstage
-        </Link>
+        <AsgLogo />
         <div className="md:flex items-center justify-center gap-4 font-medium hidden">
           <Link
             href="/projects"
@@ -70,10 +59,10 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
           <div className="flex gap-4 items-center">
             {user && (
               <>
-                <div className="font-medium hidden md:inline">
-                  {user.name}
+                <div className="font-medium hidden md:inline">{user.name}</div>
+                <div className="font-medium md:hidden">
+                  {user.name?.split(" ")[0]}
                 </div>
-                <div className="font-medium md:hidden">{user.name?.split(" ")[0]}</div>
                 <div
                   onClick={logout}
                   className="flex cursor-pointer hover:bg-slate-100 transition-all gap-4 font-medium items-center px-2 border border-slate-200 p-1 rounded-lg"

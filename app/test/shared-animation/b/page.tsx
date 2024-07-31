@@ -7,6 +7,7 @@ import {
   useMotionValue,
   useTransform,
 } from "framer-motion"
+import Image from "next/image"
 import { useState } from "react"
 
 interface Card {
@@ -28,17 +29,17 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <motion.div layout className="flex flex-col items-center space-y-4">
+      <motion.div layout className="flex flex-col items-center">
         <div className="flex space-x-4">
           {cards.map((card) => (
             <motion.div
-              className="p-4 bg-white rounded-lg shadow-lg cursor-pointer w-48"
+              className="p-4 bg-white rounded-lg shadow-lg cursor-pointer w-48 relative"
               key={card.id}
               layoutId={`card-container-${card.id}`}
               onClick={() => setSelectedId(card.id)}
             >
               <motion.h2
-                className="text-lg font-semibold"
+                className="text-lg font-semibold inline"
                 layoutId={`title-${card.id}`}
               >
                 {card.title}
@@ -53,7 +54,7 @@ const App: React.FC = () => {
         <AnimatePresence>
           {selectedId && (
             <motion.div
-              className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center bg-white rounded-lg shadow-lg p-8 z-10"
+              className="fixed top-0 left-0 right-0 bottom-0 flex flex-col items-center justify-center bg-white rounded-lg shadow-lg z-10"
               layoutId={`card-container-${selectedId}`}
               onClick={() => setSelectedId(null)}
               drag="y"
@@ -67,7 +68,7 @@ const App: React.FC = () => {
               }}
             >
               <motion.h2
-                className="text-2xl font-bold"
+                className="text-lg font-bold"
                 layoutId={`title-${selectedId}`}
               >
                 {cards.find((card) => card.id === selectedId)?.title}
@@ -75,6 +76,17 @@ const App: React.FC = () => {
               <motion.p layoutId={`description-${selectedId}`}>
                 {cards.find((card) => card.id === selectedId)?.description}
               </motion.p>
+              {/* <Image
+                src={"/imgs/asg-logo.jpg"}
+                alt={"project-image"}
+                layout="fill"
+                // objectFit="cover"
+                blurDataURL={"/imgs/asg-logo.jpg"}
+                quality={100} // Lower quality for better performance
+                className="pointer-events-none brightness"
+                priority
+                placeholder="blur"
+              /> */}
             </motion.div>
           )}
         </AnimatePresence>

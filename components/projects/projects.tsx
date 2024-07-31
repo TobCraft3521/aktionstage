@@ -1,4 +1,4 @@
-// "use client"
+"use client"
 import React, { useEffect, useMemo, useState } from "react"
 import { useAppState } from "@/hooks/use-app-state" // Update the path as per your project structure
 import { queryProjects } from "@/lib/actions/queries/projects"
@@ -18,6 +18,9 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import ProjectComp from "./project/project"
+import SmallCard from "./project/small"
+import { Skeleton } from "../ui/skeleton"
+import Footer from "../global/footer"
 
 const ProjectsComp = ({ id }: { id?: string }) => {
   const [loading, setLoading] = useState(true)
@@ -29,7 +32,6 @@ const ProjectsComp = ({ id }: { id?: string }) => {
     //   description: "Beschreibung 1",
     // },
   ])
-  const controls = useDragControls()
   const appState = useAppState() // Make sure to import useAppState from the correct path
   const [filtering, setFiltering] = useState(false)
   const router = useRouter()
@@ -77,72 +79,39 @@ const ProjectsComp = ({ id }: { id?: string }) => {
     [-swipeDismissDistance, 0, swipeDismissDistance],
     [0.2, 1, 0.2]
   )
+  const borderRadius = useTransform(
+    y,
+    [-swipeDismissDistance, 0, swipeDismissDistance],
+    [96, 0, 96]
+  )
   return (
     <div className="flex flex-col flex-1">
       {loading || filtering ? (
-        <div className="absolute top-0 bottom-0 w-screen h-screen flex items-center justify-center">
-          <Loader />
+        // <div className="absolute top-0 bottom-0 w-screen h-screen flex items-center justify-center">
+        //   <Loader />
+        // </div>
+        <div className="flex-1 w-full p-2 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+          {new Array(24).fill(0).map((_, i) => (
+            <div className="w-full h-64" key={i}>
+              <Skeleton className="w-full h-full rounded-[24px] bg-slate-200" />
+            </div>
+          ))}
         </div>
       ) : (
-        <div className="flex flex-1">
+        <div className="flex flex-1 flex-col">
           {searchedProjects.length > 0 && projects.length > 0 ? (
             <div className="w-full">
-              <div className="w-full p-2 rounded-lg mt-6 gap-4 md:gap-8 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+              <div className="w-full p-2 mb-16 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                 {searchedProjects.map((project, i) => (
                   <div className="w-full h-64" key={project.id}>
-                    <motion.div
-                      className={cn(
-                        styles.loadAni,
-                        "w-full overflow-hidden flex items-center h-64 justify-center rounded-xl cursor-pointer drop-shadow-lg group relative"
-                      )}
-                      key={project.id}
-                      layoutId={`card-container-${project.id}`}
-                      onClick={() => router.push("/projects/" + project.id)}
-                      style={{
-                        borderRadius: "24px",
-                      }}
-                      drag={id === project.id ? "y" : false}
-                      dragConstraints={{ top: 0, bottom: 0 }}
-                      dragElastic={0.3}
-                      onDragEnd={(event, info) => {
-                        if (
-                          info.offset.y > swipeDismissDistance ||
-                          info.offset.y < -swipeDismissDistance
-                        ) {
-                          router.push("/projects")
-                        }
-                      }}
-                    >
-                      <Image
-                        src={project.imageUrl || "/imgs/asg-logo.jpg"}
-                        alt={project.name || "kein Bild vorhanden"}
-                        width={16 * 64}
-                        height={9 * 64}
-                        className="relative object-cover w-full h-full transition-all group-hover:brightness-75"
-                      />
-                      <div className="absolute bottom-[9%] text-white drop-shadow-md text-lg z-30 font-semibold w-full px-2 flex flex-col items-center leading-4">
-                        <motion.h1
-                          className="truncate max-w-full mx-auto"
-                          layoutId={`title-${project.id}`}
-                        >
-                          {project.name}
-                        </motion.h1>
-                        <div className="text-xs font-medium">Teacher</div>
-                      </div>
-                      <div
-                        className="absolute top-full bg-white w-full h-[5000px] z-20 font-thin"
-                        style={{
-                          filter: "drop-shadow(0 -96px 32px rgb(0 0 0 / 0.7))",
-                        }}
-                      ></div>
-                    </motion.div>
+                    <SmallCard project={project} index={i} />
                   </div>
                 ))}
               </div>
             </div>
           ) : (
             noProjectsFound && (
-              <div className="flex-1 flex-col flex items-center justify-center text-lg drop-shadow-xl">
+              <div className="flex-1 flex-col mb-16 flex items-center justify-center text-lg drop-shadow-xl">
                 😜 Nichts gefunden{" "}
                 <Link
                   href={"https://www.google.com/search?q=snake"}
@@ -153,18 +122,20 @@ const ProjectsComp = ({ id }: { id?: string }) => {
               </div>
             )
           )}
+          {/* todo: put motion.div in a separate component */}
           <AnimatePresence>
             {id && (
               <div className="">
                 <motion.div
                   className="absolute top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white shadow-lg z-[100]"
                   layoutId={`card-container-${id}`}
-                  drag="y"
                   style={{
                     y,
                     scale,
                     willChange: "transform",
+                    borderRadius,
                   }}
+                  drag={"y"}
                   dragConstraints={{ top: 0, bottom: 0 }}
                   dragElastic={0.3}
                   onDrag={(event, info) => {
@@ -187,6 +158,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
           </AnimatePresence>
         </div>
       )}
+      <Footer />
     </div>
   )
 }
