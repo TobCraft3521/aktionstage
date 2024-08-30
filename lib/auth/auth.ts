@@ -1,23 +1,33 @@
-import type {
-  GetServerSidePropsContext,
-  NextApiRequest,
-  NextApiResponse,
-} from "next"
-import type { NextAuthOptions } from "next-auth"
-import { getServerSession } from "next-auth"
-
-// You'll need to import and pass this
-// to `NextAuth` in `app/api/auth/[...nextauth]/route.ts`
-export const config = {
-  providers: [], // rest of your config
-} satisfies NextAuthOptions
-
-// Use it in server contexts
-export function auth(
-  ...args:
-    | [GetServerSidePropsContext["req"], GetServerSidePropsContext["res"]]
-    | [NextApiRequest, NextApiResponse]
-    | []
-) {
-  return getServerSession(...args, config)
-}
+import NextAuth from "next-auth"
+import Credentials from "next-auth/providers/credentials"
+import { db } from "../db"
+import md5 from "md5"
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  providers: [
+    Credentials({
+      credentials: {
+        username: {
+          label: "Username",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+        },
+      },
+      authorize: async (credentials: any) => {
+        if (!credentials?.username || !credentials?.password) return null
+        const user = await db.account.findUnique({
+          where: {
+            userName: credentials.username,
+            password: md5(credentials.password),
+          },
+        })
+        if (!user) return null
+        return {
+          id: user.id, // Example ID, adjust as necessary
+          name: user.name,
+        }
+      },
+    }),
+  ],
+})

@@ -43,11 +43,11 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         <Image
           src={project?.imageUrl || "/imgs/asg-logo.jpg"}
           alt={project?.name || "project-image"}
-          layout="fill"
+          width={1024}
+          height={1024}
           objectFit="cover"
           blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
-          quality={100}
-          className="pointer-events-none brightness"
+          className="brightness transition-all w-full h-full object-cover group-hover:brightness-75 pointer-events-none"
           priority
           placeholder="blur"
         />
@@ -59,49 +59,51 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         <motion.h1
           layoutId={"title-" + project.id}
           className={cn(
-            "text-5xl md:text-9xl px-8 md:px-20 font-semibold text-white md:leading-[96px] drop-shadow-lg",
+            "text-5xl md:text-9xl px-8 md:px-20 font-semibold text-white md:leading-[96px]",
             istokWeb.className
           )}
         >
           {project?.name}
         </motion.h1>
         {showContents && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: 0.5 } }}
-          >
-            <motion.h2 className="text-base md:text-3xl px-8 md:px-24 text-white mb-4 md:mb-8 drop-shadow-2xl">
-              {project?.teachers?.map(
-                (teacher, i) =>
-                  teacher.name.split(" ")[0].substring(0, 1) +
-                  ". " +
-                  teacher.name.split(" ")[1] +
-                  (i + 1 === project?.teachers?.length ? "" : ", ")
-              )}
-            </motion.h2>
-            <ScrollArea>
-              <div className="max-w-[900px] text-xs sm:text-lg text-slate-200 px-8 md:px-20 mb-8 md:mb-16">
-                {project?.description}
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.5 } }}
+            >
+              <motion.h2 className="text-base md:text-3xl px-8 md:px-24 text-white mb-4 md:mb-8">
+                {project?.teachers?.map(
+                  (teacher, i) =>
+                    teacher.name.split(" ")[0].substring(0, 1) +
+                    ". " +
+                    teacher.name.split(" ")[1] +
+                    (i + 1 === project?.teachers?.length ? "" : ", ")
+                )}
+              </motion.h2>
+              <ScrollArea>
+                <div className="max-w-[900px] text-xs sm:text-lg text-slate-200 px-8 md:px-20 mb-8 md:mb-16 max-h-[40vh]">
+                  {project?.description}
+                </div>
+              </ScrollArea>
+              <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
+                <Button className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] rounded-xl hover:bg-[#1c1c3c]">
+                  Anmelden
+                </Button>
+                <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
+                  🧑‍🦱 {project.studentsCount + "/" + project.studentsMax}
+                </div>
+                <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
+                  📍 Mo, ASG 102
+                </div>
+                <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
+                  🕑 8.15-12.00
+                </div>
+                <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
+                  💳 2€
+                </div>
               </div>
-            </ScrollArea>
-            <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
-              <Button className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] rounded-xl">
-                Anmelden
-              </Button>
-              <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
-                🧑‍🦱 {project.studentsCount + "/" + project.studentsMax}
-              </div>
-              <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
-                📍 Mo, ASG 102
-              </div>
-              <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
-                🕑 8.15-12.00
-              </div>
-              <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
-                💳 2€
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </motion.div>
       {showContents && (

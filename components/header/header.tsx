@@ -1,19 +1,20 @@
 "use client"
+import { cn } from "@/lib/utils"
 import { LogOut, Menu } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
-import Image from "next/image"
 import Link from "next/link"
-import styles from "./header.module.css"
-import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import AsgLogo from "../global/asg-logo"
+import styles from "./header.module.css"
 
 const Header = ({ variant }: { variant: "main" | "login" }) => {
   const user = useSession().data?.user
   const router = useRouter()
   const logout = () => {
-    signOut()
-    router.push("/login")
+    signOut({
+      redirect: true,
+      callbackUrl: "/login",
+    })
   }
   return (
     <div
@@ -50,7 +51,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
               styles.link
             )}
           >
-            Passwort ändern
+            Einstellungen
           </Link>
         </div>
       </div>

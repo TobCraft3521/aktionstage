@@ -11,7 +11,7 @@ const Footer = () => {
     <footer className="w-full min-h-[500px] bg-slate-50 border-slate-100 border-t-2 pt-16">
       <div className="flex justify-center w-full">
         <div className="flex flex-wrap gap-4">
-          <div className="w-screen md:w-[40vw] p-8 items-center md:items-start flex flex-col">
+          <div className="w-screen md:w-[35vw] p-8 items-center md:items-start flex flex-col">
             <AsgLogo />
             <div className="mt-4 text-sm">
               Offizielle Aktionstage Webseite des
@@ -32,9 +32,10 @@ const Footer = () => {
               <Link href="/">Login</Link>
             )}
             <Link href="/projects">Home</Link>
-            <Link href="https://asg-passau.de">Adalbert-Stifter-Gymnasium</Link>
+            <Link href="https://asg-passau.de">Adalbert-Stifter-G.</Link>
+            <Link href="/my-projects">Meine Projekte</Link>
           </div>
-          <div className="w-screen md:w-[20vw] p-8 text-sm items-start md:items-start flex flex-col">
+          <div className="w-screen md:w-[20vw] p-8 text-sm flex items-center md:items-start flex-col">
             <h1 className="font-extrabold mb-1">Langweilig</h1>
             <Link href="https://asg-passau.de/extras/impressum/">
               Impressum

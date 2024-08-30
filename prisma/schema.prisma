@@ -20,17 +20,17 @@ enum Role {
 }
 
 model Account {
-  id          String    @id @default(cuid())
-  userName    String
-  name        String
-  password    String
-  role        Role      @default(STUDENT)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  projects    Project[] @relation("ProjectAccount")
-  ownProjects Project[] @relation("ProjectTeacher")
+  id             String           @id @default(cuid())
+  userName       String           @unique
+  name           String
+  password       String
+  role           Role             @default(STUDENT)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  projects       Project[]        @relation("ProjectAccount")
+  ownProjects    Project[]        @relation("ProjectTeacher")
+  tutorialStates TutorialStates[]
 
-  @@unique([userName, password])
   @@index([userName])
   @@index([role])
 }
@@ -65,4 +65,19 @@ model Project {
 
   @@index([id])
   @@index([name])
+}
+
+enum TutorialState {
+  NOT_STARTED
+  //IN_PROGRESS not needed yet
+  FINISHED
+}
+
+model TutorialStates {
+  id        String        @id @default(cuid())
+  account   Account       @relation(fields: [accountId], references: [id])
+  accountId String
+  state     TutorialState
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }

@@ -24,7 +24,7 @@ const AsgLogo = () => {
           alt="asg-logo"
           width={512}
           height={512}
-          className="w-12 h-12 rounded-lg"
+          className="w-10 h-10 rounded-lg"
         />
         Aktionstage
       </Link>
