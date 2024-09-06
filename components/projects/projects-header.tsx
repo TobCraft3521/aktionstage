@@ -42,6 +42,7 @@ const ProjectsHeader = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   useEffect(() => {
     const fetchData = async () => {
+      console.log("fetching teachers")
       setTeachers(await queryTeachers())
     }
     fetchData()

@@ -12,20 +12,20 @@ import { useEffect } from "react"
 const Layout = () => {
   const id = useParams().id as string
   const appState = useAppState()
-  useEffect(() => {
-    const preload = async () => {
-      const projects = await queryProjects()
+  // useEffect(() => {
+  //   const preload = async () => {
+  //     const projects = await queryProjects()
 
-      projects.forEach((project: Partial<Project>) => {
-        const link = document.createElement("link")
-        link.rel = "preload"
-        link.as = "image"
-        link.href = project.imageUrl || "/imgs/asg-logo.jpg"
-        document.head.appendChild(link)
-      })
-    }
-    preload()
-  }, [])
+  //     projects.forEach((project: Partial<Project>) => {
+  //       const link = document.createElement("link")
+  //       link.rel = "preload"
+  //       link.as = "image"
+  //       link.href = project.imageUrl || "/imgs/asg-logo.jpg"
+  //       document.head.appendChild(link)
+  //     })
+  //   }
+  //   preload()
+  // }, [])
   return (
     <ScrollArea className="flex h-screen" id="projects-scroll">
       <Header variant="main" />

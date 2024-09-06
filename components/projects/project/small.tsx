@@ -18,6 +18,7 @@ const SmallCard = ({
   const router = useRouter()
   const cardRef = useRef<any>(null)
   const shadowRef = useRef<any>(null)
+  const imageRef = useRef<any>(null)
   return (
     // add drop-shadow-lg that doesnt render during animation
     <motion.div
@@ -33,6 +34,9 @@ const SmallCard = ({
         if (shadowRef.current) {
           shadowRef.current.style.display = "none"
         }
+        // if (imageRef.current) {
+        //   imageRef.current.style.display = "none"
+        // }
       }}
       onLayoutAnimationComplete={() => {
         if (cardRef.current) {
@@ -42,6 +46,9 @@ const SmallCard = ({
         if (shadowRef.current) {
           shadowRef.current.style.display = "block"
         }
+        // if (imageRef.current) {
+        //   imageRef.current.style.display = "block"
+        // }
       }}
       key={project.id}
       layoutId={`card-container-${project.id}`}
@@ -57,13 +64,13 @@ const SmallCard = ({
       <Image
         src={project?.imageUrl || "/imgs/asg-logo.jpg"}
         alt={project?.name || "project-image"}
-        width={1024}
-        height={1024}
-        objectFit="cover"
+        width={512}
+        height={512}
         blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
         className="brightness transition-all w-full h-full object-cover group-hover:brightness-75 pointer-events-none"
         priority
         placeholder="blur"
+        ref={imageRef}
       />
       <div className="absolute bottom-[9%] text-white text-lg z-30 font-semibold w-full px-2 flex flex-col items-center leading-5">
         <motion.h1

@@ -40,17 +40,19 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         animate={controls}
         className="absolute inset-0"
       >
+        {/* {showContents && ( */}
         <Image
           src={project?.imageUrl || "/imgs/asg-logo.jpg"}
           alt={project?.name || "project-image"}
-          width={1024}
-          height={1024}
-          objectFit="cover"
+          width={1440}
+          height={1440}
           blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
           className="brightness transition-all w-full h-full object-cover group-hover:brightness-75 pointer-events-none"
           priority
           placeholder="blur"
         />
+        {/* )} */}
+        {/* lag */}
         {showContents && (
           <div className="top-64 md:top-[45%] left-[5%] h-96 w-[1024px] blur-[100px] bg-black opacity-70 absolute"></div>
         )}
