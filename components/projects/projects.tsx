@@ -1,12 +1,7 @@
 "use client"
 import { useAppState } from "@/hooks/use-app-state" // Update the path as per your project structure
 import { queryProjects } from "@/lib/actions/queries/projects"
-import {
-  Account,
-  Project,
-  TutorialState,
-  TutorialStateType,
-} from "@prisma/client"
+import { Account, Project } from "@prisma/client"
 import {
   AnimatePresence,
   motion,
@@ -22,7 +17,7 @@ import AboutTutorial from "../tutorials/about"
 import { Skeleton } from "../ui/skeleton"
 import ProjectComp from "./project/project"
 import SmallCard from "./project/small"
-import { queryTutorialState } from "@/lib/actions/queries/tutorials"
+import { queryTutorialComplete } from "@/lib/actions/queries/tutorials"
 
 const ProjectsComp = ({ id }: { id?: string }) => {
   const [loading, setLoading] = useState(true)
@@ -58,9 +53,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
   useEffect(() => {
     const fetchData = async () => {
       setProjects(await queryProjects())
-      setAboutTutorialDone(
-        (await queryTutorialState("about")) === TutorialStateType.FINISHED
-      )
+      setAboutTutorialDone(await queryTutorialComplete("about"))
       setLoading(false)
     }
     fetchData()
@@ -131,7 +124,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
           {searchedProjects.length > 0 && projects.length > 0 ? (
             <div className="w-full">
               <div className="w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12">
-                <h1 className="ml-8">Projekte</h1>
+                <h1 className="ml-[24px]">Projekte</h1>
               </div>
               <div className="w-full p-2 mb-16 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                 {!aboutTutorialDone && <AboutTutorial />}

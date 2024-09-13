@@ -29,7 +29,7 @@ model Account {
   updatedAt      DateTime        @updatedAt
   projects       Project[]       @relation("ProjectAccount")
   ownProjects    Project[]       @relation("ProjectTeacher")
-  tutorialStates TutorialState[]
+  toturialCompletions TutorialCompletion[]
 
   @@index([userName])
   @@index([role])
@@ -67,18 +67,15 @@ model Project {
   @@index([name])
 }
 
-enum TutorialStateType {
-  NOT_STARTED
-  //IN_PROGRESS not needed yet
-  FINISHED
+enum Tutorial {
+  ABOUT
+  FEATURES
 }
 
-model TutorialState {
+model TutorialCompletion {
   id        String            @id @default(cuid())
-  tutorial  String
+  tutorial  Tutorial
   account   Account           @relation(fields: [accountId], references: [id])
   accountId String
-  state     TutorialStateType @default(NOT_STARTED)
   createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
 }

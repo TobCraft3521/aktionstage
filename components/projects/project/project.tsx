@@ -44,8 +44,8 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         <Image
           src={project?.imageUrl || "/imgs/asg-logo.jpg"}
           alt={project?.name || "project-image"}
-          width={1440}
-          height={1440}
+          width={1028}
+          height={1028}
           blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
           className="brightness transition-all w-full h-full object-cover group-hover:brightness-75 pointer-events-none"
           priority
@@ -54,7 +54,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         {/* )} */}
         {/* lag */}
         {showContents && (
-          <div className="top-64 md:top-[45%] left-[5%] h-96 w-[1024px] blur-[100px] bg-black opacity-70 absolute"></div>
+          <div className="top-64 md:top-[35%] left-[0] h-[512px] w-[1028px] blur-[100px] bg-black opacity-80 absolute"></div>
         )}
       </motion.div>
       <motion.div className="absolute bottom-8 md:bottom-16 w-full">
@@ -83,7 +83,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 )}
               </motion.h2>
               <ScrollArea>
-                <div className="max-w-[900px] text-xs sm:text-lg text-slate-200 px-8 md:px-20 mb-8 md:mb-16 max-h-[40vh]">
+                <div className="max-w-[900px] text-sm sm:text-lg text-slate-200 px-8 md:px-20 mb-8 md:mb-16 max-h-[40vh]">
                   {project?.description}
                 </div>
               </ScrollArea>

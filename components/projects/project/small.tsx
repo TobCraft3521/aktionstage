@@ -86,7 +86,7 @@ const SmallCard = ({
         ref={shadowRef}
         className="absolute top-full bg-white w-[70%] h-[80px] hidden md:block z-20 font-thin"
         style={{
-          filter: "drop-shadow(0 -80px 24px rgb(0 0 0 / 0.9))",
+          filter: "drop-shadow(0 -80px 24px rgb(0 0 0 / 1))",
         }}
       ></div>
     </motion.div>

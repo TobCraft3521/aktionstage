@@ -1,0 +1,5 @@
+- create tutorial for new features
+- not started tutorials do not exist in db DONE
+- project search starts collabsed on mobile DONE
+- https://motion-primitives.com/docs/animated-background feature this <-- for nav DONE
+- this one is for tutorials -> https://motion-primitives.com/docs/transition-panel

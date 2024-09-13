@@ -1,4 +1,4 @@
-import { CreditCard, Lock, User, Users } from "lucide-react"
+import { CreditCard, Lightbulb, Lock, User, Users } from "lucide-react"
 import Link from "next/link"
 
 const SettingsSidebar = () => {
@@ -31,14 +31,14 @@ const SettingsSidebar = () => {
           <Users className="h-4 w-4 text-slate-400 dark:text-zinc-400" /> Team
         </Link>
       </div>
-      <h2 className="mt-4 w-full px-12 text-sm font-semibold">Organization</h2>
+      <h2 className="mt-4 w-full px-12 text-sm font-semibold">Mehr</h2>
       <div className="flex w-full flex-col items-center p-2 text-sm font-medium ">
         <Link
           href={"/dashboard/" + "organizationId" + "/settings/billing"}
           className="flex w-44 flex-row items-center gap-2 rounded-md p-2 text-sm text-slate-400 transition-all dark:text-zinc-400 dark:hover:bg-zinc-800"
         >
-          <CreditCard className="h-4 w-4 text-slate-400 dark:text-zinc-400" />{" "}
-          Billing
+          <Lightbulb className="h-4 w-4 text-slate-400 dark:text-zinc-400" />{" "}
+          Tutorials
         </Link>
       </div>
     </div>

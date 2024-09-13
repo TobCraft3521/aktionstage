@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion"
 const AboutTutorial = () => {
   const [fadeOut, setFadeOut] = useState(false)
   const finish = async () => {
-    await finishTutorial("about")
+    await finishTutorial("ABOUT")
     setFadeOut(true)
   }
   return (
@@ -15,7 +15,7 @@ const AboutTutorial = () => {
       {!fadeOut && (
         <motion.div
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, transition: { duration: 0.5 } }}
           className={cn(
             "relative p-6 bg-white rounded-3xl shadow-2xl flex flex-col justify-between h-full",
             styles.loadAni

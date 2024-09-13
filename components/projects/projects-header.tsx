@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronsUpDown,
   ChevronUp,
+  Plus,
   Search,
   X,
 } from "lucide-react"
@@ -47,7 +48,11 @@ const ProjectsHeader = () => {
     }
     fetchData()
   }, [])
-
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setIsCollapsed(true)
+    }
+  }, [])
   return (
     <motion.div
       layoutId="projects-header"
@@ -61,7 +66,7 @@ const ProjectsHeader = () => {
           id="name"
           type="text"
           placeholder="Suchen"
-          className="w-[170px] bg-slate-200 rounded-lg border border-slate-300 py-2 pl-10 pr-4 text-gray-900 focus:outline-none focus:border-slate-400"
+          className="w-[250px] bg-slate-200 rounded-lg border border-slate-300 py-2 pl-10 pr-4 text-gray-900 focus:outline-none focus:border-slate-400"
           value={search.query}
           onChange={(e) =>
             setSearch({
@@ -165,7 +170,7 @@ const ProjectsHeader = () => {
             <PopoverTrigger asChild>
               <Button
                 role="combobox"
-                className="w-[200px] md:w-[200px] justify-between bg-slate-200 hover:bg-slate-300 border text-gray-900 border-slate-300"
+                className="w-[250px] md:w-[250px] justify-between bg-slate-200 hover:bg-slate-300 border text-gray-900 border-slate-300"
               >
                 {search.teacher
                   ? teachers.find((teacher) => teacher.name === search.teacher)
@@ -174,7 +179,7 @@ const ProjectsHeader = () => {
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
+            <PopoverContent className="w-[250px] p-0">
               <Command>
                 <CommandInput placeholder="Lehrer suchen..." />
                 <CommandEmpty>Kein Lehrer gefunden.</CommandEmpty>
@@ -228,7 +233,7 @@ const ProjectsHeader = () => {
       )}
       <div className="md:hidden">
         {isCollapsed ? (
-          <ChevronDown
+          <Plus
             className="h-5 w-5 text-black/75"
             onClick={() => setIsCollapsed(false)}
           />
