@@ -25,7 +25,7 @@ const SmallCard = ({
       ref={cardRef}
       className={cn(
         styles.loadAni,
-        "w-full overflow-hidden flex items-center h-64 justify-center drop-shadow-lg rounded-xl cursor-pointer bg-white group relative will-change-transform"
+        "w-full overflow-hidden flex items-center h-64 justify-center shadow-2xl rounded-xl cursor-pointer bg-white group relative will-change-transform"
       )}
       onLayoutAnimationStart={() => {
         if (cardRef.current) {
@@ -41,7 +41,7 @@ const SmallCard = ({
       onLayoutAnimationComplete={() => {
         if (cardRef.current) {
           cardRef.current.style.filter =
-            "var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)"
+            "var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-shadow)"
         }
         if (shadowRef.current) {
           shadowRef.current.style.display = "block"
@@ -84,9 +84,9 @@ const SmallCard = ({
       {/* hide when opening to reduce lag ACTUAL PROBLEM HERE 10% ~*/}
       <div
         ref={shadowRef}
-        className="absolute top-full bg-white w-[70%] h-[80px] hidden md:block z-20 font-thin"
+        className="absolute top-full bg-white w-[80%] h-[90px] hidden md:block z-20 font-thin"
         style={{
-          filter: "drop-shadow(0 -80px 24px rgb(0 0 0 / 1))",
+          filter: "drop-shadow(0 -85px 24px rgb(0 0 0 / 1))",
         }}
       ></div>
     </motion.div>

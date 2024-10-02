@@ -9,7 +9,7 @@ import { Project } from "@prisma/client"
 import { useParams } from "next/navigation"
 import { useEffect } from "react"
 
-const Layout = () => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
   const id = useParams().id as string
   const appState = useAppState()
   // useEffect(() => {
@@ -31,6 +31,7 @@ const Layout = () => {
       <Header variant="main" />
       <ProjectsHeader />
       <ProjectsComp id={id} />
+      {children}
     </ScrollArea>
   )
 }

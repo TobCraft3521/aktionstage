@@ -61,7 +61,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         <motion.h1
           layoutId={"title-" + project.id}
           className={cn(
-            "text-5xl md:text-9xl px-8 md:px-20 font-semibold text-white md:leading-[96px]",
+            "text-5xl md:text-8xl px-8 md:px-20 font-semibold text-white md:leading-[96px]",
             istokWeb.className
           )}
         >

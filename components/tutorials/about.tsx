@@ -1,9 +1,8 @@
-import { cn } from "@/lib/utils"
 import styles from "@/components/projects/project/styles.module.css"
 import { finishTutorial } from "@/lib/actions/queries/tutorials"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
+import { useState } from "react"
 const AboutTutorial = () => {
   const [fadeOut, setFadeOut] = useState(false)
   const finish = async () => {
