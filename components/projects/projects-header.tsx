@@ -80,7 +80,7 @@ const ProjectsHeader = () => {
         <>
           <div className="md:hidden">
             <Button
-              className="bg-black/75"
+              className=""
               onClick={() => {
                 setSearch({})
                 setRerenderKey(+new Date())
@@ -220,7 +220,7 @@ const ProjectsHeader = () => {
           </Popover>
           <div className="hidden md:block">
             <Button
-              className="bg-black/75"
+              className=""
               onClick={() => {
                 setSearch({})
                 setRerenderKey(+new Date())
@@ -234,12 +234,12 @@ const ProjectsHeader = () => {
       <div className="md:hidden">
         {isCollapsed ? (
           <Plus
-            className="h-5 w-5 text-black/75"
+            className="h-5 w-5"
             onClick={() => setIsCollapsed(false)}
           />
         ) : (
           <ChevronUp
-            className="h-5 w-5 text-black/75"
+            className="h-5 w-5"
             onClick={() => setIsCollapsed(true)}
           />
         )}

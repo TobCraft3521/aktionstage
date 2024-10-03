@@ -1,3 +1,4 @@
+import FeatureTutorial from "@/components/tutorials/features"
 import FeaturesTutorial from "@/components/tutorials/features"
 import { queryTutorialComplete } from "@/lib/actions/queries/tutorials"
 import { auth } from "@/lib/auth/auth"
@@ -8,8 +9,8 @@ const Projects = async () => {
   const user = (await auth())?.user
   if (!user) return redirect("/login")
   const showFeaturesTutorial = !(await queryTutorialComplete(Tutorial.FEATURES))
-  console.log(showFeaturesTutorial)
-  return <>{showFeaturesTutorial && <FeaturesTutorial />}</>
+
+  return <FeatureTutorial show={showFeaturesTutorial} />
 }
 
 export default Projects

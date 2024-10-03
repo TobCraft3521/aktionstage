@@ -54,7 +54,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         {/* )} */}
         {/* lag */}
         {showContents && (
-          <div className="top-64 md:top-[35%] left-[0] h-[512px] w-[1028px] blur-[100px] bg-black opacity-80 absolute"></div>
+          <div className="top-64 md:top-[40%] left-[0] h-[550px] w-[1028px] blur-[80px] bg-black opacity-80 absolute"></div>
         )}
       </motion.div>
       <motion.div className="absolute bottom-8 md:bottom-16 w-full">
