@@ -60,12 +60,12 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         <motion.h1
           layoutId={"title-" + project.id}
           className={cn(
-            "text-5xl md:text-8xl font-extrabold text-white md:leading-[96px] tracking-tighter flex items-center px-8 md:px-20 gap-4",
+            "text-5xl md:text-6xl font-extrabold text-white md:leading-[96px] tracking-tighter flex items-center px-8 md:px-20 gap-4",
             dmSans.className
           )}
         >
-          <div className="text-4xl md:text-5xl flex justify-center rounded-xl items-center bg-slate-800 p-2 h-[72px] w-[72px] bg-opacity-65 border-2 border-slate-800">
-            🍕
+          <div className="text-4xl md:text-5xl flex justify-center rounded-2xl items-center bg-slate-800 p-4 h-[72px] w-[72px] bg-opacity-65 border-2 border-slate-800">
+            🎾
           </div>
           {project?.name}
         </motion.h1>
@@ -104,12 +104,12 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 </Button>
                 {[
                   {
-                    icon: "🧑‍🦱",
+                    icon: "🙋🏻",
                     text: `${project.studentsCount}/${project.studentsMax}`,
                   },
                   { icon: "📍", text: "Mo, ASG 102" },
                   { icon: "🕑", text: "8.15-12.00" },
-                  { icon: "💳", text: "2€" },
+                  { icon: "💵", text: "2€" },
                 ].map((item, index) => (
                   <div
                     key={index}

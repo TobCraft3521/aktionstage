@@ -12,7 +12,7 @@ import FeatureTutorial from "@/components/tutorials/features"
 
 const inter = Inter({ subsets: ["latin"] })
 const istokWeb = Istok_Web({ weight: "400", subsets: ["latin"] })
-
+export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Aktionstage ASG",
   description: "Offizielle Website der Aktionstage am ASG",
@@ -25,6 +25,7 @@ export default async function RootLayout({
 }>) {
   const user = (await auth())?.user
   const showFeaturesTutorial = !(await queryTutorialComplete(Tutorial.FEATURES))
+  console.log(showFeaturesTutorial)
 
   return (
     <html suppressHydrationWarning lang="en">
@@ -33,7 +34,7 @@ export default async function RootLayout({
           <ThemeProvider defaultTheme="light" enableSystem attribute="class">
             <Toaster />
             {children}
-            <FeatureTutorial show={showFeaturesTutorial} />
+            {user && <FeatureTutorial show={showFeaturesTutorial} />}
           </ThemeProvider>
         </NextAuthProvider>
       </body>

@@ -6,10 +6,12 @@ import {
   queryTutorialComplete,
   setTutorialComplete,
 } from "@/lib/actions/queries/tutorials"
+import { useRouter } from "next/navigation"
 
 const TutorialSettings = () => {
   // Dynamically get all the tutorial keys (make sure this doesn't change between renders)
   const tutorials = Object.keys(Tutorial) as Tutorial[]
+  const router = useRouter()
 
   // Initialize the state dynamically for each tutorial (default all to true or false)
   const [tutorialsState, setTutorialsState] = useState<
@@ -29,7 +31,7 @@ const TutorialSettings = () => {
       setTutorialsState(Object.assign({}, ...initialState))
     }
     initializeState()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleToggle = async (tutorial: Tutorial) => {
@@ -43,6 +45,9 @@ const TutorialSettings = () => {
     try {
       // Call the database update function
       await setTutorialComplete(tutorial, currentState)
+      if (tutorial === Tutorial.FEATURES) {
+        window.location.href = "/projects"
+      }
     } catch (error) {
       // Rollback the UI state if the update fails
       setTutorialsState((prevState) => ({

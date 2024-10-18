@@ -67,7 +67,7 @@ const LoginForm = () => {
           className="w-[400px] space-y-6"
         >
           <div className="">
-            <h1 className={cn("text-2xl font-bold tracking-tighter", dmSans.className)}>
+            <h1 className={cn("text-2xl font-bold tracking-tighter drop-shadow-lg", dmSans.className)}>
               Endlich Aktionstage 🙌
             </h1>
             <FormDescription>Hier kannst du dich einloggen</FormDescription>

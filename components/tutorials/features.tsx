@@ -20,7 +20,6 @@ const FeatureTutorial = ({ show }: { show: boolean }) => {
       setShowTutorial(true)
     }
   }
-  console.log("render")
 
   return (
     <>
