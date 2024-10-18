@@ -1,28 +1,19 @@
 "use client"
+import { useAppState } from "@/hooks/use-app-state"
+import { queryTeachers } from "@/lib/actions/queries/accounts"
+import { cn } from "@/lib/utils"
+import { Account, Day } from "@prisma/client"
+import { motion } from "framer-motion"
 import {
   Check,
-  ChevronDown,
   ChevronsUpDown,
   ChevronUp,
   Plus,
   Search,
-  X,
+  X
 } from "lucide-react"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { Input } from "../ui/input"
-import { DropdownMenu, DropdownMenuTrigger } from "../ui/dropdown-menu"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select"
-import { Search as SearchType, useAppState } from "@/hooks/use-app-state"
 import { useEffect, useState } from "react"
-import { Account, Day } from "@prisma/client"
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import AnimatedButton from "../global/some-button"
 import { Button } from "../ui/button"
 import {
   Command,
@@ -32,8 +23,15 @@ import {
   CommandItem,
   CommandList,
 } from "../ui/command"
-import { cn } from "@/lib/utils"
-import { queryTeachers } from "@/lib/actions/queries/accounts"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select"
 
 const ProjectsHeader = () => {
   const { search, setSearch } = useAppState()
@@ -79,7 +77,7 @@ const ProjectsHeader = () => {
       {!isCollapsed && (
         <>
           <div className="md:hidden">
-            <Button
+            <AnimatedButton
               className=""
               onClick={() => {
                 setSearch({})
@@ -87,7 +85,7 @@ const ProjectsHeader = () => {
               }}
             >
               Reset
-            </Button>
+            </AnimatedButton>
           </div>
           <Select
             onValueChange={(value) =>
@@ -219,7 +217,7 @@ const ProjectsHeader = () => {
             </PopoverContent>
           </Popover>
           <div className="hidden md:block">
-            <Button
+            <AnimatedButton
               className=""
               onClick={() => {
                 setSearch({})
@@ -227,21 +225,15 @@ const ProjectsHeader = () => {
               }}
             >
               Reset
-            </Button>
+            </AnimatedButton>
           </div>
         </>
       )}
       <div className="md:hidden">
         {isCollapsed ? (
-          <Plus
-            className="h-5 w-5"
-            onClick={() => setIsCollapsed(false)}
-          />
+          <Plus className="h-5 w-5" onClick={() => setIsCollapsed(false)} />
         ) : (
-          <ChevronUp
-            className="h-5 w-5"
-            onClick={() => setIsCollapsed(true)}
-          />
+          <ChevronUp className="h-5 w-5" onClick={() => setIsCollapsed(true)} />
         )}
       </div>
     </motion.div>

@@ -7,6 +7,12 @@ import { cn } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { useAppState } from "@/hooks/use-app-state"
 import styles from "./styles.module.css"
+import { DM_Sans } from "next/font/google"
+
+const dmSans = DM_Sans({
+  weight: "800",
+  subsets: ["latin"],
+})
 
 const SmallCard = ({
   project,
@@ -74,12 +80,12 @@ const SmallCard = ({
       />
       <div className="absolute bottom-[9%] text-white text-lg z-30 font-semibold w-full px-2 flex flex-col items-center leading-5">
         <motion.h1
-          className="truncate max-w-full mx-auto"
+          className={cn("truncate max-w-full mx-auto", dmSans.className)}
           layoutId={`title-${project.id}`}
         >
           {project.name}
         </motion.h1>
-        <div className="text-xs font-medium">Teacher</div>
+        <div className="text-sm font-medium">Teacher</div>
       </div>
       {/* hide when opening to reduce lag ACTUAL PROBLEM HERE 10% ~*/}
       <div

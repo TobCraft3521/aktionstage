@@ -34,7 +34,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
       current: pathName.toLowerCase().startsWith("/settings"),
     },
   ]
-  console.log(TABS)
+  
   return (
     <div
       className={cn(

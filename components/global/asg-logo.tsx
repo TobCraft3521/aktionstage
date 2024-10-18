@@ -1,11 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Istok_Web } from "next/font/google"
+import { DM_Sans } from "next/font/google"
 import { cn } from "@/lib/utils"
 
-const istokWeb = Istok_Web({
-  display: "swap",
-  weight: "700",
+const dmSans = DM_Sans({
+  weight: "800",
   subsets: ["latin"],
 })
 
@@ -15,8 +14,8 @@ const AsgLogo = () => {
       <Link
         href="/projects"
         className={cn(
-          "bg-black/75 rounded-lg z-10 flex items-center gap-2 p-2 pr-4 text-white xs:text-lg cursor-pointer hover:bg-black/90 transition-all",
-          istokWeb.className
+          "bg-slate-800 rounded-lg z-10 flex items-center gap-2 p-2 pr-4 text-white xs:text-lg cursor-pointer hover:bg-black/90 transition-all",
+          dmSans.className
         )}
       >
         <Image

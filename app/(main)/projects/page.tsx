@@ -6,11 +6,7 @@ import { Tutorial } from "@prisma/client"
 import { redirect } from "next/navigation"
 
 const Projects = async () => {
-  const user = (await auth())?.user
-  if (!user) return redirect("/login")
-  const showFeaturesTutorial = !(await queryTutorialComplete(Tutorial.FEATURES))
-
-  return <FeatureTutorial show={showFeaturesTutorial} />
+  return null
 }
 
 export default Projects

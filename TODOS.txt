@@ -1,3 +1,2 @@
-- create tutorial for new features
 - this one is for tutorials -> https://motion-primitives.com/docs/transition-panel
 - create tutorial for those who click the x button, that swiping also works

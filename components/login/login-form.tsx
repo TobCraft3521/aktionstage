@@ -19,6 +19,13 @@ import {
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
 import Loader from "../global/loader"
+import { DM_Sans } from "next/font/google"
+import { cn } from "@/lib/utils"
+
+const dmSans = DM_Sans({
+  weight: "900",
+  subsets: ["latin"],
+})
 
 const LoginForm = () => {
   const router = useRouter()
@@ -60,7 +67,9 @@ const LoginForm = () => {
           className="w-[400px] space-y-6"
         >
           <div className="">
-            <h1 className="text-2xl font-bold">Endlich Aktionstage 🙌</h1>
+            <h1 className={cn("text-2xl font-bold tracking-tighter", dmSans.className)}>
+              Endlich Aktionstage 🙌
+            </h1>
             <FormDescription>Hier kannst du dich einloggen</FormDescription>
           </div>
 

@@ -5,12 +5,16 @@ import { Button } from "@/components/ui/button"
 import { Account, Project } from "@prisma/client"
 import { motion, useAnimation } from "framer-motion"
 import Image from "next/image"
-import { Istok_Web } from "next/font/google"
-import { cn } from "@/lib/utils"
 import { X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { DM_Sans } from "next/font/google"
+import { cn } from "@/lib/utils"
 
+const dmSans = DM_Sans({
+  weight: "800",
+  subsets: ["latin"],
+})
 interface ProjectCompProps {
   project: Partial<
     Project & {
@@ -18,11 +22,6 @@ interface ProjectCompProps {
     }
   >
 }
-
-const istokWeb = Istok_Web({
-  weight: "700",
-  subsets: ["latin"],
-})
 
 const ProjectComp = ({ project }: ProjectCompProps) => {
   const controls = useAnimation()
@@ -61,19 +60,31 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         <motion.h1
           layoutId={"title-" + project.id}
           className={cn(
-            "text-5xl md:text-8xl px-8 md:px-20 font-semibold text-white md:leading-[96px]",
-            istokWeb.className
+            "text-5xl md:text-8xl font-extrabold text-white md:leading-[96px] tracking-tighter flex items-center px-8 md:px-20 gap-4",
+            dmSans.className
           )}
         >
+          <div className="text-4xl md:text-5xl flex justify-center rounded-xl items-center bg-slate-800 p-2 h-[72px] w-[72px] bg-opacity-65 border-2 border-slate-800">
+            🍕
+          </div>
           {project?.name}
         </motion.h1>
+
+        {/* org-bX8DEsBS3O5BO1wrDo0ZGUKL */}
+        {/* proj_zfj2w1kWLqg5gG781FdzRYqx */}
+
         {showContents && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { duration: 0.5 } }}
             >
-              <motion.h2 className="text-base md:text-3xl px-8 md:px-24 text-white mb-4 md:mb-8">
+              <motion.h2
+                className={cn(
+                  dmSans.className,
+                  "text-base md:text-3xl px-8 md:px-24 text-white mb-4 md:mb-8"
+                )}
+              >
                 {project?.teachers?.map(
                   (teacher, i) =>
                     teacher.name.split(" ")[0].substring(0, 1) +
@@ -83,26 +94,30 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 )}
               </motion.h2>
               <ScrollArea>
-                <div className="max-w-[900px] text-sm sm:text-lg text-slate-200 px-8 md:px-20 mb-8 md:mb-16 max-h-[40vh]">
+                <div className="max-w-[900px] text-sm sm:text-xl sm:leading-8 text-slate-200 px-8 md:px-20 mb-8 md:mb-16 max-h-[40vh]">
                   {project?.description}
                 </div>
               </ScrollArea>
               <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
-                <Button className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] rounded-xl hover:bg-[#1c1c3c]">
+                <Button className="w-full sm:w-[154px] h-[43px] rounded-xl">
                   Anmelden
                 </Button>
-                <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
-                  🧑‍🦱 {project.studentsCount + "/" + project.studentsMax}
-                </div>
-                <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
-                  📍 Mo, ASG 102
-                </div>
-                <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
-                  🕑 8.15-12.00
-                </div>
-                <div className="w-full sm:w-[154px] h-[43px] bg-[#2c2c2c] gap-2 flex items-center justify-center text-white rounded-xl border-2 border-[#2c2c2c] bg-opacity-65 hover:bg-opacity-80 transition-all">
-                  💳 2€
-                </div>
+                {[
+                  {
+                    icon: "🧑‍🦱",
+                    text: `${project.studentsCount}/${project.studentsMax}`,
+                  },
+                  { icon: "📍", text: "Mo, ASG 102" },
+                  { icon: "🕑", text: "8.15-12.00" },
+                  { icon: "💳", text: "2€" },
+                ].map((item, index) => (
+                  <div
+                    key={index}
+                    className="w-full sm:w-[154px] h-[43px] bg-slate-800 gap-2 flex items-center justify-center text-white rounded-xl border-2 border-slate-800 bg-opacity-75 hover:bg-opacity-90 transition-all"
+                  >
+                    {item.icon} {item.text}
+                  </div>
+                ))}
               </div>
             </motion.div>
           </>
@@ -110,7 +125,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
       </motion.div>
       {showContents && (
         <div
-          className="absolute top-8 md:top-12 right-8 md:right-12 border-[#2c2c2c] border-2 rounded-full p-2 cursor-pointer bg-[#2c2c2c] bg-opacity-65"
+          className="absolute top-8 md:top-12 right-8 md:right-12 border-slate-800 border-2 rounded-full p-2 cursor-pointer bg-slate-800 bg-opacity-65"
           onClick={() => {
             setShowContents(false)
             router.push("/projects")
