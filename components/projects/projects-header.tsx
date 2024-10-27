@@ -56,7 +56,7 @@ const ProjectsHeader = () => {
       layoutId="projects-header"
       transition={{ duration: 0.1 }}
       key={rerenderKey}
-      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b-2 border-slate-100 sticky top-0 items-center px-6 gap-4 drop-shadow-xl z-50"
+      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b-2 border-slate-100 sticky top-0 items-center px-6 gap-4 drop-shadow-lg z-50"
     >
       <div className="relative flex items-center">
         <Search className="absolute left-2 h-5 w-5 text-gray-500" />

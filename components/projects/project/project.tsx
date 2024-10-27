@@ -64,14 +64,11 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
             dmSans.className
           )}
         >
-          <div className="text-4xl md:text-5xl flex justify-center rounded-2xl items-center bg-slate-800 p-4 h-[72px] w-[72px] bg-opacity-65 border-2 border-slate-800">
-            🎾
+          <div className="text-2xl md:text-4xl flex justify-center rounded-2xl items-center bg-slate-800 p-4 h-[72px] w-[72px] bg-opacity-65 border-2 border-slate-800">
+            🏯
           </div>
           {project?.name}
         </motion.h1>
-
-        {/* org-bX8DEsBS3O5BO1wrDo0ZGUKL */}
-        {/* proj_zfj2w1kWLqg5gG781FdzRYqx */}
 
         {showContents && (
           <>

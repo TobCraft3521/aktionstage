@@ -44,17 +44,22 @@ const LoginForm = () => {
   const onSubmit: SubmitHandler<z.infer<typeof LoginFormSchema>> = async (
     formData
   ) => {
-    const response = await signIn("credentials", {
-      username: formData.name,
-      password: formData.password,
-      redirect: false,
-    })
-    form.reset()
+    try {
+      const response = await signIn("credentials", {
+        username: formData.name,
+        password: formData.password,
+        redirect: false,
+      })
+      form.reset()
+      console.log(response)
 
-    if (response?.ok) {
-      router.push("/projects")
-    } else {
-      setSubmitError("Falscher Benutzername oder Passwort 😒")
+      if (response?.ok && !response.error) {
+        router.push("/projects")
+      } else {
+        setSubmitError("Falscher Benutzername oder Passwort 😒")
+      }
+    } catch (error) {
+      alert("Ein Fehler ist beim Login aufgetreten. Bitte versuche es erneut.")
     }
   }
 
@@ -67,7 +72,12 @@ const LoginForm = () => {
           className="w-[400px] space-y-6"
         >
           <div className="">
-            <h1 className={cn("text-2xl font-bold tracking-tighter drop-shadow-lg", dmSans.className)}>
+            <h1
+              className={cn(
+                "text-2xl font-bold tracking-tighter drop-shadow-lg",
+                dmSans.className
+              )}
+            >
               Endlich Aktionstage 🙌
             </h1>
             <FormDescription>Hier kannst du dich einloggen</FormDescription>

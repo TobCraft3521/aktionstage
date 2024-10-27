@@ -14,22 +14,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           type: "password",
         },
       },
-      authorize: async (credentials: any) => {
-        if (!credentials?.username || !credentials?.password) return null
-        const user = await db.account.findUnique({
-          where: {
-            userName: credentials.username,
-            password: md5(credentials.password),
-          },
-        })
-        if (!user) return null
-        return {
-          id: user.id, // Example ID, adjust as necessary
-          name: user.name,
+      authorize: async (credentials: any): Promise<any> => {
+        if (!credentials?.username || !credentials?.password) return false
+        try {
+          const user = await db.account.findUnique({
+            where: {
+              userName: credentials.username,
+              password: md5(credentials.password),
+            },
+          })
+
+          if (!user) return false
+
+          return {
+            id: user.id, // Example ID, adjust as necessary
+            name: user.name,
+          }
+        } catch (error) {
+          // wrong login
         }
+        return false
       },
     }),
   ],
+  logger: {
+    error: (error) => {
+      if(error.name === "CredentialsSignin") return
+      console.log(error)
+    },
+    warn: () => {},
+    debug: () => {},
+  },
   session: {
     strategy: "jwt",
   },
