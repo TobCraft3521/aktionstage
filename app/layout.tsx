@@ -34,6 +34,7 @@ export default async function RootLayout({
           <ThemeProvider defaultTheme="light" enableSystem attribute="class">
             <Toaster />
             {children}
+            {/* requires page refresh for state update - can't be seen when changing login */}
             {user && <FeatureTutorial show={showFeaturesTutorial} />}
           </ThemeProvider>
         </NextAuthProvider>

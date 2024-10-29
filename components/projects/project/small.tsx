@@ -31,7 +31,7 @@ const SmallCard = ({
       ref={cardRef}
       className={cn(
         styles.loadAni,
-        "w-full overflow-hidden flex items-center h-64 justify-center shadow-2xl rounded-xl cursor-pointer bg-white group relative will-change-transform"
+        "w-full overflow-hidden flex items-center group h-64 justify-center shadow-2xl rounded-xl cursor-pointer bg-white group relative will-change-transform"
       )}
       onLayoutAnimationStart={() => {
         if (cardRef.current) {
@@ -73,7 +73,7 @@ const SmallCard = ({
         width={512}
         height={512}
         blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
-        className="brightness transition-all w-full h-full object-cover group-hover:brightness-75 pointer-events-none"
+        className="brightness transition-all duration-300 w-full h-full object-cover pointer-events-none group-hover:brightness-75 group-hover:scale-105 group-hover:rotate-1"
         priority
         placeholder="blur"
         ref={imageRef}

@@ -1,7 +1,7 @@
 import styles from "@/components/projects/project/styles.module.css"
 import { finishTutorial } from "@/lib/actions/queries/tutorials"
 import { cn } from "@/lib/utils"
-import { AnimatePresence, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { useState } from "react"
 const AboutTutorial = () => {
   const [fadeOut, setFadeOut] = useState(false)
@@ -10,11 +10,12 @@ const AboutTutorial = () => {
     setFadeOut(true)
   }
   return (
-    <AnimatePresence>
+    <>
+      {/* <AnimatePresence> */}
       {!fadeOut && (
         <motion.div
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.5 } }}
+          // initial={{ opacity: 1 }}
+          // exit={{ opacity: 0, transition: { duration: 0.5 } }}
           className={cn(
             "relative p-6 bg-white rounded-3xl shadow-2xl flex flex-col justify-between h-full",
             styles.loadAni
@@ -52,7 +53,8 @@ const AboutTutorial = () => {
           </div>
         </motion.div>
       )}
-    </AnimatePresence>
+      {/* </AnimatePresence> */}
+    </>
   )
 }
 

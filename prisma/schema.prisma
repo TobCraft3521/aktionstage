@@ -17,6 +17,7 @@ enum Role {
   ADMIN
   TEACHER
   STUDENT
+  VIP
 }
 
 model Account {

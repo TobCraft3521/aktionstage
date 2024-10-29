@@ -6,9 +6,14 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import AsgLogo from "../global/asg-logo"
 import AnimatedBackground from "../ui/animated-background"
+import { useEffect, useState } from "react"
+import { auth } from "@/lib/auth/auth"
+import { queryUser } from "@/lib/actions/queries/accounts"
+import { Role } from "@prisma/client"
 
 const Header = ({ variant }: { variant: "main" | "login" }) => {
   const user = useSession().data?.user
+  console.log(user)
   const logout = () => {
     signOut({
       redirect: true,
@@ -23,18 +28,41 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
       link: "/projects",
       current: pathName.toLowerCase().startsWith("/projects"),
     },
-    {
-      name: "Meine Projekte",
-      link: "/projects",
-      current: pathName.toLowerCase().startsWith("/PLACEHOLDER"),
-    },
+    ...((user as any)?.role === Role.STUDENT || (user as any)?.role === Role.VIP
+      ? [
+          {
+            name: "Ausgewählt",
+            link: "/projects",
+            current: pathName.toLowerCase().startsWith("/PLACEHOLDER"),
+          },
+        ]
+      : []),
     {
       name: "Einstellungen",
       link: "/settings",
       current: pathName.toLowerCase().startsWith("/settings"),
     },
+    ...((user as any)?.role === Role.TEACHER ||
+    (user as any)?.role === Role.ADMIN
+      ? [
+          {
+            name: "Für Lehrer",
+            link: "/students",
+            current: pathName.toLowerCase().startsWith("/students"),
+          },
+        ]
+      : []),
+    ...((user as any)?.role === Role.ADMIN
+      ? [
+          {
+            name: "💥 Admin Powers 💥",
+            link: "/admin",
+            current: pathName.toLowerCase().startsWith("/admin"),
+          },
+        ]
+      : []),
   ]
-  
+
   return (
     <div
       className={cn(
