@@ -47,8 +47,8 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
       ? [
           {
             name: "Für Lehrer",
-            link: "/students",
-            current: pathName.toLowerCase().startsWith("/students"),
+            link: "/teachers",
+            current: pathName.toLowerCase().startsWith("/teachers"),
           },
         ]
       : []),
@@ -67,7 +67,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
     <div
       className={cn(
         "p-6 w-screen flex justify-between items-center pb-4 z-50 relative",
-        variant === "main" && "border-b-2 border-slate-100 bg-white"
+        variant === "main" && "border-b-2 dark:border-b-0 border-slate-100 bg-white dark:bg-background"
       )}
     >
       <div className="z-10 flex gap-16 items-center">

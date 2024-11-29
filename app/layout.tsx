@@ -1,6 +1,6 @@
 import NextAuthProvider from "@/lib/providers/nextauthprovider"
 import type { Metadata } from "next"
-import { ThemeProvider } from "next-themes"
+import { ThemeProvider } from "@/lib/providers/theme-provider"
 import { Inter, Istok_Web } from "next/font/google"
 import { Toaster } from "react-hot-toast" // Import the 'Toaster' component from the appropriate module
 import "./globals.css"
@@ -25,19 +25,18 @@ export default async function RootLayout({
 }>) {
   const user = (await auth())?.user
   const showFeaturesTutorial = !(await queryTutorialComplete(Tutorial.FEATURES))
-  console.log(showFeaturesTutorial)
 
   return (
     <html suppressHydrationWarning lang="en">
       <body className={cn(inter.className, "")}>
-        <NextAuthProvider>
-          <ThemeProvider defaultTheme="light" enableSystem attribute="class">
+        <ThemeProvider defaultTheme="light" enableSystem attribute="class">
+          <NextAuthProvider>
             <Toaster />
             {children}
             {/* requires page refresh for state update - can't be seen when changing login */}
             {user && <FeatureTutorial show={showFeaturesTutorial} />}
-          </ThemeProvider>
-        </NextAuthProvider>
+          </NextAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

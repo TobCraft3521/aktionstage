@@ -4,14 +4,7 @@ import { queryTeachers } from "@/lib/actions/queries/accounts"
 import { cn } from "@/lib/utils"
 import { Account, Day } from "@prisma/client"
 import { motion } from "framer-motion"
-import {
-  Check,
-  ChevronsUpDown,
-  ChevronUp,
-  Plus,
-  Search,
-  X
-} from "lucide-react"
+import { Check, ChevronsUpDown, ChevronUp, Plus, Search, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import AnimatedButton from "../global/some-button"
 import { Button } from "../ui/button"
@@ -56,7 +49,7 @@ const ProjectsHeader = () => {
       layoutId="projects-header"
       transition={{ duration: 0.1 }}
       key={rerenderKey}
-      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b-2 border-slate-100 sticky top-0 items-center px-6 gap-4 drop-shadow-lg z-50"
+      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b-2 dark:border-b-0 border-slate-100 sticky top-0 items-center px-6 gap-4 drop-shadow-lg dark:drop-shadow-none z-50 dark:bg-card"
     >
       <div className="relative flex items-center">
         <Search className="absolute left-2 h-5 w-5 text-gray-500" />
@@ -64,7 +57,7 @@ const ProjectsHeader = () => {
           id="name"
           type="text"
           placeholder="Suchen"
-          className="w-[250px] bg-slate-200 rounded-lg border border-slate-300 py-2 pl-10 pr-4 text-gray-900 focus:outline-none focus:border-slate-400"
+          className="w-[250px] bg-slate-200 dark:bg-foreground rounded-lg border border-slate-300 dark:border-none py-2 pl-10 pr-4 text-gray-900 focus:outline-none focus:border-slate-400"
           value={search.query}
           onChange={(e) =>
             setSearch({
@@ -93,7 +86,7 @@ const ProjectsHeader = () => {
             }
             value={search.grade?.toString()}
           >
-            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 border-slate-300">
+            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 dark:border-none">
               <SelectValue placeholder="Jahrgangsstufe" />
             </SelectTrigger>
             <SelectContent className="bg-white border-slate-200 cursor-pointer">
@@ -128,7 +121,7 @@ const ProjectsHeader = () => {
             }
             value={search.day}
           >
-            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 border-slate-300">
+            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 dark:border-none">
               <SelectValue placeholder="Tag" />
             </SelectTrigger>
             <SelectContent
@@ -168,7 +161,7 @@ const ProjectsHeader = () => {
             <PopoverTrigger asChild>
               <Button
                 role="combobox"
-                className="w-[250px] md:w-[250px] justify-between bg-slate-200 hover:bg-slate-300 border text-gray-900 border-slate-300"
+                className="w-[250px] md:w-[250px] justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 dark:border-none"
               >
                 {search.teacher
                   ? teachers.find((teacher) => teacher.name === search.teacher)

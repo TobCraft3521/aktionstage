@@ -1,15 +1,19 @@
 import Header from "@/components/header/header"
 import SettingsSidebar from "@/components/settings/settings-sidebar"
-import { CreditCard, Lock, User, Users } from "lucide-react"
-import Link from "next/link"
+import TeachersSidebar from "@/components/teachers/teachers-sidebar"
+import React from "react"
 
-const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
+type Props = {
+  children: React.ReactNode
+}
+
+const Teachers = ({ children }: Props) => {
   return (
     <div className="flex flex-col h-screen">
       <Header variant="main" />
       <div className="flex flex-1">
         <div className="block">
-          <SettingsSidebar />
+          <TeachersSidebar />
         </div>
         <div className="flex-1 bg-slate-100 rounded-tl-xl mt-2 relative overflow-hidden">
           {children}
@@ -19,4 +23,4 @@ const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export default SettingsLayout
+export default Teachers

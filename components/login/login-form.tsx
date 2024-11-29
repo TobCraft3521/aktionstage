@@ -55,6 +55,7 @@ const LoginForm = () => {
 
       if (response?.ok && !response.error) {
         router.push("/projects")
+        window.location.reload()
       } else {
         setSubmitError("Falscher Benutzername oder Passwort 😒")
       }
