@@ -24,7 +24,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
 
   const TABS = [
     {
-      name: "Projekte",
+      name: "Entdecken",
       link: "/projects",
       current: pathName.toLowerCase().startsWith("/projects"),
     },

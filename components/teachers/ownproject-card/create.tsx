@@ -7,7 +7,7 @@ const CreateProjectCard = (props: Props) => {
   return (
     <div className="">
       <Link
-        href="/organization-list/create"
+        href="/teachers/ownprojects/create"
         className="group flex h-[128px] w-56 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-gradient-to-r from-gray-100 to-gray-200 shadow-neutral-200 shadow-lg transition-all hover:border-slate-300 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:border-[1.5px] dark:border-slate-900 dark:bg-gradient-to-r dark:from-[#0c0b0f] dark:to-gray-900 dark:hover:border-slate-800 dark:hover:bg-gradient-to-r dark:hover:from-gray-800 dark:hover:to-gray-700"
       >
         <div className="relative flex h-full w-1/3 flex-shrink-0 items-center justify-center overflow-hidden rounded-l-lg bg-neutral-300 transition-all dark:bg-gray-800">

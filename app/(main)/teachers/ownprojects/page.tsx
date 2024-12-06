@@ -6,13 +6,17 @@ import { queryOwnProjects } from "@/lib/actions/queries/projects"
 import { auth } from "@/lib/auth/auth"
 import { Account, Project } from "@prisma/client"
 import { useSession } from "next-auth/react"
+import { DM_Sans } from "next/font/google"
 import { useEffect, useState } from "react"
 
-type Props = {}
+const dmSans = DM_Sans({
+  weight: "800",
+  subsets: ["latin"],
+})
 
 type ProjectWithTeachers = Project & { teachers: Account[] }
 
-const OwnProjects = (props: Props) => {
+const OwnProjects = () => {
   const id = useSession().data?.user?.id
   const [ownProjects, setOwnProjects] = useState<
     ProjectWithTeachers[] | undefined
@@ -26,8 +30,8 @@ const OwnProjects = (props: Props) => {
   }, [])
   return (
     <div className="relative h-full w-full flex-1">
-      <div className="absolute top-0 left-0 h-[30vh] w-full border-b border-zinc-300 bg-[#EDEDF3] dark:border-zinc-800 dark:bg-[#111015]"></div>
-      <div className="relative p-16 flex flex-row gap-6">
+      <div className="absolute top-0 left-0 h-[30vh] w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]"></div>
+      <div className="relative p-16 flex flex-row gap-6 flex-wrap">
         {ownProjects?.map((project) => (
           <OwnProjectCard
             key={project.id}
