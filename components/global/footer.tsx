@@ -1,7 +1,5 @@
 "use client"
-import { auth } from "@/lib/auth/auth"
 import { signOut, useSession } from "next-auth/react"
-import Image from "next/image"
 import Link from "next/link"
 import AsgLogo from "./asg-logo"
 
@@ -21,6 +19,12 @@ const Footer = () => {
                 asg-passau.de
               </Link>
             </div>
+            <Link
+              href="https://tobcraft.xyz"
+              className="p-2 rounded-md bg-slate-200 mt-4 text-sm"
+            >
+              Made with ❤️ by <span className="underline">Tobias</span>
+            </Link>
           </div>
           <div className="w-screen md:w-[20vw] p-8 text-sm flex items-center md:items-start flex-col">
             <h1 className="font-extrabold mb-1">Interessant</h1>

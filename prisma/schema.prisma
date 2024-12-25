@@ -21,16 +21,19 @@ enum Role {
 }
 
 model Account {
-  id             String          @id @default(cuid())
-  userName       String          @unique
-  name           String
-  password       String
-  role           Role            @default(STUDENT)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  projects       Project[]       @relation("ProjectAccount")
-  ownProjects    Project[]       @relation("ProjectTeacher")
+  id       String @id @default(cuid())
+  userName String @unique
+  name     String
+  password String
+  role     Role   @default(STUDENT)
+  short    String @default("")
+
+  projects            Project[]            @relation("ProjectAccount")
+  ownProjects         Project[]            @relation("ProjectTeacher")
   toturialCompletions TutorialCompletion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userName])
   @@index([role])
@@ -74,9 +77,9 @@ enum Tutorial {
 }
 
 model TutorialCompletion {
-  id        String            @id @default(cuid())
+  id        String   @id @default(cuid())
   tutorial  Tutorial
-  account   Account           @relation(fields: [accountId], references: [id])
+  account   Account  @relation(fields: [accountId], references: [id])
   accountId String
-  createdAt DateTime          @default(now())
+  createdAt DateTime @default(now())
 }

@@ -21,16 +21,18 @@ import { suggestEmoji } from "@/lib/actions/ai/emoji-sug"
 
 // Define the form schema
 const schema = z.object({
-  name: z.string().min(1, "Project name is required"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  emoji: z.string().min(1, "Emoji is required"),
+  name: z.string().min(1, "Kein Name angegeben"),
+  description: z
+    .string()
+    .min(1, "Beschreibung muss mindestens 10 Zeichen haben"),
+  emoji: z.string().min(1, "Emoji ist erforderlich"),
   teachers: z.string().optional(),
-  students: z.number().min(1, "At least 1 student is required"),
-  location: z.string().min(1, "Location is required"),
-  price: z.number().min(0, "Price must be 0 or more"),
-  time: z.string().min(1, "Time is required"),
-  date: z.string().min(1, "Date is required"),
-  image: z.string().min(1, "Image URL is required"),
+  students: z.number().min(1, "Mindestens 1 Schüler ist erforderlich"),
+  location: z.string().min(1, "Ort ist erforderlich"),
+  price: z.number().min(0, "Preis muss 0 oder mehr sein"),
+  time: z.string().min(1, "Zeit ist erforderlich"),
+  date: z.string().min(1, "Datum ist erforderlich"),
+  image: z.string().min(1, "Bild-URL ist erforderlich"),
 })
 
 type FormData = z.infer<typeof schema>
@@ -42,11 +44,14 @@ const MultiStepForm = () => {
   ) // Track valid pages
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
-    { label: "Basic Info", fields: ["name", "description"] },
+    { label: "Titel", fields: ["name"] },
+    { label: "Details", fields: ["description", "image"] },
     { label: "Emoji", fields: ["emoji"] },
-    { label: "Details", fields: ["teachers", "students", "location"] },
-    { label: "Schedule", fields: ["time", "date", "price"] },
-    { label: "Banner", fields: ["image"] },
+    { label: "Lehrer", fields: ["teachers"] },
+    {
+      label: "Daten",
+      fields: ["students", "location", "price", "time", "date"],
+    },
   ]
 
   // Dynamically handle forms for each step
@@ -125,18 +130,19 @@ const MultiStepForm = () => {
     const time = getValues("time") || "" // Default to empty string
     const date = getValues("date") || "" // Default to empty string
     const price = getValues("price") >= 0 ? getValues("price") : 0 // Ensure price is valid
+    const image = getValues("image") || "" // Default to empty string
 
     if (step === 0) {
-      return name.length > 0 && description.length >= 10
+      return name.length > 0
     }
     if (step === 1) {
-      return emoji.length > 0 // Mark the emoji step as valid when emoji is selected
+      return description.length > 0 && image.length > 0
     }
     if (step === 2) {
-      return students > 0 && location.length > 0
+      return emoji.length > 0
     }
     if (step === 3) {
-      return time.length > 0 && date.length > 0 && price >= 0
+      return true // No othe teachers required
     }
     if (step === 4) {
       return true // Banner step has no validation logic
@@ -151,7 +157,7 @@ const MultiStepForm = () => {
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-5">
-      <h1 className="text-xl font-bold mb-4">Create a Project</h1>
+      <h1 className="text-xl font-bold mb-4">Projekt erstellen</h1>
 
       {/* Progress Bar */}
       <div className="mb-6">
@@ -159,7 +165,7 @@ const MultiStepForm = () => {
       </div>
 
       {/* Step Titles */}
-      <div className="flex justify-between text-sm mb-4">
+      <div className="flex justify-between text-sm mb-8">
         {steps.map((stepObj, index) => (
           <button
             key={index}
@@ -177,18 +183,21 @@ const MultiStepForm = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         {step === 0 && (
           <div>
-            <h2 className="text-lg font-semibold mb-2">Name Your Project</h2>
+            <h2 className="text-lg font-semibold mb-2">Name des Projekts</h2>
             <Input
-              placeholder="Project Name"
+              placeholder="Benenne dein Projekt"
               {...register("name")}
               className="mb-2"
             />
             {errors.name && (
               <p className="text-red-500">{errors.name.message}</p>
             )}
-
+          </div>
+        )}
+        {step === 1 && (
+          <div>
             <h2 className="text-lg font-semibold mt-4 mb-2">
-              Project Description
+              Projekt Beschreibung
             </h2>
             <Textarea
               placeholder="Description"
@@ -198,10 +207,16 @@ const MultiStepForm = () => {
             {errors.description && (
               <p className="text-red-500">{errors.description.message}</p>
             )}
+
+            <h2 className="text-lg font-semibold mb-2">Upload Banner</h2>
+            <Input placeholder="Image URL" {...register("image")} />
+            {errors.image && (
+              <p className="text-red-500">{errors.image.message}</p>
+            )}
           </div>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <div>
             <h2 className="text-lg font-semibold mb-2">Select Emoji</h2>
             <p className="text-gray-500">
@@ -234,9 +249,11 @@ const MultiStepForm = () => {
           </div>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <div>
-            <h2 className="text-lg font-semibold mt-4 mb-2">Teachers</h2>
+            <h2 className="text-lg font-semibold mt-4 mb-2">
+              Lehrer Hinzufügen
+            </h2>
             <Input
               placeholder="Teachers"
               type="text"
@@ -246,7 +263,7 @@ const MultiStepForm = () => {
             {errors.teachers && (
               <p className="text-red-500">{errors.teachers.message}</p>
             )}
-
+            {/* 
             <h2 className="text-lg font-semibold mt-4 mb-2">Students</h2>
             <Input
               placeholder="Number of Students"
@@ -266,11 +283,11 @@ const MultiStepForm = () => {
             />
             {errors.location && (
               <p className="text-red-500">{errors.location.message}</p>
-            )}
+            )} */}
           </div>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <div>
             <h2 className="text-lg font-semibold mb-2">Time</h2>
             <Input placeholder="Time" {...register("time")} className="mb-2" />
@@ -304,13 +321,20 @@ const MultiStepForm = () => {
 
         {step === 4 && (
           <div>
-            <h2 className="text-lg font-semibold mb-2">Upload Banner</h2>
-            <Input placeholder="Image URL" {...register("image")} />
+            <h2 className="text-lg font-semibold mb-2">Image URL</h2>
+            <Input
+              placeholder="Image URL"
+              {...register("image")}
+              className="mb-2"
+            />
+            {errors.image && (
+              <p className="text-red-500">{errors.image.message}</p>
+            )}
           </div>
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between mt-8">
           {step > 0 ? (
             <Button onClick={handlePrev} variant="secondary" type="button">
               Previous

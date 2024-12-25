@@ -2,7 +2,7 @@
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Project } from "@prisma/client"
+import { Account, Project } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
 import { useAppState } from "@/hooks/use-app-state"
@@ -18,7 +18,11 @@ const SmallCard = ({
   project,
   index,
 }: {
-  project: Partial<Project>
+  project: Partial<
+    Project & {
+      teachers: Account[]
+    }
+  >
   index: number
 }) => {
   const router = useRouter()
@@ -73,7 +77,7 @@ const SmallCard = ({
         width={512}
         height={512}
         blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
-        className="brightness transition-all duration-300 w-full h-full object-cover pointer-events-none group-hover:brightness-75 group-hover:scale-105 group-hover:rotate-1"
+        className="brightness transition-all duration-300 w-full h-full object-cover pointer-events-none group-hover:brightness-75 group-hover:scale-[102%]"
         priority
         placeholder="blur"
         ref={imageRef}
@@ -85,12 +89,16 @@ const SmallCard = ({
         >
           {project.name}
         </motion.h1>
-        <div className="text-sm font-medium">Teacher</div>
+        <div className="text-sm font-medium opacity-90">
+          {project.teachers?.map((teacher) => teacher.short).join(" ") ||
+            "Kein Lehrer"}
+          , {project.studentsCount}/{project.studentsMax}
+        </div>
       </div>
       {/* hide when opening to reduce lag ACTUAL PROBLEM HERE 10% ~*/}
       <div
         ref={shadowRef}
-        className="absolute top-full bg-white w-[80%] h-[90px] hidden md:block z-20 font-thin"
+        className="absolute top-full bg-white w-[80%] h-[90px] block z-20 font-thin"
         style={{
           filter: "drop-shadow(0 -85px 24px rgb(0 0 0 / 1))",
         }}

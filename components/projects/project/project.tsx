@@ -90,8 +90,8 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                     (i + 1 === project?.teachers?.length ? "" : ", ")
                 )}
               </motion.h2>
-              <ScrollArea>
-                <div className="max-w-[900px] text-sm sm:text-xl sm:leading-8 text-slate-200 px-8 md:px-20 mb-8 md:mb-16 max-h-[40vh]">
+              <ScrollArea className="max-h-[20vh] mb-8">
+                <div className="max-w-[900px] text-base sm:text-xl sm:leading-8 text-slate-200 px-8 md:px-20 mb-8 md:mb-16 max-h-[40vh]">
                   {project?.description}
                 </div>
               </ScrollArea>

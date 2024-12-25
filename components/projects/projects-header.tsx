@@ -57,7 +57,7 @@ const ProjectsHeader = () => {
           id="name"
           type="text"
           placeholder="Suchen"
-          className="w-[250px] bg-slate-200 dark:bg-foreground rounded-lg border border-slate-300 dark:border-none py-2 pl-10 pr-4 text-gray-900 focus:outline-none focus:border-slate-400"
+          className="w-[250px] bg-slate-200 dark:bg-foreground rounded-lg border-slate-300 dark:border-none py-2 pl-10 pr-4 text-gray-900 focus:outline-none focus:border-indigo-400"
           value={search.query}
           onChange={(e) =>
             setSearch({
@@ -86,31 +86,73 @@ const ProjectsHeader = () => {
             }
             value={search.grade?.toString()}
           >
-            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 dark:border-none">
+            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 border-none">
               <SelectValue placeholder="Jahrgangsstufe" />
             </SelectTrigger>
             <SelectContent className="bg-white border-slate-200 cursor-pointer">
-              <SelectItem value="5" className="cursor-pointer">
+              <SelectItem
+                value="5"
+                className={cn(
+                  "cursor-pointer",
+                  search.grade === 5 && "bg-slate-100"
+                )}
+              >
                 5. Klasse
               </SelectItem>
-              <SelectItem value="6" className="cursor-pointer">
+              <SelectItem
+                value="6"
+                className={cn(
+                  "cursor-pointer",
+                  search.grade === 6 && "bg-slate-100"
+                )}
+              >
                 6. Klasse
               </SelectItem>
-              <SelectItem value="7" className="cursor-pointer">
+              <SelectItem
+                value="7"
+                className={cn(
+                  "cursor-pointer",
+                  search.grade === 7 && "bg-slate-100"
+                )}
+              >
                 7. Klasse
               </SelectItem>
               <SelectSeparator />
-              <SelectItem value="8" className="cursor-pointer">
+              <SelectItem
+                value="8"
+                className={cn(
+                  "cursor-pointer",
+                  search.grade === 8 && "bg-slate-100"
+                )}
+              >
                 8. Klasse
               </SelectItem>
-              <SelectItem value="9" className="cursor-pointer">
+              <SelectItem
+                value="9"
+                className={cn(
+                  "cursor-pointer",
+                  search.grade === 9 && "bg-slate-100"
+                )}
+              >
                 9. Klasse
               </SelectItem>
-              <SelectItem value="10" className="cursor-pointer">
+              <SelectItem
+                value="10"
+                className={cn(
+                  "cursor-pointer",
+                  search.grade === 10 && "bg-slate-100"
+                )}
+              >
                 10. Klasse
               </SelectItem>
               <SelectSeparator />
-              <SelectItem value="11" className="cursor-pointer">
+              <SelectItem
+                value="11"
+                className={cn(
+                  "cursor-pointer",
+                  search.grade === 11 && "bg-slate-100"
+                )}
+              >
                 11. Klasse
               </SelectItem>
             </SelectContent>
@@ -121,13 +163,12 @@ const ProjectsHeader = () => {
             }
             value={search.day}
           >
-            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 dark:border-none">
+            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 border-none">
               <SelectValue placeholder="Tag" />
             </SelectTrigger>
             <SelectContent
               className="bg-white border-slate-200 cursor-pointer z-[60]"
               onClick={(event) => {
-                console.log("test")
                 event.stopPropagation()
               }}
             >
@@ -146,13 +187,31 @@ const ProjectsHeader = () => {
                   <SelectSeparator />
                 </>
               )}
-              <SelectItem value="MON" className="cursor-pointer">
+              <SelectItem
+                value="MON"
+                className={cn(
+                  "cursor-pointer",
+                  search.day === Day.MON && "bg-slate-100"
+                )}
+              >
                 Montag
               </SelectItem>
-              <SelectItem value="TUE" className="cursor-pointer">
+              <SelectItem
+                value="TUE"
+                className={cn(
+                  "cursor-pointer",
+                  search.day === Day.TUE && "bg-slate-100"
+                )}
+              >
                 Dienstag
               </SelectItem>
-              <SelectItem value="WED" className="cursor-pointer">
+              <SelectItem
+                value="WED"
+                className={cn(
+                  "cursor-pointer",
+                  search.day === Day.WED && "bg-slate-100"
+                )}
+              >
                 Mittwoch
               </SelectItem>
             </SelectContent>
@@ -161,7 +220,7 @@ const ProjectsHeader = () => {
             <PopoverTrigger asChild>
               <Button
                 role="combobox"
-                className="w-[250px] md:w-[250px] justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 dark:border-none"
+                className="w-[250px] md:w-[250px] justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
               >
                 {search.teacher
                   ? teachers.find((teacher) => teacher.name === search.teacher)

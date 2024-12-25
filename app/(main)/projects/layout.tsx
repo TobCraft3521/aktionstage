@@ -27,11 +27,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   //   preload()
   // }, [])
   return (
-    <ScrollArea className="flex h-screen" id="projects-scroll">
+    <ScrollArea className="flex h-screen relative" id="projects-scroll">
       <Header variant="main" />
       <ProjectsHeader />
       <ProjectsComp id={id} />
-      {children}
+      {/* {children} */}
     </ScrollArea>
   )
 }

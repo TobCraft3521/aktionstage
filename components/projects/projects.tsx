@@ -11,16 +11,15 @@ import {
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 
+import { queryTutorialComplete } from "@/lib/actions/queries/tutorials"
+import { cn } from "@/lib/utils"
+import { DM_Sans } from "next/font/google"
 import { useRouter } from "next/navigation"
 import Footer from "../global/footer"
 import AboutTutorial from "../tutorials/about"
 import { Skeleton } from "../ui/skeleton"
 import ProjectComp from "./project/project"
 import SmallCard from "./project/small"
-import { queryTutorialComplete } from "@/lib/actions/queries/tutorials"
-import { DM_Sans } from "next/font/google"
-import { cn } from "@/lib/utils"
-import { suggestEmoji } from "@/lib/actions/ai/emoji-sug"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -66,6 +65,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
     }
     fetchData()
   }, [])
+  console.log(appState.search.teacher)
 
   const searchedProjects = useMemo(() => {
     setFiltering(true)
@@ -80,9 +80,16 @@ const ProjectsComp = ({ id }: { id?: string }) => {
         (!appState.search.day || appState.search.day === project.day) &&
         (!appState.search.grade ||
           (appState.search.grade >= (project.minGrade || 5) &&
-            appState.search.grade <= (project.maxGrade || 11)))
+            appState.search.grade <= (project.maxGrade || 11))) &&
+        (!appState.search.teacher ||
+          project.teachers?.some(
+            (teacher) =>
+              teacher.name.toLowerCase() ===
+              appState.search.teacher?.toLocaleLowerCase()
+          ))
     )
     setFiltering(false)
+    console.log(filtered)
     return filtered
   }, [projects, appState.search])
 
@@ -132,7 +139,14 @@ const ProjectsComp = ({ id }: { id?: string }) => {
           {searchedProjects.length > 0 && projects.length > 0 ? (
             <div className="w-full">
               <div className="w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12">
-                <h1 className={cn("ml-[24px] tracking-tighter text-slate-800", dmSans.className)}>Projekte</h1>
+                <h1
+                  className={cn(
+                    "ml-[24px] tracking-tighter text-slate-800",
+                    dmSans.className
+                  )}
+                >
+                  Projekte
+                </h1>
               </div>
               <div className="w-full p-2 mb-16 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                 {!aboutTutorialDone && <AboutTutorial />}
@@ -162,7 +176,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
             {id && (
               <div className="">
                 <motion.div
-                  className="absolute top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white shadow-lg z-[100]"
+                  className="absolute top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white shadow-lg z-[120]"
                   layoutId={`card-container-${id}`}
                   style={{
                     y,
@@ -176,7 +190,11 @@ const ProjectsComp = ({ id }: { id?: string }) => {
                   // exit={{
                   //   opacity: 0,
                   // }}
-                  drag={"y"}
+                  drag={
+                    typeof window !== "undefined" && window.innerWidth > 768
+                      ? "y"
+                      : false
+                  }
                   dragConstraints={{ top: 0, bottom: 0 }}
                   dragElastic={0.2}
                   onDrag={(event, info) => {

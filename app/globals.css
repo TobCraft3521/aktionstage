@@ -79,3 +79,22 @@ body {
   -webkit-overflow-scrolling: touch;
   font-family: "Segoe UI Emoji", sans-serif;
 }
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.popInAni {
+  animation: popIn 0.5s ease-in-out normal backwards;
+}

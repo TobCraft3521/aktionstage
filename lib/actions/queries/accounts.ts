@@ -6,7 +6,14 @@ import { Role } from "@prisma/client"
 export const queryTeachers = async () => {
   const teachers = await db.account.findMany({
     where: {
-      role: Role.TEACHER,
+      OR: [
+        {
+          role: Role.TEACHER,
+        },
+        {
+          role: Role.ADMIN,
+        },
+      ],
     },
   })
   // never return the password!!!

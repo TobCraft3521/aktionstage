@@ -13,7 +13,6 @@ import { Role } from "@prisma/client"
 
 const Header = ({ variant }: { variant: "main" | "login" }) => {
   const user = useSession().data?.user
-  console.log(user)
   const logout = () => {
     signOut({
       redirect: true,
@@ -67,7 +66,8 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
     <div
       className={cn(
         "p-6 w-screen flex justify-between items-center pb-4 z-50 relative",
-        variant === "main" && "border-b-2 dark:border-b-0 border-slate-100 bg-white dark:bg-background"
+        variant === "main" &&
+          "border-b-2 dark:border-b-0 border-slate-100 bg-white dark:bg-background"
       )}
     >
       <div className="z-10 flex gap-16 items-center">
