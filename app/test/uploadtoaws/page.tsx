@@ -1,118 +1,113 @@
 "use client"
-import { CreateOrgFormSchema } from "@/lib/types"
-import { z } from "zod"
-import { SubmitHandler, useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form"
+
 import { useState } from "react"
-import { Loader, UmbrellaOff, User } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { getPresignedUploadURL } from "@/lib/actions/aws/upload"
-import { error } from "console"
-import { useRouter } from "next/navigation"
-import Compressor from "compressorjs"
+import { getPresignedUploadPost } from "@/lib/actions/aws/upload"
 
-const Upload = () => {
-  const [submitError, setSubmitError] = useState<string>("")
-  const router = useRouter()
-  const form = useForm<z.infer<typeof CreateOrgFormSchema>>({
-    mode: "onChange",
-    resolver: zodResolver(CreateOrgFormSchema),
-    defaultValues: {
-      img: undefined,
-    },
-  })
-  const isLoading = form.formState.isSubmitting
-  const onSubmit: SubmitHandler<z.infer<typeof CreateOrgFormSchema>> = async (
-    formData
-  ) => {
-    new Compressor(formData.img[0], {
-      quality: 0.6,
-      async success(img) {
-        const { url, error, futurePublicURL } = await getPresignedUploadURL(
-          img.type
-        )
-        if (error || !url) return setSubmitError("Failed to get presigned URL")
+export default function FileUploadPage() {
+  const [file, setFile] = useState<File | null>(null)
+  const [uploadUrl, setUploadUrl] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-        // !!! change cors origin on aws on production
-        const data = await fetch(url, {
-          method: "PUT",
-          headers: {
-            "Content-Type": img.type,
-          },
-          body: img,
-        })
-        console.log(futurePublicURL)
-        router.push(futurePublicURL)
-      },
-      error(err) {
-        console.log(err.message)
-      },
-    })
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cFile = e.target.files?.[0]
+
+    if (!cFile) return
+    setFile(cFile)
+
+    // Check file size (limit to 5MB)
+    const MAX_SIZE_MB = 5
+    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
+
+    if (cFile.size > MAX_SIZE_BYTES) {
+      setError(`File size exceeds ${MAX_SIZE_MB} MB.`)
+      return
+    }
+
+    setError(null)
+    console.log("File is valid:", file)
   }
-  return (
-    <div className="flex h-full w-full items-center justify-center">
-      <Form {...form}>
-        <form
-          onChange={() => {
-            if (submitError) setSubmitError("")
-          }}
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex w-full flex-col space-y-4 sm:w-[400px] sm:justify-center"
-        >
-          <h1 className="flex items-center gap-2 text-xl font-bold">
-            <UmbrellaOff />
-            Create an organization
-          </h1>
 
-          <FormField
-            disabled={isLoading}
-            control={form.control}
-            name="img"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <>
-                    <label
-                      className="mb-2 block text-sm font-medium tracking-wide text-gray-900 dark:text-zinc-400"
-                      htmlFor="img"
-                    >
-                      Image
-                    </label>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      placeholder="image"
-                      {...form.register("img", {
-                        required: "Please select an image",
-                      })}
-                    />
-                  </>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {submitError && <FormMessage>{submitError}</FormMessage>}
-          <Button
-            type="submit"
-            className="w-full p-6"
-            size="lg"
-            disabled={isLoading}
-          >
-            {!isLoading ? "Create" : <Loader />}
-          </Button>
-        </form>
-      </Form>
+  const handleUpload = async () => {
+    if (!file) {
+      setError("Please select a file to upload.")
+      return
+    }
+
+    setIsUploading(true)
+    setError(null)
+
+    try {
+      // Call the server action to get presigned POST data
+      const {
+        url,
+        fields,
+        publicUrl,
+        error: serverError,
+      } = await getPresignedUploadPost(file.type.split("/")[1])
+
+      if (serverError) {
+        setError("Failed to get upload URL.")
+        console.error(serverError)
+        setIsUploading(false)
+        return
+      }
+
+      // Prepare form data
+      const formData = new FormData()
+      Object.entries(fields).forEach(([key, value]) => {
+        formData.append(key, value) // Add all fields from presigned POST
+      })
+      formData.append("file", file) // Add the file
+
+      // Perform the POST request
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        setError(`Upload failed: ${errorText}`)
+        console.error("Upload failed:", errorText)
+      } else {
+        console.log("File uploaded successfully!")
+        setUploadUrl(publicUrl)
+      }
+    } catch (err) {
+      console.error(err)
+      setError("An error occurred during the upload.")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center space-y-4">
+      <h1 className="text-xl font-bold">Upload a File</h1>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        disabled={isUploading}
+        className="mb-4"
+      />
+      <button
+        onClick={handleUpload}
+        disabled={isUploading || !file}
+        className="px-4 py-2 bg-blue-600 text-white rounded"
+      >
+        {isUploading ? "Uploading..." : "Upload"}
+      </button>
+      {error && <p className="text-red-600">{error}</p>}
+      {uploadUrl && (
+        <p className="text-green-600">
+          File uploaded successfully! Public URL:{" "}
+          <a href={uploadUrl} target="_blank" rel="noopener noreferrer">
+            {uploadUrl}
+          </a>
+        </p>
+      )}
     </div>
   )
 }
-
-export default Upload

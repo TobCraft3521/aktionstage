@@ -96,9 +96,18 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 </div>
               </ScrollArea>
               <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
-                <Button className="w-full sm:w-[154px] h-[43px] rounded-xl">
-                  Anmelden
-                </Button>
+                {(project.studentsCount || 0) < (project.studentsMax || 0) ? (
+                  <Button className="w-full sm:w-[154px] h-[43px] rounded-xl">
+                    Anmelden
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full sm:w-[154px] h-[43px] rounded-xl"
+                    disabled
+                  >
+                    Voll 😭
+                  </Button>
+                )}
                 {[
                   {
                     icon: "🙋🏻",
