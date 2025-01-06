@@ -1,6 +1,15 @@
 "use client"
 
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
@@ -12,12 +21,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { suggestEmoji } from "@/lib/actions/ai/emoji-sug"
 import { getPresignedUploadPost } from "@/lib/actions/aws/upload"
+import { queryTeachers } from "@/lib/actions/queries/accounts"
+import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Day } from "@prisma/client"
-import { Check, Loader2Icon } from "lucide-react"
-import React, { useRef, useState } from "react"
+import { Account, Day } from "@prisma/client"
+import { Check, Loader2Icon, Plus, Trash, Trash2, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -40,13 +51,19 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 const MultiStepForm = () => {
+  // Multi step form logic
   const [step, setStep] = useState(0)
   const validPages = useRef<boolean[]>(new Array(5).fill(false)) // Track valid pages
+  // File upload logic
   const [file, setFile] = useState<File | null>(null)
   const [fileTooLarge, setFileTooLarge] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [fileUploadError, setFileUploadError] = useState<string | undefined>()
   const [fileUploadSuccess, setFileUploadSuccess] = useState(false)
+  // Teacher adding logic
+  const [isTeacherSelectOpen, setIsTeacherSelectOpen] = useState(false)
+  const [addedTeachers, setAddedTeachers] = useState<Partial<Account>[]>([])
+  const [teachers, setTeachers] = useState<Partial<Account>[]>([])
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
     { label: "Titel", fields: ["title"] },
@@ -201,6 +218,43 @@ const MultiStepForm = () => {
       setIsUploading(false)
     }
   }
+
+  // Add a teacher
+  const addTeacher = (teacher: Partial<Account>) => {
+    if (!addedTeachers.find((t) => t.id === teacher.id)) {
+      setAddedTeachers((prev) => [...prev, teacher])
+    }
+    setValue(
+      "teachers",
+      // addition is needed as the state update is async
+      [...addedTeachers, teacher].map(
+        (t) => t.id || "should have been fetched with id"
+      )
+    )
+  }
+
+  // Remove a teacher
+  const removeTeacher = (id: string) => {
+    setAddedTeachers((prev) => prev.filter((t) => t.id !== id))
+    setValue(
+      "teachers",
+      addedTeachers
+        // filter is needed as the state update is async
+        .filter((t) => t.id !== id)
+        .map((t) => t.id || "should have been fetched with id")
+    )
+  }
+
+  // Fetch teachers from the server
+  useEffect(() => {
+    console.log("test")
+    const fetchTeachers = async () => {
+      const teachers = await queryTeachers()
+      console.log(teachers)
+      setTeachers(teachers)
+    }
+    fetchTeachers()
+  }, [])
 
   // Watch for form changes to keep the button disabled state correct
   const isCurrentStepValid = () => {
@@ -407,18 +461,79 @@ const MultiStepForm = () => {
 
         {step === 3 && (
           <div>
-            <h2 className="text-lg font-semibold mt-4 mb-2">
-              Lehrer Hinzufügen
-            </h2>
-            <p
-              // cheat
-              onClick={() => {
-                setValue("teachers", ["test"])
-                alert("Teachers cleared")
-              }}
+            <h2 className="text-lg font-semibold mb-3">Lehrer Hinzufügen</h2>
+            {/* Display Added Teachers */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {addedTeachers.length > 0 ? (
+                addedTeachers.map((teacher) => (
+                  <Badge
+                    key={teacher.id}
+                    variant="outline"
+                    className="flex items-center gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop"
+                    onClick={() => removeTeacher(teacher.id || "")}
+                  >
+                    {teacher.name}
+                    <span className="text-red-500 hover:text-red-700">
+                      <Trash2 className="h-4 w-4" />
+                    </span>
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-slate-500">Noch keine anderen Leher.</p>
+              )}
+            </div>
+            {/* Teacher Search Popover */}
+            <Popover
+              open={isTeacherSelectOpen}
+              onOpenChange={setIsTeacherSelectOpen}
             >
-              TODO: add teachers UI
-            </p>
+              <PopoverTrigger asChild className="w-32">
+                <div>
+                  <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer transition-all hover:bg-slate-200">
+                    <Plus className="text-slate-500" />
+                  </Button>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-[250px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search teachers..." />
+                  <CommandEmpty>No teachers found.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandList>
+                      {teachers.length > 0 &&
+                        teachers.map((teacher: Partial<Account>) => (
+                          <CommandItem
+                            key={teacher.id}
+                            className={cn(
+                              "cursor-pointer",
+                              addedTeachers.find((t) => t.id === teacher.id)
+                                ? "opacity-50 pointer-events-none"
+                                : ""
+                            )}
+                            value={teacher.name}
+                            onSelect={(currentValue) => {
+                              if (currentValue === teacher.name) {
+                                addTeacher(teacher)
+                                setIsTeacherSelectOpen(false)
+                              }
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                addedTeachers.find((t) => t.id === teacher.id)
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {teacher.name}
+                          </CommandItem>
+                        ))}
+                    </CommandList>
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
             {errors.teachers && (
               <p className="text-red-500">{errors.teachers.message}</p>
             )}

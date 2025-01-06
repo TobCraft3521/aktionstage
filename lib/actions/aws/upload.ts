@@ -21,7 +21,7 @@ export const getPresignedUploadPost = async (
   error: any | null
 }> => {
   const { NEXT_AWS_BUCKET_NAME, NEXT_AWS_REGION } = process.env
-  const Key = `${uuid()}`
+  const Key = `${uuid()}.${type.split("/")[1]}`
   const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB
 
   try {
@@ -29,7 +29,8 @@ export const getPresignedUploadPost = async (
       Bucket: NEXT_AWS_BUCKET_NAME!,
       Key,
       Fields: {
-        "Content-Type": `image/${type}`,
+        "Content-Type": `${type}`,
+        // "Content-Disposition": "inline", // fixed: content type was image/image/...
       },
       Conditions: [
         ["content-length-range", 0, MAX_UPLOAD_SIZE_BYTES], // Enforce file size limit
