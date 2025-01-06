@@ -25,6 +25,9 @@ import { queryTeachers } from "@/lib/actions/queries/accounts"
 import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
+import RangeSlider from "react-range-slider-input"
+import "react-range-slider-input/dist/style.css"
+import "./range-slider-styles.css"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Account, Day } from "@prisma/client"
 import { Check, Loader2Icon, Plus, Trash, Trash2, X } from "lucide-react"
@@ -577,7 +580,28 @@ const MultiStepForm = () => {
           <div>
             {/* min/max grade */}
             <h2 className="text-lg font-semibold mt-4 mb-2">Jahrgangsstufen</h2>
-            {/* TODO range selector students */}
+            <p className="text-gray-500 mb-8">
+              Wähle die Jahrgangsstufen für dein Projekt
+            </p>
+            <div className="w-full max-w-lg mx-auto flex flex-col gap-4">
+              <div className="flex justify-between mx-2">
+                <span>{getValues("minGrade")}. Klasse</span>
+                <span>{getValues("maxGrade")}. Klasse</span>
+              </div>
+              <div className="w-full">
+                <RangeSlider
+                  min={5}
+                  max={11}
+                  step={1}
+                  defaultValue={[5, 11]}
+                  id="rangeSlider"
+                  onInput={(values: any) => {
+                    setValue("minGrade", values[0])
+                    setValue("maxGrade", values[1])
+                  }}
+                />
+              </div>
+            </div>
             {(errors.minGrade || errors.maxGrade) && (
               <p className="text-red-500">
                 {errors.minGrade?.message || errors.maxGrade?.message}
@@ -585,7 +609,7 @@ const MultiStepForm = () => {
             )}
 
             {/* max students */}
-            <h2 className="text-lg font-semibold mt-4 mb-2">
+            <h2 className="text-lg font-semibold mt-8 mb-2">
               Maximale Schüleranzahl
             </h2>
             <Input
