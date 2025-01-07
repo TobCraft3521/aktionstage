@@ -30,10 +30,19 @@ import "react-range-slider-input/dist/style.css"
 import "./range-slider-styles.css"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Account, Day } from "@prisma/client"
-import { Check, Loader2Icon, Plus, Trash, Trash2, X } from "lucide-react"
+import {
+  Check,
+  Loader2Icon,
+  PartyPopper,
+  Plus,
+  Trash,
+  Trash2,
+  X,
+} from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 // Define the form schema
 const schema = z.object({
@@ -67,6 +76,9 @@ const MultiStepForm = () => {
   const [isTeacherSelectOpen, setIsTeacherSelectOpen] = useState(false)
   const [addedTeachers, setAddedTeachers] = useState<Partial<Account>[]>([])
   const [teachers, setTeachers] = useState<Partial<Account>[]>([])
+  // Time logic
+  const [timeFrom, setTimeFrom] = useState("")
+  const [timeTo, setTimeTo] = useState("")
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
     { label: "Titel", fields: ["title"] },
@@ -258,6 +270,18 @@ const MultiStepForm = () => {
     }
     fetchTeachers()
   }, [])
+
+  // Handle time input
+  const handleTime = (from: string, to: string) => {
+    // combine the two time inputs
+    const time = `${from} - ${to}`
+    setValue("time", time)
+  }
+
+  useEffect(() => {
+    handleTime(timeFrom, timeTo)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeFrom, timeTo])
 
   // Watch for form changes to keep the button disabled state correct
   const isCurrentStepValid = () => {
@@ -490,7 +514,7 @@ const MultiStepForm = () => {
               open={isTeacherSelectOpen}
               onOpenChange={setIsTeacherSelectOpen}
             >
-              <PopoverTrigger asChild className="w-32">
+              <PopoverTrigger asChild className="w-8">
                 <div>
                   <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer transition-all hover:bg-slate-200">
                     <Plus className="text-slate-500" />
@@ -547,18 +571,58 @@ const MultiStepForm = () => {
           <div>
             {/* TODO: custom MON / TUE / WED picker */}
             <h2 className="text-lg font-semibold mt-4 mb-2">Tag</h2>
-            <Input
-              placeholder="Date"
-              type="text"
-              {...register("date")}
-              className="mb-2"
-            />
+            <div className="p-4 border-slate-200 border rounded-lg inline-block mb-4">
+              <ToggleGroup
+                type="single"
+                onValueChange={(value) => setValue("date", value as Day)}
+                value={getValues("date")}
+              >
+                <ToggleGroupItem
+                  value={Day.MON}
+                  aria-label="Wechseln zu Montag"
+                >
+                  Montag
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value={Day.TUE}
+                  aria-label="Wechseln zu Dienstag"
+                >
+                  Dienstag
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value={Day.WED}
+                  aria-label="Wechseln zu Mittwoch"
+                >
+                  Mittwoch
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </div>
+
             {errors.date && (
-              <p className="text-red-500">{errors.date.message}</p>
+              <p className="text-red-500">Fehler bei der Tageswahl.</p>
             )}
 
             <h2 className="text-lg font-semibold mb-2">Zeitraum</h2>
-            <Input placeholder="Time" {...register("time")} className="mb-2" />
+            <div className="flex gap-4 items-center">
+              <p className="">Von</p>
+              <Input
+                placeholder="zB. 8 Uhr"
+                onChange={(e) => {
+                  setTimeFrom(e.target.value)
+                }}
+                value={timeFrom}
+                className=""
+              />
+              <p className="">bis</p>
+              <Input
+                placeholder="zB. 12:55"
+                onChange={(e) => {
+                  setTimeTo(e.target.value)
+                }}
+                value={timeTo}
+                className=""
+              />
+            </div>
             {errors.time && (
               <p className="text-red-500">{errors.time.message}</p>
             )}
@@ -585,15 +649,19 @@ const MultiStepForm = () => {
             </p>
             <div className="w-full max-w-lg mx-auto flex flex-col gap-4">
               <div className="flex justify-between mx-2">
-                <span>{getValues("minGrade")}. Klasse</span>
-                <span>{getValues("maxGrade")}. Klasse</span>
+                <span>{getValues("minGrade") || 5}. Klasse</span>
+                <span>{getValues("maxGrade") || 11}. Klasse</span>
               </div>
               <div className="w-full">
                 <RangeSlider
                   min={5}
                   max={11}
                   step={1}
-                  defaultValue={[5, 11]}
+                  // keep default values in sync with the form values when switching steps
+                  defaultValue={[
+                    getValues("minGrade") || 5,
+                    getValues("maxGrade") || 11,
+                  ]}
                   id="rangeSlider"
                   onInput={(values: any) => {
                     setValue("minGrade", values[0])
@@ -638,8 +706,9 @@ const MultiStepForm = () => {
             <Button
               onClick={() => onSubmit(getValues())}
               disabled={!isCurrentStepValid()}
+              className="flex items-center gap-2"
             >
-              Fertig
+              Fertig <PartyPopper size={16} />
             </Button>
           ) : (
             <Button
