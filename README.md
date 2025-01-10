@@ -8,9 +8,14 @@ Das ist die neue Version der "ASG Aktionstage Webseite" diesmal mit Typescript/N
 - Only one day can be selected, but also deselected
 - You can search for teachers (NEW) in a dropdown select
 - LIVE search
+  
+### Core functionality
 - sharable link even though the detail view happens on the same component -> layout
+- Enhanced project creation multi step form with better features and ux enhancements
+- Tons of details, like taken rooms show who's in there with what project, ...
+- Project create and edit forms dont loose all content when inputs are invalid
 
-### The login page was redesigned.
+### The login page has been redesigned.
 UX fixes such as
 - Page redirected you to many times
 - Confirm form resubmission
@@ -27,7 +32,8 @@ Bad alignment
 They are inspired by "guided website tours" like these [ones](https://design.mindsphere.io/patterns/guided-tour.html)
 
 ### Architechture improvements
-- Code and image upload storage are separated
+- Code and image upload storage are separated (AWS for storage) instead of storage in codebase
 
 ### Other improvements
 - Default password changed for security reasons
+- Server side validation and double checks
