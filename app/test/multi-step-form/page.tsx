@@ -3,6 +3,13 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -19,30 +26,31 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { suggestEmoji } from "@/lib/actions/ai/emoji-sug"
 import { getPresignedUploadPost } from "@/lib/actions/aws/upload"
-import { queryTeachers } from "@/lib/actions/queries/accounts"
+import { queryTeacherLoad, queryTeachers } from "@/lib/actions/queries/accounts"
+import { queryRooms } from "@/lib/actions/queries/rooms"
 import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
-import RangeSlider from "react-range-slider-input"
-import "react-range-slider-input/dist/style.css"
-import "./range-slider-styles.css"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Account, Day } from "@prisma/client"
+import { Account, Day, Project, Room } from "@prisma/client"
 import {
+  Ban,
   Check,
+  ChevronsUpDown,
   Loader2Icon,
   PartyPopper,
   Plus,
-  Trash,
   Trash2,
-  X,
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
+import RangeSlider from "react-range-slider-input"
+import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import "./range-slider-styles.css"
 
 // Define the form schema
 const schema = z.object({
@@ -57,8 +65,16 @@ const schema = z.object({
   location: z.string().min(1, "Kein Ort angegeben"),
   price: z.number().min(0, "Preis muss größer oder gleich 0 sein"),
   time: z.string().min(1, "Keine Zeit angegeben"),
-  date: z.enum([Day.MON, Day.TUE, Day.WED]),
+  date: z.enum([Day.MON, Day.TUE, Day.WED], { message: "Kein Tag ausgewählt" }),
 })
+
+type RoomWithProjectWithTeachers = Room & {
+  project:
+    | (Project & {
+        teachers: Account[] | null
+      })
+    | null
+}
 
 type FormData = z.infer<typeof schema>
 
@@ -79,6 +95,14 @@ const MultiStepForm = () => {
   // Time logic
   const [timeFrom, setTimeFrom] = useState("")
   const [timeTo, setTimeTo] = useState("")
+  // Front end day validation (whether or not already a project on each day)
+  const [dayLoad, setDayLoad] = useState<{ [key in Day]?: boolean } | null>(
+    null
+  )
+  // Room logic
+  const [rooms, setRooms] = useState<RoomWithProjectWithTeachers[]>([])
+  const [isRoomSelectOpen, setIsRoomSelectOpen] = useState(false)
+  const [room, setRoom] = useState<RoomWithProjectWithTeachers | undefined>()
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
     { label: "Titel", fields: ["title"] },
@@ -117,10 +141,10 @@ const MultiStepForm = () => {
       if (step === 0) {
         setTimeout(async () => {
           try {
-            setValue("emoji", "⌛") // Clear the emoji field
-            const suggestedEmoji = (
-              await suggestEmoji(getValues("title") || "")
-            ).emoji
+            validPages.current[2] = false // Mark the emoji step as invalid
+            const suggestedEmoji =
+              (await suggestEmoji(getValues("title") || "")).emoji || "🔮"
+            validPages
             setValue("emoji", suggestedEmoji)
           } catch (error) {
             console.error("Failed to suggest emoji:", error)
@@ -148,7 +172,12 @@ const MultiStepForm = () => {
   }
 
   const onSubmit = (data: FormData) => {
-    console.log("Form submitted:", data)
+    // merge location type
+    const mergedData = {
+      ...data,
+      room: room?.id,
+    }
+    console.log("Form submitted:", mergedData)
     alert("Form submitted! Check the console.")
   }
 
@@ -262,10 +291,8 @@ const MultiStepForm = () => {
 
   // Fetch teachers from the server
   useEffect(() => {
-    console.log("test")
     const fetchTeachers = async () => {
       const teachers = await queryTeachers()
-      console.log(teachers)
       setTeachers(teachers)
     }
     fetchTeachers()
@@ -274,14 +301,46 @@ const MultiStepForm = () => {
   // Handle time input
   const handleTime = (from: string, to: string) => {
     // combine the two time inputs
+    if (from.length === 0 || to.length === 0) {
+      // smart no-error-on-initial-load approach: look at the "old" combined value -> thats only empty on initial load
+      if (!getValues("time")) return
+      setValue("time", "", {
+        shouldValidate: true,
+      })
+      return
+    }
     const time = `${from} - ${to}`
-    setValue("time", time)
+    setValue("time", time, {
+      shouldValidate: true,
+    })
   }
 
   useEffect(() => {
     handleTime(timeFrom, timeTo)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeFrom, timeTo])
+
+  // Fetch teacher load for each day (front end validation, server side validation on submit)
+  useEffect(() => {
+    const fetchTeacherLoad = async () => {
+      // query whether or not a teacher already has a project on each day of the Aktionstage
+      const dailyLoad = await queryTeacherLoad()
+      setDayLoad(dailyLoad)
+    }
+    fetchTeacherLoad()
+  }, [])
+
+  // Fetch rooms from the server
+  const isStep4 = step === 4
+  useEffect(() => {
+    const fetchRooms = async () => {
+      // query rooms
+      const rooms = await queryRooms()
+      setRooms(rooms)
+    }
+    fetchRooms()
+    // fresh data on page load
+  }, [isStep4])
 
   // Watch for form changes to keep the button disabled state correct
   const isCurrentStepValid = () => {
@@ -320,7 +379,12 @@ const MultiStepForm = () => {
     }
     if (step === 4) {
       // Check date
-      const valid = date.length > 0 && time.length > 0 && location.length > 0
+      const valid =
+        date.length > 0 &&
+        time.length > 0 &&
+        timeFrom.length > 0 &&
+        timeTo.length > 0 &&
+        location.length > 0
       validPages.current[4] = valid
       return valid
     }
@@ -571,38 +635,47 @@ const MultiStepForm = () => {
           <div>
             {/* TODO: custom MON / TUE / WED picker */}
             <h2 className="text-lg font-semibold mt-4 mb-2">Tag</h2>
-            <div className="p-4 border-slate-200 border rounded-lg inline-block mb-4">
+            <div className="p-4 border-slate-200 border rounded-lg inline-block mb-2">
               <ToggleGroup
                 type="single"
-                onValueChange={(value) => setValue("date", value as Day)}
+                onValueChange={(value) =>
+                  setValue("date", value as Day, { shouldValidate: true })
+                } // non empty
                 value={getValues("date")}
               >
-                <ToggleGroupItem
-                  value={Day.MON}
-                  aria-label="Wechseln zu Montag"
-                >
-                  Montag
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value={Day.TUE}
-                  aria-label="Wechseln zu Dienstag"
-                >
-                  Dienstag
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value={Day.WED}
-                  aria-label="Wechseln zu Mittwoch"
-                >
-                  Mittwoch
-                </ToggleGroupItem>
+                {Object.values(Day).map((day) => {
+                  const dayNames = {
+                    [Day.MON]: "Montag",
+                    [Day.TUE]: "Dienstag",
+                    [Day.WED]: "Mittwoch",
+                  }
+                  return (
+                    <div
+                      key={day}
+                      // blur on hover when already a project on that day
+                      // className={dayLoad?.[day] ? "hover:blur-[1px]" : ""}
+                      style={{
+                        cursor: dayLoad?.[day] ? "not-allowed" : undefined,
+                      }}
+                    >
+                      <ToggleGroupItem
+                        value={day}
+                        aria-label={`Wechseln zu ${dayNames[day]}`}
+                        disabled={dayLoad?.[day] || false}
+                      >
+                        {dayNames[day]}
+                      </ToggleGroupItem>
+                    </div>
+                  )
+                })}
               </ToggleGroup>
             </div>
 
             {errors.date && (
-              <p className="text-red-500">Fehler bei der Tageswahl.</p>
+              <p className="text-red-500">{errors.date.message}</p>
             )}
 
-            <h2 className="text-lg font-semibold mb-2">Zeitraum</h2>
+            <h2 className="text-lg font-semibold mb-2 mt-4">Zeitraum</h2>
             <div className="flex gap-4 items-center">
               <p className="">Von</p>
               <Input
@@ -624,16 +697,132 @@ const MultiStepForm = () => {
               />
             </div>
             {errors.time && (
-              <p className="text-red-500">{errors.time.message}</p>
+              <p className="text-red-500 mt-2">
+                In beiden Zeitraum-feldern ist eine Eingabe benötigt.{" "}
+              </p>
             )}
 
             {/* TODO: custom location picker */}
             <h2 className="text-lg font-semibold mt-4 mb-2">Ort</h2>
-            <Input
-              placeholder="Ort"
-              {...register("location")}
-              className="mb-2"
-            />
+            <Tabs defaultValue="room" className="w-[400px] mx-auto">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger
+                  value="room"
+                  onClick={() => {
+                    setValue("location", "") // reset custom location
+                    setRoom(undefined)
+                  }}
+                >
+                  Am ASG
+                </TabsTrigger>
+                <TabsTrigger
+                  onClick={() => {
+                    setValue("location", "") // reset custom location
+                    setRoom(undefined)
+                  }}
+                  value="custom"
+                >
+                  Freie Eingabe
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="room">
+                <Card className="w-[400px]">
+                  <CardHeader>
+                    <CardTitle>Raum</CardTitle>
+                    <CardDescription>Wähle einen Raum am ASG</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Popover
+                      open={isRoomSelectOpen}
+                      onOpenChange={setIsRoomSelectOpen}
+                    >
+                      <PopoverTrigger asChild className="w-full">
+                        <Button
+                          role="combobox"
+                          className="w-[250px] md:w-full justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+                        >
+                          {room
+                            ? rooms.find((cRoom) => cRoom.name === room.name)
+                                ?.name
+                            : "Wähle einen Raum..."}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0" side="top">
+                        <Command>
+                          <CommandInput placeholder="Search teachers..." />
+                          <CommandEmpty>
+                            Kein passender Raum gefunden.
+                          </CommandEmpty>
+                          <CommandGroup>
+                            <CommandList>
+                              {rooms?.length > 0 &&
+                                rooms.map(
+                                  (cRoom: RoomWithProjectWithTeachers) => (
+                                    <CommandItem
+                                      key={cRoom.id}
+                                      className={cn(
+                                        "cursor-pointer",
+                                        cRoom.id === room?.id ||
+                                          cRoom.project /* selected or taken */
+                                          ? "opacity-50 pointer-events-none"
+                                          : ""
+                                      )}
+                                      value={cRoom.name}
+                                      onSelect={(currentValue) => {
+                                        setRoom(
+                                          rooms.find(
+                                            (r) => r.name === currentValue
+                                          )
+                                        )
+                                        // rerendered server side (in case of room taken -> just asg)
+                                        setValue(
+                                          "location",
+                                          "ASG " + cRoom.name
+                                        )
+                                        setIsRoomSelectOpen(false)
+                                      }}
+                                    >
+                                      <Check
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          cRoom.id === room?.id ? "" : "hidden"
+                                        )}
+                                      />
+                                      <Ban
+                                        className={cn(
+                                          "mr-2 h-4 w-4",
+                                          cRoom.project ? "" : "hidden"
+                                        )}
+                                      />
+                                      {cRoom.name}
+                                      {cRoom.project &&
+                                        " (belegt: " +
+                                          cRoom.project.name +
+                                          ", " +
+                                          (cRoom?.project?.teachers?.[0]
+                                            ?.name || "unbekannt") +
+                                          ")"}
+                                    </CommandItem>
+                                  )
+                                )}
+                            </CommandList>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="custom">
+                <Input
+                  placeholder="Ort zB. unterwasser (beim Uboot fahren ;) )"
+                  {...register("location")}
+                  className="mb-2"
+                />
+              </TabsContent>
+            </Tabs>
+
             {errors.location && (
               <p className="text-red-500">{errors.location?.message}</p>
             )}

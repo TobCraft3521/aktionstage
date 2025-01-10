@@ -54,6 +54,7 @@ model Project {
   studentsMax   Int
   cost          Float  @default(0)
   time          String @default("8.00-12.00")
+  // custom location or room rendered to string
   location      String @default("ASG")
   day           Day    @default(MON)
   minGrade      Int    @default(5)
@@ -66,6 +67,8 @@ model Project {
 
   // max 3 teachers
   teachers Account[] @relation("ProjectTeacher")
+  room     Room?     @relation(fields: [roomId], references: [id])
+  roomId   String?   @unique
 
   @@index([id])
   @@index([name])
@@ -82,4 +85,15 @@ model TutorialCompletion {
   account   Account  @relation(fields: [accountId], references: [id])
   accountId String
   createdAt DateTime @default(now())
+}
+
+// Rooms including their status (free, taken)
+model Room {
+  id      String   @id @default(cuid())
+  name    String
+  // taken variable now represented simply by whether it has a project or not
+  project Project?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

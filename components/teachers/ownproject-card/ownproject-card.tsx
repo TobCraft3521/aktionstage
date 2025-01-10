@@ -25,9 +25,15 @@ const OwnProjectCard = ({ imageUrl, title, teachers }: Props) => {
         className="object-cover group-hover:brightness-75 transition-all"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/90 to-transparent" />
-      <div className={cn("absolute top-4 left-4 text-white font-semibold z-10")}>
+      <div
+        className={cn("absolute top-4 left-4 text-white font-semibold z-10")}
+      >
         {title}
-        <p className="text-sm font-bold text-white/90">with {teachers}</p>
+        {teachers ? (
+          <p className="text-sm font-bold text-white/90">mit {teachers}</p>
+        ) : (
+          <p className="text-sm font-bold text-white/90">alleine</p>
+        )}
       </div>
     </div>
   )
