@@ -62,8 +62,6 @@ export const queryTeacherLoad = async () => {
     },
   })
 
-  console.log(projects)
-
   // return an object with the days as keys and a boolean as value
   return {
     [Day.MON]: projects.some((project) => project.day === Day.MON),

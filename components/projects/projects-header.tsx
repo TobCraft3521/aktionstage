@@ -49,7 +49,7 @@ const ProjectsHeader = () => {
       layoutId="projects-header"
       transition={{ duration: 0.1 }}
       key={rerenderKey}
-      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b-2 dark:border-b-0 border-slate-100 sticky top-0 items-center px-6 gap-4 dark:drop-shadow-none z-50 dark:bg-card"
+      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b dark:border-b-0 border-slate-200 sticky top-0 items-center px-6 gap-4 dark:drop-shadow-none z-50 dark:bg-card"
     >
       <div className="relative flex items-center">
         <Search className="absolute left-2 h-5 w-5 text-gray-500" />
@@ -221,6 +221,7 @@ const ProjectsHeader = () => {
               <Button
                 role="combobox"
                 className="w-[250px] md:w-[250px] justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+                aria-label="Lehrer auswählen"
               >
                 {search.teacher
                   ? teachers.find((teacher) => teacher.name === search.teacher)

@@ -27,7 +27,7 @@ export default async function RootLayout({
   const showFeaturesTutorial = !(await queryTutorialComplete(Tutorial.FEATURES))
 
   return (
-    <html suppressHydrationWarning lang="en">
+    <html suppressHydrationWarning lang="de">
       <body className={cn(inter.className, "")}>
         <ThemeProvider defaultTheme="light" enableSystem attribute="class">
           <NextAuthProvider>

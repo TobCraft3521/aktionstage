@@ -51,10 +51,18 @@ import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
+import { createProject } from "@/lib/actions/queries/projects"
+import Image from "next/image"
+import { DM_Sans } from "next/font/google"
+
+const dmSans = DM_Sans({
+  weight: "800",
+  subsets: ["latin"],
+})
 
 // Define the form schema
-const schema = z.object({
-  title: z.string().min(1, "Kein Name angegeben"),
+export const schema = z.object({
+  title: z.string().min(1, "Kein Name angegeben").max(32, "Name zu lang"),
   description: z.string().min(1, "Keine Beschreibung angegeben"),
   banner: z.string().min(1, "Kein Bild hochgeladen"),
   emoji: z.string().min(1, "Kein Emoji ausgewählt"),
@@ -76,7 +84,7 @@ type RoomWithProjectWithTeachers = Room & {
     | null
 }
 
-type FormData = z.infer<typeof schema>
+export type FormData = z.infer<typeof schema>
 
 const MultiStepForm = () => {
   // Multi step form logic
@@ -171,14 +179,14 @@ const MultiStepForm = () => {
     }
   }
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     // merge location type
     const mergedData = {
       ...data,
       room: room?.id,
     }
     console.log("Form submitted:", mergedData)
-    alert("Form submitted! Check the console.")
+    await createProject(mergedData)
   }
 
   const handleEmojiSelect = (emoji: string) => {
@@ -357,7 +365,8 @@ const MultiStepForm = () => {
     const banner = getValues("banner") || "" // Default to empty string
 
     if (step === 0) {
-      const valid = name.length > 0
+      // Front end validation for the name is enough - only teachers have access to this page and they can be trusted or at least blamed for hacking.
+      const valid = name.length > 0 && name.length <= 32
       if (valid) {
         validPages.current[0] = true
       }
@@ -436,14 +445,47 @@ const MultiStepForm = () => {
         {step === 0 && (
           <div>
             <h2 className="text-lg font-semibold mb-2">Name des Projekts</h2>
+            <p className="text-gray-500 mb-4">
+              Bitte auf eine schöne Formatierung achten und kürzere Namen
+              bevorzugen. In der Beschreibung ist genug Platz.
+            </p>
             <Input
               placeholder="Benenne dein Projekt"
               {...register("title")}
               className="mb-2"
+              maxLength={32}
             />
             {errors.title && (
               <p className="text-red-500">{errors.title.message}</p>
             )}
+            <div className="w-[200px] h-[256px] bg-slate-900 rounded-[24px] mt-8 mx-auto drop-shadow-lg relative overflow-hidden">
+              <Image
+                // hard coded example banner
+                src="https://images.pexels.com/photos/22484280/pexels-photo-22484280/free-photo-of-aerial-view-of-tennis-courts-and-park-in-miraflores-peru.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                alt="Example banner"
+                width={200}
+                height={256}
+                className="object-cover rounded-[24px] w-full h-full"
+              ></Image>
+              <div className="absolute bottom-[9%] text-white text-lg z-30 font-semibold w-full px-2 flex flex-col items-center leading-5">
+                <h1
+                  // split too long text into two lines
+                  className={cn(
+                    "max-w-[150px] break-words text-center",
+                    dmSans.className
+                  )}
+                >
+                  {getValues("title") || "Vorschau"}
+                </h1>
+                <div className="text-sm font-medium opacity-90">Vorschau</div>
+              </div>
+              <div
+                className="absolute top-full bg-white w-[80%] h-[90px] block z-20 font-thin"
+                style={{
+                  filter: "drop-shadow(0 -85px 24px rgb(0 0 0 / 1))",
+                }}
+              ></div>
+            </div>
           </div>
         )}
         {step === 1 && (
@@ -679,7 +721,7 @@ const MultiStepForm = () => {
             <div className="flex gap-4 items-center">
               <p className="">Von</p>
               <Input
-                placeholder="zB. 8 Uhr"
+                placeholder="zB. 7:55"
                 onChange={(e) => {
                   setTimeFrom(e.target.value)
                 }}

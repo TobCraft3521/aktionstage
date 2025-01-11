@@ -35,7 +35,7 @@ const SmallCard = ({
       ref={cardRef}
       className={cn(
         styles.loadAni,
-        "w-full overflow-hidden flex items-center group h-64 justify-center shadow-2xl rounded-xl cursor-pointer bg-white group relative will-change-transform"
+        "w-full overflow-hidden flex items-center group h-64 justify-center shadow-2xl cursor-pointer bg-white group relative will-change-transform"
       )}
       onLayoutAnimationStart={() => {
         if (cardRef.current) {
@@ -74,8 +74,8 @@ const SmallCard = ({
       <Image
         src={project?.imageUrl || "/imgs/asg-logo.jpg"}
         alt={project?.name || "project-image"}
-        width={512}
-        height={512}
+        width={256}
+        height={256}
         blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
         className="brightness transition-all duration-300 w-full h-full object-cover pointer-events-none group-hover:brightness-75 group-hover:scale-[102%]"
         priority
@@ -84,7 +84,11 @@ const SmallCard = ({
       />
       <div className="absolute bottom-[9%] text-white text-lg z-30 font-semibold w-full px-2 flex flex-col items-center leading-5">
         <motion.h1
-          className={cn("truncate max-w-full mx-auto", dmSans.className)}
+          // split too long text into two lines
+          className={cn(
+            "max-w-[150px] break-words text-center",
+            dmSans.className
+          )}
           layoutId={`title-${project.id}`}
         >
           {project.name}

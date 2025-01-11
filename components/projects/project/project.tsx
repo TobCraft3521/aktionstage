@@ -90,9 +90,10 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                     (i + 1 === project?.teachers?.length ? "" : ", ")
                 )}
               </motion.h2>
-              <ScrollArea className="max-h-[20vh] mb-8">
-                <div className="max-w-[900px] text-base sm:text-xl sm:leading-8 text-slate-200 px-8 md:px-20 mb-8 md:mb-16 max-h-[40vh]">
-                  {project?.description}
+              <ScrollArea className="max-h-[30vh] h-auto text-wrap mb-8">
+                <div className="max-w-[900px] text-base sm:text-xl sm:leading-8 text-slate-200 px-8 md:px-20 max-h-[40vh]">
+                  {project?.description} Jahrgangsstufen: {project?.minGrade}.
+                  Klasse - {project?.maxGrade}. Klasse
                 </div>
               </ScrollArea>
               <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">

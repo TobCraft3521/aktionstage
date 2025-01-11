@@ -54,7 +54,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       // Add user ID and role from the token to the session
       if (token) {
         session.user.id = token.id as string
