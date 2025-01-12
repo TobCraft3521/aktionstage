@@ -2,6 +2,14 @@
 This is the new version of the "ASG Aktionstage Webseite" built in Typescript/Next.js.
 Das ist die neue Version der "ASG Aktionstage Webseite" diesmal mit Typescript/Next.js.
 
+## Contribution
+Feel free to create a pull request to contribute to the repository.
+And give it a star if you are nice 🌞.
+To clone and run locally, just run npm i, and set up the env:
+- I recommend creating a project on supabase, as you get a free s3 bucket which is needed for file uploads and you get a postgres sql db on top.
+- For the emoji AI (which isnt too excellent) you can get an api key on rapidapi: Emoji AI by alexadamski
+- I have included an env.example file
+
 ## Features and improvements
 ### It uses an improved search featuring 
 - Only one grade can be selected
