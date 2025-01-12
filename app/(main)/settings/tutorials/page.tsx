@@ -23,11 +23,9 @@ const TutorialSettings = () => {
       const initialState = await Promise.all(
         tutorials.map(async (tutorial) => {
           const isComplete = await queryTutorialComplete(tutorial)
-          console.log(isComplete, tutorial)
           return { [tutorial]: !isComplete }
         })
       )
-      console.log(initialState)
       setTutorialsState(Object.assign({}, ...initialState))
     }
     initializeState()

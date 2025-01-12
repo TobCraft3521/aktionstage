@@ -65,7 +65,6 @@ const ProjectsComp = ({ id }: { id?: string }) => {
     }
     fetchData()
   }, [])
-  console.log(appState.search.teacher)
 
   const searchedProjects = useMemo(() => {
     setFiltering(true)
@@ -89,7 +88,6 @@ const ProjectsComp = ({ id }: { id?: string }) => {
           ))
     )
     setFiltering(false)
-    console.log(filtered)
     return filtered
   }, [projects, appState.search])
 

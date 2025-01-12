@@ -97,7 +97,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 </div>
               </ScrollArea>
               <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
-                {(project.studentsCount || 0) < (project.studentsMax || 0) ? (
+                {(project.studentsCount || 0) < (project.maxStudents || 0) ? (
                   <Button className="w-full sm:w-[154px] h-[43px] rounded-xl">
                     Anmelden
                   </Button>
@@ -112,9 +112,9 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 {[
                   {
                     icon: "🙋🏻",
-                    text: `${project.studentsCount}/${project.studentsMax}`,
+                    text: `${project.studentsCount}/${project.maxStudents}`,
                   },
-                  { icon: "📍", text: "Mo, ASG 102" },
+                  { icon: "📍", text: project.location },
                   { icon: "🕑", text: "8.15-12.00" },
                   { icon: "💵", text: "2€" },
                 ].map((item, index) => (

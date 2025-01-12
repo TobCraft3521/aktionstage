@@ -1,7 +1,6 @@
 "use client"
-import { signIn, signOut, useSession } from "next-auth/react"
-import Image from "next/image"
-import { redirect, useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
 
 export default function Home() {
   const user = useSession().data?.user
@@ -21,6 +20,6 @@ export default function Home() {
   // const logout = () => {
   //   signOut()
   // }
-  if(user) return redirect("/projects")
+  if (user) return redirect("/projects")
   return redirect("/login")
 }

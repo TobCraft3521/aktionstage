@@ -37,7 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   logger: {
     error: (error) => {
       if (error.name === "CredentialsSignin") return
-      console.log(error)
+      // possible clg here
     },
     warn: () => {},
     debug: () => {},

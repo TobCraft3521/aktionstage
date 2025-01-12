@@ -51,7 +51,6 @@ const LoginForm = () => {
         redirect: false,
       })
       form.reset()
-      console.log(response)
 
       if (response?.ok && !response.error) {
         router.push("/projects")

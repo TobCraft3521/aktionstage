@@ -37,6 +37,7 @@ const OwnProjects = () => {
             key={project.id}
             title={project.name}
             imageUrl={project.imageUrl}
+            day={project.day}
             teachers={project.teachers
               .filter(
                 // Filter out the current user

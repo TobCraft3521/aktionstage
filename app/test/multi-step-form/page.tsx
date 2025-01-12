@@ -186,7 +186,7 @@ const MultiStepForm = () => {
       room: room?.id,
     }
     console.log("Form submitted:", mergedData)
-    await createProject(mergedData)
+    const { error } = await createProject(mergedData)
   }
 
   const handleEmojiSelect = (emoji: string) => {
@@ -317,7 +317,7 @@ const MultiStepForm = () => {
       })
       return
     }
-    const time = `${from} - ${to}`
+    const time = `${from}-${to}`
     setValue("time", time, {
       shouldValidate: true,
     })
@@ -919,6 +919,18 @@ const MultiStepForm = () => {
             />
             {errors.maxStudents && (
               <p className="text-red-500">{errors.maxStudents.message}</p>
+            )}
+
+            {/* price */}
+            <h2 className="text-lg font-semibold mt-8 mb-2">Kosten</h2>
+            <Input
+              placeholder="Preis"
+              {...register("price", { valueAsNumber: true })}
+              type="number"
+              className="mb-2"
+            />
+            {errors.price && (
+              <p className="text-red-500">{errors.price.message}</p>
             )}
           </div>
         )}

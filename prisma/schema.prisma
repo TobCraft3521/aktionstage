@@ -51,9 +51,10 @@ model Project {
   description   String
   imageUrl      String
   studentsCount Int
-  studentsMax   Int
-  cost          Float  @default(0)
-  time          String @default("8.00-12.00")
+  maxStudents   Int    @default(10)
+  price          Float  @default(0)
+  time          String @default("7:55-12.55")
+  emoji         String @default("🤗")
   // custom location or room rendered to string
   location      String @default("ASG")
   day           Day    @default(MON)

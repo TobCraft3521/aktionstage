@@ -96,7 +96,7 @@ const SmallCard = ({
         <div className="text-sm font-medium opacity-90">
           {project.teachers?.map((teacher) => teacher.short).join(" ") ||
             "Kein Lehrer"}
-          , {project.studentsCount}/{project.studentsMax}
+          , {project.studentsCount}/{project.maxStudents}
         </div>
       </div>
       {/* hide when opening to reduce lag ACTUAL PROBLEM HERE 10% ~*/}
