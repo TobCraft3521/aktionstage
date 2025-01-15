@@ -1,11 +1,11 @@
 // File: /components/ProjectComp.tsx
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Account, Project } from "@prisma/client"
-import { motion, useAnimation } from "framer-motion"
+import { AnimatePresence, motion, spring, useAnimation } from "framer-motion"
 import Image from "next/image"
-import { X } from "lucide-react"
+import { ArrowDown, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { DM_Sans } from "next/font/google"
@@ -27,6 +27,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
   const controls = useAnimation()
   const [showContents, setShowContents] = useState(false)
   const router = useRouter()
+  const [showScrollHint, setShowScrollHint] = useState(true)
 
   useEffect(() => {
     setTimeout(() => setShowContents(true), 400)
@@ -65,7 +66,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
           )}
         >
           <div className="text-2xl md:text-4xl flex justify-center rounded-2xl items-center bg-slate-800 p-4 h-[72px] w-[72px] bg-opacity-65 border-2 border-slate-800">
-            🏯
+            {project.emoji}
           </div>
           {project?.name}
         </motion.h1>
@@ -90,10 +91,45 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                     (i + 1 === project?.teachers?.length ? "" : ", ")
                 )}
               </motion.h2>
-              <ScrollArea className="max-h-[30vh] h-auto text-wrap mb-8">
-                <div className="max-w-[900px] text-base sm:text-xl sm:leading-8 text-slate-200 px-8 md:px-20 max-h-[40vh]">
+              <ScrollArea
+                className="max-h-[25vh] h-auto text-wrap mb-8 relative ml-8 md:ml-20 inline-block"
+                onScrollCapture={(e) => setShowScrollHint(false)}
+              >
+                <div
+                  className={cn(
+                    "max-w-[900px] text-base sm:text-xl sm:leading-8 max-h-[25vh] text-slate-200 break-words",
+                    (project.description || "").length > 560 &&
+                      showScrollHint &&
+                      "from-slate-200 bg-gradient-to-b from-50% to-90% bg-clip-text text-transparent"
+                  )}
+                >
                   {project?.description} Jahrgangsstufen: {project?.minGrade}.
                   Klasse - {project?.maxGrade}. Klasse
+                  {/* {"a".repeat(561)} */}
+                  <AnimatePresence>
+                    {(project.description || "").length > 560 &&
+                      showScrollHint && (
+                        <div
+                          className={cn(
+                            "absolute bottom-2 w-full flex items-center justify-center text-slate-200"
+                          )}
+                        >
+                          <motion.div
+                            exit={{ opacity: 0, scale: 0 }}
+                            transition={{
+                              x: {
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 30,
+                              },
+                            }}
+                            className="p-1 px-4 bg-slate-950 rounded-lg flex items-center justify-center gap-2"
+                          >
+                            scroll <ArrowDown size={20} />
+                          </motion.div>
+                        </div>
+                      )}
+                  </AnimatePresence>
                 </div>
               </ScrollArea>
               <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
@@ -122,7 +158,12 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                     key={index}
                     className="w-full sm:w-[154px] h-[43px] bg-slate-800 gap-2 flex items-center justify-center text-white rounded-xl border-2 border-slate-800 bg-opacity-75 hover:bg-opacity-90 transition-all"
                   >
-                    {item.icon} {item.text}
+                    {item.icon}
+                    <div
+                      className={(item.text || "").length > 10 ? "text-xs" : ""}
+                    >
+                      {item.text}
+                    </div>
                   </div>
                 ))}
               </div>

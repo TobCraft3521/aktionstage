@@ -93,7 +93,7 @@ const SmallCard = ({
         >
           {project.name}
         </motion.h1>
-        <div className="text-sm font-medium opacity-90">
+        <div className="text-xs font-medium opacity-90">
           {project.teachers?.map((teacher) => teacher.short).join(" ") ||
             "Kein Lehrer"}
           , {project.studentsCount}/{project.maxStudents}

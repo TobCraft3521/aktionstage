@@ -27,6 +27,6 @@ export const suggestEmoji = async (text: string) => {
     return data
   } catch (error) {
     console.error("Error fetching emoji suggestions")
-    return { emoji: "❌" } // Return an error emoji
+    return { error: true } // Return an error emoji
   }
 }

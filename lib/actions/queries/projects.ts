@@ -3,8 +3,11 @@
 import { auth } from "@/lib/auth/auth"
 import { db } from "@/lib/db"
 import { cache } from "react"
-import { FormData } from "@/app/test/multi-step-form/page"
 import { redirect } from "next/navigation"
+import { z } from "zod"
+import { CreateProjectSchema } from "@/lib/form-schemas"
+
+type FormData = z.infer<typeof CreateProjectSchema>
 
 export const queryProjects = cache(async () => {
   const projects = await db.project.findMany({
@@ -36,20 +39,20 @@ export const queryOwnProjects = async () => {
 
 export const createProject = async (formData: FormData & { room?: string }) => {
   // ultimative debugger 🤭
-  // console.log(`🚀 Creating project:
-  // 🔤\tName: ${formData.title}
-  // 📝\tDescription: ${formData.description}
-  // 🏫\tRoom: ${formData.room || "Not specified"}
-  // 🖼️\tBanner: ${formData.banner}
-  // 🤭\tEmoji: ${formData.emoji}
-  // 🧑🏻‍🏫\tTeachers: ${formData.teachers}
-  // 📅\tDate: ${formData.date}
-  // 🕒\tTime: ${formData.time}
-  // 🫂\tMaxStudents: ${formData.maxStudents}
-  // 🎓\tGrades: ${formData.minGrade} - ${formData.maxGrade}
-  // 📍\tLocation: ${formData.location}
-  // 🫰🏻\tPrice: ${formData.price}
-  // `)
+  console.log(`🚀 Creating project:
+  🔤\tName: ${formData.title}
+  📝\tDescription: ${formData.description}
+  🏫\tRoom: ${formData.room || "Not specified"}
+  🖼️\tBanner: ${formData.banner}
+  🤭\tEmoji: ${formData.emoji}
+  🧑🏻‍🏫\tTeachers: ${formData.teachers}
+  📅\tDate: ${formData.date}
+  🕒\tTime: ${formData.time}
+  🫂\tMaxStudents: ${formData.maxStudents}
+  🎓\tGrades: ${formData.minGrade} - ${formData.maxGrade}
+  📍\tLocation: ${formData.location}
+  🫰🏻\tPrice: ${formData.price}
+  `)
 
   const id = (await auth())?.user?.id
   if (!id) return redirect("/login")
@@ -89,14 +92,20 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       error: "Titel zu lang",
     }
 
+  const otherTeacherIds = formData.teachers || []
   // Check if teachers exist
   // Ignore invalid teachers later
   const teachers = await db.account.findMany({
     where: {
       id: {
-        in: formData.teachers || [],
+        // Add creator to teachers
+        in: [...otherTeacherIds, id],
       },
-      role: "TEACHER",
+      OR: [{ role: "TEACHER" }, { role: "ADMIN" }],
+    },
+    select: {
+      id: true,
+      ownProjects: true,
     },
   })
 
@@ -120,7 +129,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       teachers: {
         some: {
           id: {
-            in: formData.teachers,
+            in: teachers.map((teacher) => teacher.id),
           },
         },
       },
@@ -162,7 +171,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
         id: formData.room,
       },
       include: {
-        project: true,
+        projects: true,
       },
     })
     // Just for typescript, already checked above
@@ -170,7 +179,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       return {
         error: "Raum nicht gefunden",
       }
-    if (room.project) {
+    if (room.projects.find((p) => p.day === formData.date)) {
       // Update project location
       await db.project.update({
         where: {
@@ -183,7 +192,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       return {
         error:
           "Raum wurde in der Zwischenzeit bereits belegt. Projekt: " +
-          room.project.name +
+          room.projects.find((p) => p.day === formData.date)?.name +
           ". Das Projekt wurde trotzdem erstellt.",
       }
     }
@@ -193,7 +202,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
         id: formData.room,
       },
       data: {
-        project: {
+        projects: {
           connect: {
             id: project.id,
           },

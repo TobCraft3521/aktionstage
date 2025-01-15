@@ -218,9 +218,8 @@ const ProjectsHeader = () => {
           </Select>
           <Popover open={teachersOpen} onOpenChange={setTeachersOpen}>
             <PopoverTrigger asChild>
-              <Button
-                role="combobox"
-                className="w-[250px] md:w-[250px] justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+              <span
+                className="w-[250px] md:w-[250px] justify-center cursor-pointer text-sm items-center flex rounded-md h-10 bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
                 aria-label="Lehrer auswählen"
               >
                 {search.teacher
@@ -228,7 +227,7 @@ const ProjectsHeader = () => {
                       ?.name
                   : "Wähle einen Lehrer..."}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
+              </span>
             </PopoverTrigger>
             <PopoverContent className="w-[250px] p-0">
               <Command>

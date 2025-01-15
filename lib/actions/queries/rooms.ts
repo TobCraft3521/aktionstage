@@ -7,7 +7,7 @@ import { db } from "@/lib/db"
 export const queryRooms = async () => {
   return await db.room.findMany({
     include: {
-      project: {
+      projects: {
         include: {
           teachers: true,
         },

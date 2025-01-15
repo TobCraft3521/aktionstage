@@ -2,3 +2,4 @@
 - create tutorial for those who click the x button, that swiping also works
 - remove with when no other teacher
 - change aws cors under bucket/policies/ on the bottom in production
+- show day on project detail view

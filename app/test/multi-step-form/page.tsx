@@ -29,7 +29,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { suggestEmoji } from "@/lib/actions/ai/emoji-sug"
 import { getPresignedUploadPost } from "@/lib/actions/aws/upload"
-import { queryTeacherLoad, queryTeachers } from "@/lib/actions/queries/accounts"
+import {
+  queryAllTeacherLoads,
+  queryTeachers,
+} from "@/lib/actions/queries/accounts"
 import { queryRooms } from "@/lib/actions/queries/rooms"
 import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
@@ -54,37 +57,24 @@ import "./range-slider-styles.css"
 import { createProject } from "@/lib/actions/queries/projects"
 import Image from "next/image"
 import { DM_Sans } from "next/font/google"
+import { auth } from "@/lib/auth/auth"
+import { useSession } from "next-auth/react"
+import { CreateProjectSchema } from "@/lib/form-schemas"
 
 const dmSans = DM_Sans({
   weight: "800",
   subsets: ["latin"],
 })
 
-// Define the form schema
-export const schema = z.object({
-  title: z.string().min(1, "Kein Name angegeben").max(32, "Name zu lang"),
-  description: z.string().min(1, "Keine Beschreibung angegeben"),
-  banner: z.string().min(1, "Kein Bild hochgeladen"),
-  emoji: z.string().min(1, "Kein Emoji ausgewählt"),
-  teachers: z.array(z.string()).optional().default([]),
-  maxStudents: z.number().min(1, "Mindestens 1 Schüler ist erforderlich"),
-  minGrade: z.number().min(5, "Ungültige Jahrgangsstufen"),
-  maxGrade: z.number().min(11, "Ungültige Jahrgangsstufen"),
-  location: z.string().min(1, "Kein Ort angegeben"),
-  price: z.number().min(0, "Preis muss größer oder gleich 0 sein"),
-  time: z.string().min(1, "Keine Zeit angegeben"),
-  date: z.enum([Day.MON, Day.TUE, Day.WED], { message: "Kein Tag ausgewählt" }),
-})
-
 type RoomWithProjectWithTeachers = Room & {
-  project:
+  projects:
     | (Project & {
         teachers: Account[] | null
-      })
+      })[]
     | null
 }
 
-export type FormData = z.infer<typeof schema>
+type FormData = z.infer<typeof CreateProjectSchema>
 
 const MultiStepForm = () => {
   // Multi step form logic
@@ -104,23 +94,28 @@ const MultiStepForm = () => {
   const [timeFrom, setTimeFrom] = useState("")
   const [timeTo, setTimeTo] = useState("")
   // Front end day validation (whether or not already a project on each day)
-  const [dayLoad, setDayLoad] = useState<{ [key in Day]?: boolean } | null>(
-    null
-  )
+  const [allTeacherLoads, setAllTeacherLoads] = useState<Record<
+    string,
+    Day[]
+  > | null>(null)
+  const [personalLoad, setPersonalLoad] = useState<Day[] | null>(null)
+  const [day, setDay] = useState<Day | undefined>()
   // Room logic
   const [rooms, setRooms] = useState<RoomWithProjectWithTeachers[]>([])
   const [isRoomSelectOpen, setIsRoomSelectOpen] = useState(false)
   const [room, setRoom] = useState<RoomWithProjectWithTeachers | undefined>()
+  // auth
+  const user = useSession()
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
     { label: "Titel", fields: ["title"] },
     { label: "Details", fields: ["description", "banner"] },
     { label: "Emoji", fields: ["emoji"] },
-    { label: "Lehrer", fields: ["teachers"] },
     {
       label: "Zeit und Ort",
       fields: ["date", "time", "location"],
     },
+    { label: "Lehrer", fields: ["teachers"] },
     {
       label: "Sonstiges",
       fields: ["price", "maxStudents", "minGrade", "maxGrade"],
@@ -136,8 +131,13 @@ const MultiStepForm = () => {
     setValue,
     watch,
   } = useForm<FormData>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(CreateProjectSchema),
     mode: "onTouched",
+    defaultValues: {
+      // otherwise not set unless touched
+      minGrade: 5,
+      maxGrade: 11,
+    },
   })
 
   // Handle Next button click
@@ -150,10 +150,11 @@ const MultiStepForm = () => {
         setTimeout(async () => {
           try {
             validPages.current[2] = false // Mark the emoji step as invalid
-            const suggestedEmoji =
-              (await suggestEmoji(getValues("title") || "")).emoji || "🔮"
-            validPages
+            const res = await suggestEmoji(getValues("title") || "")
+            const randomAlternative = Math.random() > 0.5 ? "🔮" : "🤗"
+            let suggestedEmoji = res.emoji || randomAlternative
             setValue("emoji", suggestedEmoji)
+            validPages.current[2] = true // Mark the emoji step as valid
           } catch (error) {
             console.error("Failed to suggest emoji:", error)
           }
@@ -185,8 +186,9 @@ const MultiStepForm = () => {
       ...data,
       room: room?.id,
     }
-    console.log("Form submitted:", mergedData)
+    alert("Form submitted:" + JSON.stringify(mergedData))
     const { error } = await createProject(mergedData)
+    alert(error)
   }
 
   const handleEmojiSelect = (emoji: string) => {
@@ -330,13 +332,18 @@ const MultiStepForm = () => {
 
   // Fetch teacher load for each day (front end validation, server side validation on submit)
   useEffect(() => {
-    const fetchTeacherLoad = async () => {
+    const fetchAllTeacherLoads = async () => {
       // query whether or not a teacher already has a project on each day of the Aktionstage
-      const dailyLoad = await queryTeacherLoad()
-      setDayLoad(dailyLoad)
+      const teacherLoads = await queryAllTeacherLoads()
+      setAllTeacherLoads(teacherLoads)
+      console.log(teacherLoads)
+      // personal teacher load, filter teacher load by current teacher by auth
+      const currentTeacherLoad = teacherLoads?.[user.data?.user.id] || []
+      setPersonalLoad(currentTeacherLoad)
+      console.log(currentTeacherLoad)
     }
-    fetchTeacherLoad()
-  }, [])
+    fetchAllTeacherLoads()
+  }, [user.data?.user.id])
 
   // Fetch rooms from the server
   const isStep4 = step === 4
@@ -363,7 +370,7 @@ const MultiStepForm = () => {
     const date = getValues("date") || "" // Default to empty string
     const price = getValues("price") >= 0 ? getValues("price") : 0 // Ensure price is valid
     const banner = getValues("banner") || "" // Default to empty string
-
+    if (Object.entries(errors).length > 0) return false
     if (step === 0) {
       // Front end validation for the name is enough - only teachers have access to this page and they can be trusted or at least blamed for hacking.
       const valid = name.length > 0 && name.length <= 32
@@ -383,10 +390,6 @@ const MultiStepForm = () => {
       return valid
     }
     if (step === 3) {
-      validPages.current[3] = true
-      return true // No other teachers required
-    }
-    if (step === 4) {
       // Check date
       const valid =
         date.length > 0 &&
@@ -396,6 +399,10 @@ const MultiStepForm = () => {
         location.length > 0
       validPages.current[4] = valid
       return valid
+    }
+    if (step === 4) {
+      validPages.current[3] = true
+      return true // No other teachers required [current teacher added server side]
     }
     if (step === 5) {
       // Check price, maxStudents, minGrade, maxGrade
@@ -409,7 +416,6 @@ const MultiStepForm = () => {
 
   // Watch for form changes to keep the button disabled state correct
   const currentStepErrors = watch(steps[step].fields)
-
   const emoji = watch("emoji")
 
   return (
@@ -447,7 +453,8 @@ const MultiStepForm = () => {
             <h2 className="text-lg font-semibold mb-2">Name des Projekts</h2>
             <p className="text-gray-500 mb-4">
               Bitte auf eine schöne Formatierung achten und kürzere Namen
-              bevorzugen. In der Beschreibung ist genug Platz.
+              bevorzugen <u>(Am besten nur ein Wort, zB Tennis)</u>. In der
+              Beschreibung ist genug Platz.
             </p>
             <Input
               placeholder="Benenne dein Projekt"
@@ -493,16 +500,23 @@ const MultiStepForm = () => {
             <h2 className="text-lg font-semibold mt-4 mb-2">
               Projekt Beschreibung
             </h2>
-            <Textarea
-              placeholder="Description"
-              {...register("description")}
-              className="mb-2"
-            />
-            {errors.description && (
-              <p className="text-red-500">{errors.description.message}</p>
-            )}
+            <div className="mb-4">
+              <Textarea
+                placeholder="Description"
+                {...register("description")}
+                className="mb-2"
+              />
+              {errors.description && (
+                <p className="text-red-500">{errors.description.message}</p>
+              )}
+            </div>
 
-            <h2 className="text-lg font-semibold mb-2">Banner Upload</h2>
+            <h2 className="text-lg font-semibold mb-2">Bild Upload</h2>
+            <p className="text-gray-500 mb-4">
+              Bitte Mühe geben,{" "}
+              <u>ein schönes, buntes und scharfes Bild zu wählen</u>, die Bilder
+              stellen einen großen Teil der Seite dar.
+            </p>
             {/* either url or upload */}
             <Tabs defaultValue="upload" className="w-[400px] mx-auto">
               <TabsList className="grid w-full grid-cols-2">
@@ -594,95 +608,18 @@ const MultiStepForm = () => {
 
         {step === 3 && (
           <div>
-            <h2 className="text-lg font-semibold mb-3">Lehrer Hinzufügen</h2>
-            {/* Display Added Teachers */}
-            <div className="flex flex-wrap gap-2 mb-3">
-              {addedTeachers.length > 0 ? (
-                addedTeachers.map((teacher) => (
-                  <Badge
-                    key={teacher.id}
-                    variant="outline"
-                    className="flex items-center gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop"
-                    onClick={() => removeTeacher(teacher.id || "")}
-                  >
-                    {teacher.name}
-                    <span className="text-red-500 hover:text-red-700">
-                      <Trash2 className="h-4 w-4" />
-                    </span>
-                  </Badge>
-                ))
-              ) : (
-                <p className="text-slate-500">Noch keine anderen Leher.</p>
-              )}
-            </div>
-            {/* Teacher Search Popover */}
-            <Popover
-              open={isTeacherSelectOpen}
-              onOpenChange={setIsTeacherSelectOpen}
-            >
-              <PopoverTrigger asChild className="w-8">
-                <div>
-                  <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer transition-all hover:bg-slate-200">
-                    <Plus className="text-slate-500" />
-                  </Button>
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-[250px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search teachers..." />
-                  <CommandEmpty>No teachers found.</CommandEmpty>
-                  <CommandGroup>
-                    <CommandList>
-                      {teachers.length > 0 &&
-                        teachers.map((teacher: Partial<Account>) => (
-                          <CommandItem
-                            key={teacher.id}
-                            className={cn(
-                              "cursor-pointer",
-                              addedTeachers.find((t) => t.id === teacher.id)
-                                ? "opacity-50 pointer-events-none"
-                                : ""
-                            )}
-                            value={teacher.name}
-                            onSelect={(currentValue) => {
-                              if (currentValue === teacher.name) {
-                                addTeacher(teacher)
-                                setIsTeacherSelectOpen(false)
-                              }
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                addedTeachers.find((t) => t.id === teacher.id)
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {teacher.name}
-                          </CommandItem>
-                        ))}
-                    </CommandList>
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            {errors.teachers && (
-              <p className="text-red-500">{errors.teachers.message}</p>
-            )}
-          </div>
-        )}
-
-        {step === 4 && (
-          <div>
             {/* TODO: custom MON / TUE / WED picker */}
             <h2 className="text-lg font-semibold mt-4 mb-2">Tag</h2>
             <div className="p-4 border-slate-200 border rounded-lg inline-block mb-2">
               <ToggleGroup
                 type="single"
-                onValueChange={(value) =>
+                onValueChange={(value) => {
+                  setDay(value as Day)
+                  // reset room choice
+                  setRoom(undefined)
+                  setValue("location", "") // reset custom location
                   setValue("date", value as Day, { shouldValidate: true })
-                } // non empty
+                }} // non empty
                 value={getValues("date")}
               >
                 {Object.values(Day).map((day) => {
@@ -695,15 +632,18 @@ const MultiStepForm = () => {
                     <div
                       key={day}
                       // blur on hover when already a project on that day
-                      // className={dayLoad?.[day] ? "hover:blur-[1px]" : ""}
+                      // className={personalLoad?.indexOf(day) === undefined ? "hover:blur-[1px]" : ""}
                       style={{
-                        cursor: dayLoad?.[day] ? "not-allowed" : undefined,
+                        cursor:
+                          personalLoad?.indexOf(day) !== undefined
+                            ? "not-allowed"
+                            : undefined,
                       }}
                     >
                       <ToggleGroupItem
                         value={day}
                         aria-label={`Wechseln zu ${dayNames[day]}`}
-                        disabled={dayLoad?.[day] || false}
+                        disabled={personalLoad?.indexOf(day) !== undefined}
                       >
                         {dayNames[day]}
                       </ToggleGroupItem>
@@ -806,7 +746,9 @@ const MultiStepForm = () => {
                                       className={cn(
                                         "cursor-pointer",
                                         cRoom.id === room?.id ||
-                                          cRoom.project /* selected or taken */
+                                          cRoom.projects?.find(
+                                            (p) => p.day === day
+                                          ) /* selected or taken */
                                           ? "opacity-50 pointer-events-none"
                                           : ""
                                       )}
@@ -834,16 +776,26 @@ const MultiStepForm = () => {
                                       <Ban
                                         className={cn(
                                           "mr-2 h-4 w-4",
-                                          cRoom.project ? "" : "hidden"
+                                          cRoom.projects?.find(
+                                            (p) => p.day === day
+                                          )
+                                            ? ""
+                                            : "hidden"
                                         )}
                                       />
                                       {cRoom.name}
-                                      {cRoom.project &&
+                                      {cRoom.projects?.find(
+                                        (p) => p.day === day
+                                      ) &&
                                         " (belegt: " +
-                                          cRoom.project.name +
+                                          cRoom.projects?.find(
+                                            (p) => p.day === day
+                                          )?.name +
                                           ", " +
-                                          (cRoom?.project?.teachers?.[0]
-                                            ?.name || "unbekannt") +
+                                          (cRoom.projects?.find(
+                                            (p) => p.day === day
+                                          )?.teachers?.[0]?.name ||
+                                            "unbekannt") +
                                           ")"}
                                     </CommandItem>
                                   )
@@ -867,6 +819,99 @@ const MultiStepForm = () => {
 
             {errors.location && (
               <p className="text-red-500">{errors.location?.message}</p>
+            )}
+          </div>
+        )}
+
+        {step === 4 && (
+          <div>
+            <h2 className="text-lg font-semibold mb-3">Lehrer Hinzufügen</h2>
+            {/* Display Added Teachers */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {addedTeachers.length > 0 ? (
+                addedTeachers.map((teacher) => (
+                  <Badge
+                    key={teacher.id}
+                    variant="outline"
+                    className="flex items-center gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop"
+                    onClick={() => removeTeacher(teacher.id || "")}
+                  >
+                    {teacher.name}
+                    <span className="text-red-500 hover:text-red-700">
+                      <Trash2 className="h-4 w-4" />
+                    </span>
+                  </Badge>
+                ))
+              ) : (
+                <p className="text-slate-500">Noch keine anderen Leher.</p>
+              )}
+            </div>
+            {/* Teacher Search Popover */}
+            <Popover
+              open={isTeacherSelectOpen}
+              onOpenChange={setIsTeacherSelectOpen}
+            >
+              <PopoverTrigger
+                className={cn("", addedTeachers.length < 2 && "w-8")}
+                disabled={addedTeachers.length >= 2}
+              >
+                {addedTeachers.length < 2 ? (
+                  <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer hover:bg-slate-200">
+                    <Plus className="text-slate-500" />
+                  </Button>
+                ) : (
+                  // 2/2 reached
+                  <span className="bg-slate-100 p-2 mt-2 rounded-lg text-sm">
+                    ⚠️ 2/2 weiteren Lehrern
+                  </span>
+                )}
+              </PopoverTrigger>
+              <PopoverContent className="w-[250px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search teachers..." />
+                  <CommandEmpty>No teachers found.</CommandEmpty>
+                  <CommandGroup>
+                    <CommandList>
+                      {teachers.length > 0 &&
+                        teachers.map((teacher: Partial<Account>) => (
+                          <CommandItem
+                            key={teacher.id}
+                            className={cn(
+                              "cursor-pointer",
+                              addedTeachers.find((t) => t.id === teacher.id) ||
+                                day === undefined ||
+                                allTeacherLoads?.[teacher.id || ""]?.includes(
+                                  day
+                                )
+                                ? "opacity-50 pointer-events-none"
+                                : ""
+                            )}
+                            value={teacher.name}
+                            onSelect={(currentValue) => {
+                              if (currentValue === teacher.name) {
+                                addTeacher(teacher)
+                                setIsTeacherSelectOpen(false)
+                              }
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                addedTeachers.find((t) => t.id === teacher.id)
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {teacher.name}
+                          </CommandItem>
+                        ))}
+                    </CommandList>
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {errors.teachers && (
+              <p className="text-red-500">{errors.teachers.message}</p>
             )}
           </div>
         )}
@@ -948,7 +993,11 @@ const MultiStepForm = () => {
           {step === steps.length - 1 ? (
             <Button
               onClick={() => onSubmit(getValues())}
-              disabled={!isCurrentStepValid()}
+              disabled={
+                !isCurrentStepValid() ||
+                !validPages.current.every((v) => v) ||
+                Object.entries(errors).length > 0
+              }
               className="flex items-center gap-2"
             >
               Fertig <PartyPopper size={16} />
