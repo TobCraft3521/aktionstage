@@ -15,6 +15,7 @@ export const queryProjects = cache(async () => {
       teachers: true,
     },
   })
+  
   return projects
 })
 

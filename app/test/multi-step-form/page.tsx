@@ -635,7 +635,7 @@ const MultiStepForm = () => {
                       // className={personalLoad?.indexOf(day) === undefined ? "hover:blur-[1px]" : ""}
                       style={{
                         cursor:
-                          personalLoad?.indexOf(day) !== undefined
+                          personalLoad?.includes(day)
                             ? "not-allowed"
                             : undefined,
                       }}
@@ -643,7 +643,7 @@ const MultiStepForm = () => {
                       <ToggleGroupItem
                         value={day}
                         aria-label={`Wechseln zu ${dayNames[day]}`}
-                        disabled={personalLoad?.indexOf(day) !== undefined}
+                        disabled={personalLoad?.includes(day)}
                       >
                         {dayNames[day]}
                       </ToggleGroupItem>
