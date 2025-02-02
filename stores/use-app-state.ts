@@ -25,3 +25,4 @@ export const useAppState = create<AppStateStore>((set) => ({
   selectedProject: null,
   setSelectedProject: (selectedProject) => set({ selectedProject }),
 }))
+

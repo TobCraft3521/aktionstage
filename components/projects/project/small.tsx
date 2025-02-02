@@ -1,11 +1,11 @@
 "use client"
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Account, Project } from "@prisma/client"
 import { cn } from "@/lib/utils"
 import { useEffect, useRef, useState } from "react"
-import { useAppState } from "@/hooks/use-app-state"
+import { useAppState } from "@/stores/use-app-state"
 import styles from "./styles.module.css"
 import { DM_Sans } from "next/font/google"
 

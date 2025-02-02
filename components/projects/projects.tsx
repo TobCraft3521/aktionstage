@@ -1,5 +1,5 @@
 "use client"
-import { useAppState } from "@/hooks/use-app-state" // Update the path as per your project structure
+import { useAppState } from "@/stores/use-app-state" // Update the path as per your project structure
 import { queryProjects } from "@/lib/actions/queries/projects"
 import { Account, Project } from "@prisma/client"
 import {
@@ -7,7 +7,7 @@ import {
   motion,
   useMotionValue,
   useTransform,
-} from "framer-motion"
+} from "motion/react"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 

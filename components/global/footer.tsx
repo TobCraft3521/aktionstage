@@ -80,7 +80,7 @@ const Footer = () => {
               </Tooltip>
             </TooltipProvider>
             <Link
-              href="https://forms.gle/rCEBBvxQgFUWTVBM6"
+              href="https://insigh.to/b/asg-aktionstage"
               className="group hover:text-red-500 relative"
             >
               Feedback{" "}

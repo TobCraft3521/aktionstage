@@ -1,5 +1,5 @@
 "use client"
-import { AnimateSharedLayout, LayoutGroup, motion } from "framer-motion"
+import { AnimateSharedLayout, LayoutGroup, motion } from "motion/react"
 import { useState } from "react"
 import "./test.css"
 function Card({ value, animationId }: { value: string; animationId: string }) {

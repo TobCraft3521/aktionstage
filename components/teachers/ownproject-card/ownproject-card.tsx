@@ -1,9 +1,10 @@
+"use client"
 import { cn } from "@/lib/utils"
 import { Day } from "@prisma/client"
-import { ChevronRight, Plus } from "lucide-react"
+import { motion } from "motion/react"
 import { DM_Sans } from "next/font/google"
 import Image from "next/image"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { cache } from "react"
 
 const dmSans = DM_Sans({
@@ -16,9 +17,12 @@ type Props = {
   title: string
   teachers: string
   day: string
+  id: string
 }
 
-const OwnProjectCard = ({ imageUrl, title, teachers, day }: Props) => {
+const OwnProjectCard = ({ imageUrl, title, teachers, day, id }: Props) => {
+  const router = useRouter()
+
   // Format the date from MON TUE WED to Montag Dienstag Mittwoch
   const formatDay = cache((day: string) => {
     switch (day) {
@@ -33,11 +37,16 @@ const OwnProjectCard = ({ imageUrl, title, teachers, day }: Props) => {
         return day
     }
   })
+  router.prefetch(`/teachers/projects/${id}`)
 
   const formattedDay = formatDay(day)
-
   return (
-    <div className="relative w-56 h-[128px] overflow-hidden rounded-lg shadow-lg cursor-pointer group">
+    <div
+      className="relative w-56 h-[128px] overflow-hidden rounded-lg shadow-lg cursor-pointer group"
+      onClick={() => {
+        router.push(`/teachers/projects/${id}`)
+      }}
+    >
       <Image
         src={imageUrl}
         alt={title}
@@ -45,8 +54,9 @@ const OwnProjectCard = ({ imageUrl, title, teachers, day }: Props) => {
         className="object-cover group-hover:brightness-75 transition-all"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/90 to-transparent" />
-      <div
+      <motion.h1
         className={cn("absolute top-4 left-4 text-white font-semibold z-10")}
+        layoutId={`title-${id}`}
       >
         {title}
         {teachers ? (
@@ -58,7 +68,7 @@ const OwnProjectCard = ({ imageUrl, title, teachers, day }: Props) => {
             alleine, am {formattedDay}
           </p>
         )}
-      </div>
+      </motion.h1>
     </div>
   )
 }

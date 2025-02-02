@@ -62,7 +62,7 @@ const TutorialSettings = () => {
 
   return (
     <div className="relative flex h-full w-full flex-1 items-center justify-center">
-      <div className="absolute top-0 h-[30vh] w-full border-b border-zinc-300 from-[#e0e0ee] to-[#ebedff] bg-gradient-to-tl dark:border-zinc-800 dark:bg-[#111015]"></div>
+      <div className="absolute top-0 left-0 h-[30vh] w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]"></div>
       <div className="relative flex w-full max-w-lg flex-col gap-6 rounded-xl border border-gray-200 bg-gray-50 p-6 text-sm shadow-lg shadow-slate-200 dark:border-gray-800 dark:bg-[#111015] md:rounded-xl md:p-10">
         <div className="space-y-1">
           <h1 className="text-xl font-semibold">Tutorials</h1>

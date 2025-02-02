@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Account, Project } from "@prisma/client"
-import { AnimatePresence, motion, spring, useAnimation } from "framer-motion"
+import { AnimatePresence, motion, spring, useAnimation } from "motion/react"
 import Image from "next/image"
 import { ArrowDown, X } from "lucide-react"
 import { useRouter } from "next/navigation"

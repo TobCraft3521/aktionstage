@@ -334,11 +334,9 @@ const MultiStepForm = () => {
       // query whether or not a teacher already has a project on each day of the Aktionstage
       const teacherLoads = await queryAllTeacherLoads()
       setAllTeacherLoads(teacherLoads)
-      console.log(teacherLoads)
       // personal teacher load, filter teacher load by current teacher by auth
       const currentTeacherLoad = teacherLoads?.[user.data?.user.id] || []
       setPersonalLoad(currentTeacherLoad)
-      console.log(currentTeacherLoad)
     }
     fetchAllTeacherLoads()
   }, [user.data?.user.id])

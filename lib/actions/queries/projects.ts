@@ -15,7 +15,7 @@ export const queryProjects = cache(async () => {
       teachers: true,
     },
   })
-  
+
   return projects
 })
 
@@ -64,9 +64,9 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     },
   })
   if (!user || (user.role !== "TEACHER" && user.role !== "ADMIN"))
-    return {
-      error: "Nicht berechtigt",
-    }
+    return redirect(
+      `/teachers/create/feedback?msg=Keine Berechtigung&status=error`
+    )
 
   // validate form data
   // this could be done using zod [server side] but this is more customisable
@@ -84,14 +84,14 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     !formData.location ||
     formData.price === undefined
   )
-    return {
-      error: "Bitte fülle alle Felder aus",
-    }
+    return redirect(
+      `/teachers/create/feedback?msg=Bitte fülle alle Felder aus`
+    )
 
   if (formData.title.length > 32)
-    return {
-      error: "Titel zu lang",
-    }
+    return redirect(
+      `/teachers/create/feedback?msg=Titel zu lang (max. 32 Zeichen)&status=error`
+    )
 
   const otherTeacherIds = formData.teachers || []
   // Check if teachers exist
@@ -118,9 +118,9 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       },
     })
     if (!room)
-      return {
-        error: "Raum nicht gefunden",
-      }
+      return redirect(
+        `/teachers/create/feedback?msg=Raum nicht gefunden&status=error`
+      )
   }
 
   // Check if teacher already has a project on this day
@@ -137,9 +137,9 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     },
   })
   if (projects.length > 0)
-    return {
-      error: "Bereits ein Projekt an diesem Tag",
-    }
+    return redirect(
+      `/teachers/create/feedback?msg=Bereits ein Projekt an diesem Tag&status=error`
+    )
 
   // create project
   // Ignore invalid teachers - only from "teachers" array
@@ -177,9 +177,9 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     })
     // Just for typescript, already checked above
     if (!room)
-      return {
-        error: "Raum nicht gefunden",
-      }
+      return redirect(
+        `/teachers/create/feedback?msg=Raum nicht gefunden&status=error`
+      )
     if (room.projects.find((p) => p.day === formData.date)) {
       // Update project location
       await db.project.update({
@@ -190,12 +190,12 @@ export const createProject = async (formData: FormData & { room?: string }) => {
           location: `Keine Ahnung`,
         },
       })
-      return {
-        error:
-          "Raum wurde in der Zwischenzeit bereits belegt. Projekt: " +
-          room.projects.find((p) => p.day === formData.date)?.name +
-          ". Das Projekt wurde trotzdem erstellt.",
-      }
+      return redirect(
+        `/teachers/create/feedback?msg=Raum wurde in der Zwischenzeit bereits belegt. Projekt: ${
+          room.projects.find((p) => p.day === formData.date)?.name
+        }
+          ". Das Projekt wurde trotzdem erstellt.&status=warning`
+      )
     }
     // Room available
     await db.room.update({
@@ -222,7 +222,19 @@ export const createProject = async (formData: FormData & { room?: string }) => {
   }
 
   // Everything successful
-  return {
-    error: null,
-  }
+  return redirect(
+    `/teachers/feedback?msg=Projekt erfolgreich erstellt&status=success`
+  )
+}
+
+export const queryProject = async (id: string) => {
+  const project = await db.project.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      teachers: true,
+    },
+  })
+  return project
 }

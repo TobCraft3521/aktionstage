@@ -1,5 +1,5 @@
 "use client"
-import { useAppState } from "@/hooks/use-app-state"
+import { useAppState } from "@/stores/use-app-state"
 import { queryTeachers } from "@/lib/actions/queries/accounts"
 import { cn } from "@/lib/utils"
 import { Account, Day } from "@prisma/client"
@@ -34,7 +34,6 @@ const ProjectsHeader = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   useEffect(() => {
     const fetchData = async () => {
-      console.log("fetching teachers")
       setTeachers(await queryTeachers())
     }
     fetchData()

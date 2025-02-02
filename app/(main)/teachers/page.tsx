@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation"
+import { redirect } from 'next/navigation'
 
 const Redirect = () => {
-  return redirect("/teachers/ownprojects")
+  return redirect('/teachers/projects')
 }
 
 export default Redirect
