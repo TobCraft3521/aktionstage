@@ -1,17 +1,18 @@
+import FeatureTutorial from "@/components/tutorials/features"
+import { queryTutorialComplete } from "@/lib/actions/queries/tutorials"
+import { auth } from "@/lib/auth/auth"
 import NextAuthProvider from "@/lib/providers/nextauthprovider"
-import type { Metadata } from "next"
 import { ThemeProvider } from "@/lib/providers/theme-provider"
-import { Inter, Istok_Web } from "next/font/google"
+import { cn } from "@/lib/utils"
+import { Tutorial } from "@prisma/client"
+import { QueryClientProvider } from "@tanstack/react-query"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
 import { Toaster } from "react-hot-toast" // Import the 'Toaster' component from the appropriate module
 import "./globals.css"
-import { cn } from "@/lib/utils"
-import { auth } from "@/lib/auth/auth"
-import { queryTutorialComplete } from "@/lib/actions/queries/tutorials"
-import { Tutorial } from "@prisma/client"
-import FeatureTutorial from "@/components/tutorials/features"
+import TanstackQueryProvider from "@/lib/providers/tanstack-query-provider"
 
 const inter = Inter({ subsets: ["latin"] })
-const istokWeb = Istok_Web({ weight: "400", subsets: ["latin"] })
 export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Aktionstage ASG",
@@ -29,14 +30,16 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning lang="de">
       <body className={cn(inter.className, "")}>
-        <ThemeProvider defaultTheme="light" enableSystem attribute="class">
-          <NextAuthProvider>
-            <Toaster />
-            {children}
-            {/* requires page refresh for state update - can't be seen when changing login */}
-            {user && <FeatureTutorial show={showFeaturesTutorial} />}
-          </NextAuthProvider>
-        </ThemeProvider>
+        <TanstackQueryProvider>
+          <ThemeProvider defaultTheme="light" enableSystem attribute="class">
+            <NextAuthProvider>
+              <Toaster />
+              {children}
+              {/* requires page refresh for state update - can't be seen when changing login */}
+              {user && <FeatureTutorial show={showFeaturesTutorial} />}
+            </NextAuthProvider>
+          </ThemeProvider>
+        </TanstackQueryProvider>
       </body>
     </html>
   )

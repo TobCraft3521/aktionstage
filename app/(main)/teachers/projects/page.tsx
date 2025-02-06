@@ -5,8 +5,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { queryUser } from "@/lib/actions/queries/accounts"
 import { queryOwnProjects } from "@/lib/actions/queries/projects"
 import { auth } from "@/lib/auth/auth"
-import { useTeacherProjectStore } from "@/stores/teacher-project-store"
 import { Account, Project } from "@prisma/client"
+import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "motion/react"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
@@ -15,11 +15,11 @@ type Props = {}
 
 const OwnProjects = (props: Props) => {
   const id = useSession().data?.user?.id
-  const { projects: ownProjects, fetchProjects } = useTeacherProjectStore()
+  const { data: ownProjects, isLoading } = useQuery({
+    queryKey: ["teacher-projects"],
+    queryFn: () => queryOwnProjects(), // Fetch projects from the API
+  })
 
-  useEffect(() => {
-    if (!ownProjects) fetchProjects()
-  }, [ownProjects, fetchProjects])
   return (
     <div className="relative h-full w-full flex-1">
       <div className="absolute top-0 left-0 h-[30vh] w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]"></div>
