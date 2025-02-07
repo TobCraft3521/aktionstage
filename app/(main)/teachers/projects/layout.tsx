@@ -34,12 +34,12 @@ const Teachers = ({ children }: Props) => {
   return (
     <div className="flex flex-col h-screen">
       <Header variant="main" />
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-0">
         <div className="block">
           <TeachersSidebar />
         </div>
-        <div className="flex-1 bg-slate-100 rounded-tl-xl mt-2 relative overflow-hidden">
-          <AnimatePresence mode="wait">{children}</AnimatePresence>
+        <div className="flex flex-1 bg-slate-100 rounded-tl-xl mt-2 relative overflow-hidden min-h-0 flex-col">
+          <AnimatePresence>{children}</AnimatePresence>
         </div>
       </div>
     </div>
