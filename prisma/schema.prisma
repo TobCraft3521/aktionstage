@@ -27,6 +27,7 @@ model Account {
   password String
   role     Role   @default(STUDENT)
   short    String @default("")
+  grade    Int?
 
   projects            Project[]            @relation("ProjectAccount")
   ownProjects         Project[]            @relation("ProjectTeacher")

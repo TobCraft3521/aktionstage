@@ -1,10 +1,19 @@
 "use client"
+import { StudentsOverview } from "@/components/teachers/projects/printable"
 import TeachersList from "@/components/teachers/projects/teachers-list"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { queryOwnProjects } from "@/lib/actions/queries/projects"
 import { removeTeacherFromProject } from "@/lib/actions/updates/projects"
 import { cn } from "@/lib/utils"
@@ -14,8 +23,10 @@ import { motion } from "motion/react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
 import { useParams, useRouter } from "next/navigation"
-import { useMemo } from "react"
+import posthog from "posthog-js"
+import { useMemo, useRef } from "react"
 import toast from "react-hot-toast"
+import { useReactToPrint } from "react-to-print"
 const dmSans = DM_Sans({
   weight: "800",
   subsets: ["latin"],
@@ -25,6 +36,11 @@ const ProjectDetailView = () => {
   const { projectId: id } = useParams() // Get the project ID from the URL
   const userId = useSession().data?.user.id
   const router = useRouter()
+  const printableRef = useRef<HTMLDivElement>(null)
+  const print = useReactToPrint({
+    contentRef: printableRef,
+    documentTitle: "Print Page Title",
+  })
   const { data: ownProjects } = useQuery({
     queryKey: ["teacher-projects"],
     queryFn: () => queryOwnProjects(),
@@ -63,25 +79,40 @@ const ProjectDetailView = () => {
       <div className="p-16 px-20 flex flex-row gap-10 flex-1 min-h-0">
         <div className="flex flex-1 flex-col min-h-0 w-screen max-w-[400px]">
           <h1 className={cn(`${dmSans.className} text-2xl mb-4`)}>
-            Anmeldungen
+            Anmeldungen (12)
           </h1>
           <ScrollArea className="bg-slate-100 h-full rounded-xl border border-slate-200 w-screen max-w-[400px]">
-            {[1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3].map(() => (
-              <>
-                <div className="flex flex-row items-center justify-start p-2 gap-4 px-4">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-slate-200">T</AvatarFallback>
-                  </Avatar>
-                  <p className="text-sm">Tobias Hackenberg</p>
-                </div>
-                <Separator />
-              </>
-            ))}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="">Nr.</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="text-right">Klasse</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>1</TableCell>
+                    <TableCell>Tobias Hackenberg</TableCell>
+                    <TableCell className="text-right">10a</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </ScrollArea>
         </div>
         <div className="flex flex-col gap-2">
           <h1 className={cn(`${dmSans.className} text-2xl mb-4`)}>Projekt</h1>
-          <Button className="flex items-center gap-2">
+          <Button
+            className="flex items-center gap-2"
+            onClick={() => {
+              posthog.capture("print_project_signups", {
+                project_id: project?.id,
+              })
+              print()
+            }}
+          >
             <Printer className="h-4 w-4" /> Ausdrucken
           </Button>
           <Button className="flex items-center gap-2">
@@ -89,6 +120,11 @@ const ProjectDetailView = () => {
           </Button>
           <Button variant="destructive">Löschen</Button>
         </div>
+      </div>
+
+      {/* printable students overview (only shown when clicking print) */}
+      <div className="hidden">
+        <StudentsOverview ref={printableRef} />
       </div>
     </div>
   )

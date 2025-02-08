@@ -10,6 +10,7 @@ import { useEffect, useState } from "react"
 import { auth } from "@/lib/auth/auth"
 import { queryUser } from "@/lib/actions/queries/accounts"
 import { Role } from "@prisma/client"
+import posthog from "posthog-js"
 
 const Header = ({ variant }: { variant: "main" | "login" }) => {
   const user = useSession().data?.user
@@ -18,6 +19,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
       redirect: true,
       callbackUrl: "/login",
     })
+    posthog.reset()
   }
   const pathName = usePathname()
 

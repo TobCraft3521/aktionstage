@@ -2,7 +2,7 @@
 
 import { LoginFormSchema } from "@/lib/form-schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signIn, useSession } from "next-auth/react"
+import { getSession, signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
@@ -21,6 +21,7 @@ import { Button } from "../ui/button"
 import Loader from "../global/loader"
 import { DM_Sans } from "next/font/google"
 import { cn } from "@/lib/utils"
+import posthog from "posthog-js"
 
 const dmSans = DM_Sans({
   weight: "900",
@@ -51,10 +52,17 @@ const LoginForm = () => {
         redirect: false,
       })
       form.reset()
-
+      const user = (await getSession())?.user
       if (response?.ok && !response.error) {
+        posthog.identify(user.id, {
+          name: user.name,
+          role: user.role,
+        })
+        // when you follow the tutorial and then you hit a paywall 😭
+        // posthog.group("role", user.role)
+        // posthog.group("grade", user.grade)
         router.push("/projects")
-        window.location.reload()
+        // window.location.reload()
       } else {
         setSubmitError("Falscher Benutzername oder Passwort 😒")
       }

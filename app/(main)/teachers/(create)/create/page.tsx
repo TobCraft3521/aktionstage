@@ -27,13 +27,17 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { useDebounce } from "@/hooks/use-debounce"
 import { suggestEmoji } from "@/lib/actions/ai/emoji-sug"
 import { getPresignedUploadPost } from "@/lib/actions/aws/upload"
 import {
   queryAllTeacherLoads,
   queryTeachers,
 } from "@/lib/actions/queries/accounts"
+import { createProject } from "@/lib/actions/queries/projects"
 import { queryRooms } from "@/lib/actions/queries/rooms"
+import { CreateProjectSchema } from "@/lib/form-schemas"
+import { isValidImage } from "@/lib/helpers/image"
 import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
@@ -48,18 +52,16 @@ import {
   Plus,
   Trash2,
 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { DM_Sans } from "next/font/google"
+import Image from "next/image"
+import posthog from "posthog-js"
 import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
-import { createProject } from "@/lib/actions/queries/projects"
-import Image from "next/image"
-import { DM_Sans } from "next/font/google"
-import { auth } from "@/lib/auth/auth"
-import { useSession } from "next-auth/react"
-import { CreateProjectSchema } from "@/lib/form-schemas"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -80,6 +82,11 @@ const MultiStepForm = () => {
   // Multi step form logic
   const [step, setStep] = useState(0)
   const validPages = useRef<boolean[]>(new Array(5).fill(false)) // Track valid pages
+  // Custom image URL logic
+  const [imgUrl, setImgUrl] = useState<string | undefined>()
+  const debouncedUrl = useDebounce(imgUrl, 500)
+  const [imgError, setImgError] = useState<string | undefined>()
+
   // File upload logic
   const [file, setFile] = useState<File | null>(null)
   const [fileTooLarge, setFileTooLarge] = useState(false)
@@ -193,6 +200,33 @@ const MultiStepForm = () => {
     setValue("emoji", emoji) // Update the form value for the emoji field
     validPages.current[2] = true // Mark the emoji step as valid
   }
+
+  // Handle URL input change
+  const handleImgUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImgUrl(e.target.value)
+  }
+
+  // Validate URL asynchronously
+  useEffect(() => {
+    const validateUrl = async () => {
+      if (debouncedUrl) {
+        const isValid = await isValidImage(debouncedUrl)
+        if (isValid) {
+          // Register the valid URL with react-hook-form
+          setValue("banner", debouncedUrl)
+          // Reset the error message
+          setImgError(undefined)
+        } else {
+          // Set error message if the URL is invalid
+          setImgError("Ungültiger Bild Link")
+        }
+      }
+    }
+    // Trigger the validation after the debounced URL is updated
+    if (debouncedUrl) {
+      validateUrl()
+    }
+  }, [debouncedUrl, setValue])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileUploadError(undefined)
@@ -469,6 +503,7 @@ const MultiStepForm = () => {
                 width={200}
                 height={256}
                 className="object-cover rounded-[24px] w-full h-full"
+                priority
               ></Image>
               <div className="absolute bottom-[9%] text-white text-lg z-30 font-semibold w-full px-2 flex flex-col items-center leading-5">
                 <h1
@@ -558,9 +593,11 @@ const MultiStepForm = () => {
                   placeholder="Banner URL"
                   title="Banner URL"
                   type="url"
-                  {...register("banner")}
+                  // {...register("banner")}
+                  onChange={handleImgUrlChange}
                   className="mb-2"
                 />
+                {imgError && <p className="text-yellow-500">{imgError}</p>}
               </TabsContent>
             </Tabs>
             {errors.banner && (

@@ -11,6 +11,7 @@ import { Inter } from "next/font/google"
 import { Toaster } from "react-hot-toast" // Import the 'Toaster' component from the appropriate module
 import "./globals.css"
 import TanstackQueryProvider from "@/lib/providers/tanstack-query-provider"
+import { CSPostHogProvider } from "@/lib/providers/posthog-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 export const dynamic = "force-dynamic"
@@ -28,17 +29,19 @@ export default async function RootLayout({
   const showFeaturesTutorial = !(await queryTutorialComplete(Tutorial.FEATURES))
 
   return (
-    <html suppressHydrationWarning lang="de">
+    <html lang="de">
       <body className={cn(inter.className, "")}>
         <TanstackQueryProvider>
-          <ThemeProvider defaultTheme="light" enableSystem attribute="class">
-            <NextAuthProvider>
-              <Toaster />
-              {children}
-              {/* requires page refresh for state update - can't be seen when changing login */}
-              {user && <FeatureTutorial show={showFeaturesTutorial} />}
-            </NextAuthProvider>
-          </ThemeProvider>
+          <CSPostHogProvider>
+            <ThemeProvider defaultTheme="light" enableSystem attribute="class">
+              <NextAuthProvider>
+                <Toaster />
+                {children}
+                {/* requires page refresh for state update - can't be seen when changing login */}
+                {user && <FeatureTutorial show={showFeaturesTutorial} />}
+              </NextAuthProvider>
+            </ThemeProvider>
+          </CSPostHogProvider>
         </TanstackQueryProvider>
       </body>
     </html>

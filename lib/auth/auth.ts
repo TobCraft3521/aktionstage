@@ -25,6 +25,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             id: user.id,
             name: user.name,
             role: user.role, // Add role property to the user object returned
+            grade: user.grade,
           }
         } catch (error) {
           // handle error

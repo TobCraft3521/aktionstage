@@ -6,6 +6,8 @@ import { cache } from "react"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { CreateProjectSchema } from "@/lib/form-schemas"
+import { PostHog } from "posthog-js"
+import PostHogClient from "@/lib/posthog/posthog"
 
 type FormData = z.infer<typeof CreateProjectSchema>
 
@@ -39,6 +41,9 @@ export const queryOwnProjects = async () => {
 }
 
 export const createProject = async (formData: FormData & { room?: string }) => {
+  //Analytics
+  const posthog = PostHogClient()
+
   // ultimative debugger 🤭
   console.log(`🚀 Creating project:
   🔤\tName: ${formData.title}
@@ -63,10 +68,37 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       id,
     },
   })
-  if (!user || (user.role !== "TEACHER" && user.role !== "ADMIN"))
+
+  posthog.capture({
+    event: "attempt_create_project",
+    properties: {
+      title: formData.title,
+      description: formData.description,
+      banner: formData.banner,
+      emoji: formData.emoji,
+      teachers: formData.teachers,
+      date: formData.date,
+      time: formData.time,
+      maxStudents: formData.maxStudents,
+      minGrade: formData.minGrade,
+      maxGrade: formData.maxGrade,
+      location: formData.location,
+      price: formData.price,
+    },
+    distinctId: id,
+  })
+  if (!user || (user.role !== "TEACHER" && user.role !== "ADMIN")) {
+    posthog.capture({
+      event: "create_project_failed",
+      properties: {
+        reason: "no_permission",
+      },
+      distinctId: id,
+    })
     return redirect(
       `/teachers/create/feedback?msg=Keine Berechtigung&status=error`
     )
+  }
 
   // validate form data
   // this could be done using zod [server side] but this is more customisable
@@ -83,15 +115,29 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     !formData.maxGrade ||
     !formData.location ||
     formData.price === undefined
-  )
-    return redirect(
-      `/teachers/create/feedback?msg=Bitte fülle alle Felder aus`
-    )
+  ) {
+    posthog.capture({
+      event: "create_project_failed",
+      properties: {
+        reason: "missing_fields",
+      },
+      distinctId: id,
+    })
+    return redirect(`/teachers/create/feedback?msg=Bitte fülle alle Felder aus`)
+  }
 
-  if (formData.title.length > 32)
+  if (formData.title.length > 32) {
+    posthog.capture({
+      event: "create_project_failed",
+      properties: {
+        reason: "title_too_long",
+      },
+      distinctId: id,
+    })
     return redirect(
       `/teachers/create/feedback?msg=Titel zu lang (max. 32 Zeichen)&status=error`
     )
+  }
 
   const otherTeacherIds = formData.teachers || []
   // Check if teachers exist
@@ -117,10 +163,18 @@ export const createProject = async (formData: FormData & { room?: string }) => {
         id: formData.room,
       },
     })
-    if (!room)
+    if (!room) {
+      posthog.capture({
+        event: "create_project_failed",
+        properties: {
+          reason: "room_not_found",
+        },
+        distinctId: id,
+      })
       return redirect(
         `/teachers/create/feedback?msg=Raum nicht gefunden&status=error`
       )
+    }
   }
 
   // Check if teacher already has a project on this day
@@ -136,10 +190,18 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       },
     },
   })
-  if (projects.length > 0)
+  if (projects.length > 0) {
+    posthog.capture({
+      event: "create_project_failed",
+      properties: {
+        reason: "teacher_has_project_on_day",
+      },
+      distinctId: id,
+    })
     return redirect(
       `/teachers/create/feedback?msg=Bereits ein Projekt an diesem Tag&status=error`
     )
+  }
 
   // create project
   // Ignore invalid teachers - only from "teachers" array
@@ -190,6 +252,13 @@ export const createProject = async (formData: FormData & { room?: string }) => {
           location: `Keine Ahnung`,
         },
       })
+      posthog.capture({
+        event: "create_project_warn",
+        properties: {
+          reason: "room_already_taken",
+        },
+        distinctId: id,
+      })
       return redirect(
         `/teachers/create/feedback?msg=Raum wurde in der Zwischenzeit bereits belegt. Projekt: ${
           room.projects.find((p) => p.day === formData.date)?.name
@@ -222,6 +291,24 @@ export const createProject = async (formData: FormData & { room?: string }) => {
   }
 
   // Everything successful
+  posthog.capture({
+    event: "create_project_success",
+    properties: {
+      title: formData.title,
+      description: formData.description,
+      banner: formData.banner,
+      emoji: formData.emoji,
+      teachers: formData.teachers,
+      date: formData.date,
+      time: formData.time,
+      maxStudents: formData.maxStudents,
+      minGrade: formData.minGrade,
+      maxGrade: formData.maxGrade,
+      location: formData.location,
+      price: formData.price,
+    },
+    distinctId: id,
+  })
   return redirect(
     `/teachers/feedback?msg=Projekt erfolgreich erstellt&status=success`
   )
