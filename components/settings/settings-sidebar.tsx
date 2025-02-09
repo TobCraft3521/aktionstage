@@ -15,7 +15,7 @@ const SettingsSidebar = () => {
         </Link>
 
         <Link
-          href={"/settings/security"}
+          href={"/settings/password"}
           className="flex w-44 flex-row items-center gap-2 rounded-md p-2 text-sm text-slate-400 transition-all dark:text-zinc-400 dark:hover:bg-zinc-800"
         >
           <Lock className="h-4 w-4 text-slate-400 dark:text-zinc-400" />

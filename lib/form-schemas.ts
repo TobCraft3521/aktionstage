@@ -27,3 +27,9 @@ export const CreateProjectSchema = z.object({
   time: z.string().min(1, "Keine Zeit angegeben"),
   date: z.enum([Day.MON, Day.TUE, Day.WED], { message: "Kein Tag ausgewählt" }),
 })
+
+export const ChangePasswordSchema = z.object({
+  oldPassword: z.string().min(1, "Kein altes Passwort angegeben"),
+  newPassword: z.string().min(1, "Kein neues Passwort angegeben"),
+  newPasswordRepeat: z.string().min(1, "Kein neues Passwort wiederholt"),
+})

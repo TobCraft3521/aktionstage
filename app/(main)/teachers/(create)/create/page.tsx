@@ -62,6 +62,8 @@ import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
+import Loader from "@/components/global/loader"
+import { useRouter } from "next/navigation"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -113,6 +115,9 @@ const MultiStepForm = () => {
   const [room, setRoom] = useState<RoomWithProjectWithTeachers | undefined>()
   // auth
   const user = useSession()
+  // other
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
     { label: "Titel", fields: ["title"] },
@@ -193,7 +198,10 @@ const MultiStepForm = () => {
       ...data,
       room: room?.id,
     }
+    setIsSubmitting(true)
     await createProject(mergedData)
+    // redirects to projects page anyway
+    setIsSubmitting(false)
   }
 
   const handleEmojiSelect = (emoji: string) => {
@@ -1020,7 +1028,13 @@ const MultiStepForm = () => {
               Zurück
             </Button>
           ) : (
-            <div />
+            <Button
+              onClick={() => router.back()}
+              variant="secondary"
+              type="button"
+            >
+              Zurück
+            </Button>
           )}
 
           {step === steps.length - 1 ? (
@@ -1029,11 +1043,18 @@ const MultiStepForm = () => {
               disabled={
                 !isCurrentStepValid() ||
                 !validPages.current.every((v) => v) ||
-                Object.entries(errors).length > 0
+                Object.entries(errors).length > 0 ||
+                isSubmitting
               }
               className="flex items-center gap-2"
             >
-              Fertig <PartyPopper size={16} />
+              {!isSubmitting ? (
+                <>
+                  Fertig <PartyPopper size={16} />
+                </>
+              ) : (
+                <Loader />
+              )}
             </Button>
           ) : (
             <Button
