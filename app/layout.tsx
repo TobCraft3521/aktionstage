@@ -12,6 +12,7 @@ import { Toaster } from "react-hot-toast" // Import the 'Toaster' component from
 import "./globals.css"
 import TanstackQueryProvider from "@/lib/providers/tanstack-query-provider"
 import { CSPostHogProvider } from "@/lib/providers/posthog-provider"
+import { ModalsProvider } from "@/lib/providers/modal"
 
 const inter = Inter({ subsets: ["latin"] })
 export const dynamic = "force-dynamic"
@@ -36,6 +37,7 @@ export default async function RootLayout({
             <ThemeProvider defaultTheme="light" enableSystem attribute="class">
               <NextAuthProvider>
                 <Toaster />
+                <ModalsProvider />
                 {children}
                 {/* requires page refresh for state update - can't be seen when changing login */}
                 {user && <FeatureTutorial show={showFeaturesTutorial} />}

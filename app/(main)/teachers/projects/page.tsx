@@ -50,7 +50,7 @@ const OwnProjects = (props: Props) => {
               .join(", ")}
           />
         ))}
-        <CreateProjectCard />
+        {(ownProjects?.length || 3) < 3 && <CreateProjectCard />}
       </div>
     </div>
   )

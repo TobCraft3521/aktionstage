@@ -15,12 +15,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { deleteProject } from "@/lib/actions/delete/project"
 import { queryProjectStudents } from "@/lib/actions/queries/accounts"
 import { queryOwnProjects } from "@/lib/actions/queries/projects"
-import { removeTeacherFromProject } from "@/lib/actions/updates/projects"
 import { cn } from "@/lib/utils"
+import { useConfirmModal } from "@/stores/confirm-modal"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ChevronLeft, Edit, Loader2, Plus, Printer, Trash2 } from "lucide-react"
+import {
+  ChevronLeft,
+  DoorOpen,
+  Edit,
+  Loader2,
+  Plus,
+  Printer,
+  Trash2,
+} from "lucide-react"
 import { motion } from "motion/react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
@@ -43,6 +52,7 @@ const ProjectDetailView = () => {
     contentRef: printableRef,
     documentTitle: "Print Page Title",
   })
+  const queryClient = useQueryClient()
   const { data: ownProjects } = useQuery({
     queryKey: ["teacher-projects"],
     queryFn: () => queryOwnProjects(),
@@ -56,6 +66,36 @@ const ProjectDetailView = () => {
     queryFn: () => queryProjectStudents(project?.id || ""),
     refetchInterval: 5000,
   })
+  const { mutateAsync: deleteProjectMutation, isPending: isDeletingProject } =
+    useMutation({
+      mutationFn: async ({}: { projectName: string }) =>
+        deleteProject(id as string),
+      onSuccess: () => {
+        toast.success(`Projekt ${project?.name} erfolgreich gelöscht`)
+        router.push("/teachers/projects")
+      },
+      onError: () => {
+        toast.error("Fehler beim Löschen des Projekts")
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["teacher-projects"],
+        })
+      },
+    })
+  const { openConfirmModal } = useConfirmModal()
+  const handleDelete = () => {
+    openConfirmModal({
+      title: "Projekt löschen",
+      message: "Projekt wirlich löschen?",
+      confirmText: "Löschen",
+      cancelText: "Abbrechen",
+      confirmCallback: () =>
+        deleteProjectMutation({
+          projectName: project?.name || "",
+        }),
+    })
+  }
 
   return (
     <div className="w-full flex-1 min-h-0 left-0 top-0 bg-slate-50 flex flex-col">
@@ -144,7 +184,12 @@ const ProjectDetailView = () => {
           <Button className="flex items-center gap-2">
             <Edit className="h-4 w-4" /> Bearbeiten
           </Button>
-          <Button variant="destructive">Löschen</Button>
+          <Button className="flex items-center gap-2">
+            <DoorOpen className="h-4 w-4" /> Verlassen
+          </Button>
+          <Button variant="destructive" onClick={handleDelete}>
+            Löschen
+          </Button>
         </div>
       </div>
 
