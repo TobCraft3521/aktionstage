@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -14,11 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { queryProjectStudents } from "@/lib/actions/queries/accounts"
 import { queryOwnProjects } from "@/lib/actions/queries/projects"
 import { removeTeacherFromProject } from "@/lib/actions/updates/projects"
 import { cn } from "@/lib/utils"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ChevronLeft, Edit, Plus, Printer, Trash2 } from "lucide-react"
+import { ChevronLeft, Edit, Loader2, Plus, Printer, Trash2 } from "lucide-react"
 import { motion } from "motion/react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
@@ -49,6 +51,11 @@ const ProjectDetailView = () => {
     () => ownProjects?.find((p) => p.id === id),
     [ownProjects, id]
   )
+  const { data: students, isPending: isStudentsLoading } = useQuery({
+    queryKey: ["students", project?.id],
+    queryFn: () => queryProjectStudents(project?.id || ""),
+    refetchInterval: 5000,
+  })
 
   return (
     <div className="w-full flex-1 min-h-0 left-0 top-0 bg-slate-50 flex flex-col">
@@ -79,7 +86,7 @@ const ProjectDetailView = () => {
       <div className="p-16 px-20 flex flex-row gap-10 flex-1 min-h-0">
         <div className="flex flex-1 flex-col min-h-0 w-screen max-w-[400px]">
           <h1 className={cn(`${dmSans.className} text-2xl mb-4`)}>
-            Anmeldungen (12)
+            Anmeldungen ({students?.length || 0})
           </h1>
           <ScrollArea className="bg-slate-100 h-full rounded-xl border border-slate-200 w-screen max-w-[400px]">
             <Table>
@@ -91,13 +98,32 @@ const ProjectDetailView = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {[1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3].map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell>1</TableCell>
-                    <TableCell>Tobias Hackenberg</TableCell>
-                    <TableCell className="text-right">10a</TableCell>
+                {students?.map((s, i) => (
+                  <TableRow key={i} className={`animate-fade-in`}>
+                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>{s.name}</TableCell>
+                    <TableCell className="text-right">{s.grade}</TableCell>
                   </TableRow>
                 ))}
+                {isStudentsLoading &&
+                  new Array(5).fill(0).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Skeleton className="bg-slate-200 w-[20px] h-[20px]" />
+                      </TableCell>
+                      <TableCell className="">
+                        <Skeleton className="bg-slate-200 w-full h-[20px]" />
+                      </TableCell>
+                      <TableCell className="flex justify-end">
+                        <Skeleton className="bg-slate-200 w-[40px] h-[20px]" />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                {!students?.length && !isStudentsLoading && (
+                  <TableRow>
+                    <TableCell colSpan={3}>Keine Anmeldungen</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </ScrollArea>
@@ -124,7 +150,7 @@ const ProjectDetailView = () => {
 
       {/* printable students overview (only shown when clicking print) */}
       <div className="hidden">
-        <StudentsOverview ref={printableRef} />
+        <StudentsOverview ref={printableRef} projectId={project?.id || ""} />
       </div>
     </div>
   )

@@ -38,6 +38,7 @@ export const queryUser = async () => {
     id: user.id,
     name: user.name,
     role: user.role,
+    grade: user.grade,
   }
 }
 
@@ -67,32 +68,28 @@ export const queryAllTeacherLoads = async () => {
   return teacherDays
 }
 
-// query whether or not a teacher already has a project on each day of the Aktionstage [replaced by queryAllTeacherLoads, no auth needed except for limiting unauthorized "spam" whether involuntarily or not]
-// export const queryTeacherLoad = async (teacherId?: string) => {
-//   // ensure the user is a teacher or admin
-//   const user = await queryUser()
-//   if (!user || user.role === Role.STUDENT) return null
-
-//   // query teachers projects
-//   const projects = await db.project.findMany({
-//     where: {
-//       teachers: {
-//         some: {
-//           // if teacherId is not provided, use the user id (teacher) for the project day input
-//           id: teacherId || user.id,
-//         },
-//       },
-//     },
-//     // only select the day to save bandwidth
-//     select: {
-//       day: true,
-//     },
-//   })
-
-//   // return an object with the days as keys and a boolean as value
-//   return {
-//     [Day.MON]: projects.some((project) => project.day === Day.MON),
-//     [Day.TUE]: projects.some((project) => project.day === Day.TUE),
-//     [Day.WED]: projects.some((project) => project.day === Day.WED),
-//   }
-// }
+export const queryProjectStudents = async (projectId: string) => {
+  const id = (await auth())?.user?.id
+  if (!id) return null
+  const project = await db.project.findUnique({
+    where: {
+      id: projectId,
+      teachers: {
+        some: {
+          id,
+        },
+      },
+    },
+    include: {
+      students: true,
+    },
+  })
+  if (!project) return null
+  return project.students.map((student) => {
+    return {
+      id: student.id,
+      name: student.name,
+      grade: student.grade,
+    }
+  })
+}

@@ -21,13 +21,13 @@ enum Role {
 }
 
 model Account {
-  id       String @id @default(cuid())
-  userName String @unique
+  id       String  @id @default(cuid())
+  userName String  @unique
   name     String
   password String
-  role     Role   @default(STUDENT)
-  short    String @default("")
-  grade    Int?
+  role     Role    @default(STUDENT)
+  short    String  @default("")
+  grade    String?
 
   projects            Project[]            @relation("ProjectAccount")
   ownProjects         Project[]            @relation("ProjectTeacher")
