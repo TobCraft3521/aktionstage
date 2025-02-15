@@ -15,9 +15,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { deleteProject } from "@/lib/actions/delete/project"
 import { queryProjectStudents } from "@/lib/actions/queries/accounts"
 import { queryOwnProjects } from "@/lib/actions/queries/projects"
+import { leaveProject } from "@/lib/actions/updates/projects"
 import { cn } from "@/lib/utils"
 import { useConfirmModal } from "@/stores/confirm-modal"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -47,6 +54,7 @@ const ProjectDetailView = () => {
   const { projectId: id } = useParams() // Get the project ID from the URL
   const userId = useSession().data?.user.id
   const router = useRouter()
+  const { openConfirmModal } = useConfirmModal()
   const printableRef = useRef<HTMLDivElement>(null)
   const print = useReactToPrint({
     contentRef: printableRef,
@@ -83,7 +91,6 @@ const ProjectDetailView = () => {
         })
       },
     })
-  const { openConfirmModal } = useConfirmModal()
   const handleDelete = () => {
     openConfirmModal({
       title: "Projekt löschen",
@@ -92,6 +99,36 @@ const ProjectDetailView = () => {
       cancelText: "Abbrechen",
       confirmCallback: () =>
         deleteProjectMutation({
+          projectName: project?.name || "",
+        }),
+    })
+  }
+
+  const { mutateAsync: leaveProjectMutation } = useMutation({
+    mutationFn: async ({}: { projectName: string }) =>
+      leaveProject(id as string),
+    onSuccess: () => {
+      toast.success(`Projekt ${project?.name} erfolgreich verlassen`)
+      router.push("/teachers/projects")
+    },
+    onError: () => {
+      toast.error("Fehler beim Verlassen des Projekts")
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["teacher-projects"],
+      })
+    },
+  })
+
+  const handleLeave = () => {
+    openConfirmModal({
+      title: "Projekt verlassen",
+      message: "Projekt wirklich verlassen?",
+      confirmText: "Verlassen",
+      cancelText: "Abbrechen",
+      confirmCallback: () =>
+        leaveProjectMutation({
           projectName: project?.name || "",
         }),
     })
@@ -184,9 +221,33 @@ const ProjectDetailView = () => {
           <Button className="flex items-center gap-2">
             <Edit className="h-4 w-4" /> Bearbeiten
           </Button>
-          <Button className="flex items-center gap-2">
-            <DoorOpen className="h-4 w-4" /> Verlassen
-          </Button>
+          {(project?.teachers?.length || 0) > 1 ? (
+            <Button
+              className="flex items-center gap-2 w-full"
+              onClick={handleLeave}
+            >
+              <DoorOpen className="h-4 w-4" /> Verlassen
+            </Button>
+          ) : (
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger className="w-full">
+                  <Button
+                    className="flex items-center gap-2 w-full"
+                    onClick={handleLeave}
+                    disabled
+                  >
+                    <DoorOpen className="h-4 w-4" /> Verlassen
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {(project?.teachers?.length || 0) <= 1
+                    ? "Keine weiteren Lehrer"
+                    : null}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <Button variant="destructive" onClick={handleDelete}>
             Löschen
           </Button>
