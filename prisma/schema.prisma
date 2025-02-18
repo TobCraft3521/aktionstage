@@ -47,20 +47,20 @@ enum Day {
 }
 
 model Project {
-  id            String @id @default(cuid())
+  id            String  @id @default(cuid())
   name          String
   description   String
-  imageUrl      String
+  imageUrl      String?
   studentsCount Int
-  maxStudents   Int    @default(10)
-  price         Float  @default(0)
-  time          String @default("7:55-12.55")
-  emoji         String @default("🤗")
+  maxStudents   Int     @default(10)
+  price         Float   @default(0)
+  time          String  @default("7:55-12.55")
+  emoji         String  @default("🤗")
   // custom location or room rendered to string
-  location      String @default("ASG")
-  day           Day    @default(MON)
-  minGrade      Int    @default(5)
-  maxGrade      Int    @default(11)
+  location      String  @default("ASG")
+  day           Day     @default(MON)
+  minGrade      Int     @default(5)
+  maxGrade      Int     @default(11)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

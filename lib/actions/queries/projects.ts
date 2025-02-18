@@ -2,12 +2,12 @@
 
 import { auth } from "@/lib/auth/auth"
 import { db } from "@/lib/db"
-import { cache } from "react"
-import { redirect } from "next/navigation"
-import { z } from "zod"
 import { CreateProjectSchema } from "@/lib/form-schemas"
-import { PostHog } from "posthog-js"
 import PostHogClient from "@/lib/posthog/posthog"
+import { redirect } from "next/navigation"
+import { cache } from "react"
+import { z } from "zod"
+import { serverSideUpload } from "../aws/upload"
 
 type FormData = z.infer<typeof CreateProjectSchema>
 
@@ -96,7 +96,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       distinctId: id,
     })
     return redirect(
-      `/teachers/create/feedback?msg=Keine Berechtigung&status=error`
+      `/teachers/projects/feedback?msg=Keine Berechtigung&status=error`
     )
   }
 
@@ -123,7 +123,9 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       },
       distinctId: id,
     })
-    return redirect(`/teachers/create/feedback?msg=Bitte fülle alle Felder aus`)
+    return redirect(
+      `/teachers/projects/feedback?msg=Bitte fülle alle Felder aus`
+    )
   }
 
   if (formData.title.length > 32) {
@@ -135,7 +137,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       distinctId: id,
     })
     return redirect(
-      `/teachers/create/feedback?msg=Titel zu lang (max. 32 Zeichen)&status=error`
+      `/teachers/projects/feedback?msg=Titel zu lang (max. 32 Zeichen)&status=error`
     )
   }
 
@@ -172,7 +174,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
         distinctId: id,
       })
       return redirect(
-        `/teachers/create/feedback?msg=Raum nicht gefunden&status=error`
+        `/teachers/projects/feedback?msg=Raum nicht gefunden&status=error`
       )
     }
   }
@@ -199,9 +201,16 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       distinctId: id,
     })
     return redirect(
-      `/teachers/create/feedback?msg=Bereits ein Projekt an diesem Tag&status=error`
+      `/teachers/projects/feedback?msg=Bereits ein Projekt an diesem Tag&status=error`
     )
   }
+
+  // custom url / temp img
+  const imgUrl =
+    typeof formData.banner === "string"
+      ? formData.banner
+      : // temp img
+        "https://static.vecteezy.com/system/resources/thumbnails/008/202/370/original/loading-circle-icon-loading-gif-loading-screen-gif-loading-spinner-gif-loading-animation-loading-free-video.jpg"
 
   // create project
   // Ignore invalid teachers - only from "teachers" array
@@ -209,7 +218,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     data: {
       name: formData.title,
       description: formData.description,
-      imageUrl: formData.banner,
+      imageUrl: imgUrl,
       emoji: formData.emoji,
       day: formData.date,
       time: formData.time,
@@ -240,7 +249,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     // Just for typescript, already checked above
     if (!room)
       return redirect(
-        `/teachers/create/feedback?msg=Raum nicht gefunden&status=error`
+        `/teachers/projects/feedback?msg=Raum nicht gefunden&status=error`
       )
     if (room.projects.find((p) => p.day === formData.date)) {
       // Update project location
@@ -260,10 +269,10 @@ export const createProject = async (formData: FormData & { room?: string }) => {
         distinctId: id,
       })
       return redirect(
-        `/teachers/create/feedback?msg=Raum wurde in der Zwischenzeit bereits belegt. Projekt: ${
+        `/teachers/projects/feedback?msg=Raum wurde in der Zwischenzeit bereits belegt. Projekt: ${
           room.projects.find((p) => p.day === formData.date)?.name
         }
-          ". Das Projekt wurde trotzdem erstellt.&status=warning`
+          ". Das Projekt wurde trotzdem erstellt. Bitte bearbeiten.&status=warning`
       )
     }
     // Room available
@@ -290,6 +299,23 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     })
   }
 
+  if (formData.banner instanceof File) {
+    // Upload image
+    const { error } = await serverSideUpload(formData.banner)
+    if (error) {
+      posthog.capture({
+        event: "create_project_failed",
+        properties: {
+          reason: "image_upload_failed",
+        },
+        distinctId: id,
+      })
+      return redirect(
+        `/teachers/projects/feedback?msg=Bild konnte nicht hochgeladen werden, Projekt wurde trotzdem erstellt. Bitte bearbeiten.&status=error`
+      )
+    }
+  }
+
   // Everything successful
   posthog.capture({
     event: "create_project_success",
@@ -310,7 +336,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     distinctId: id,
   })
   return redirect(
-    `/teachers/feedback?msg=Projekt erfolgreich erstellt&status=success`
+    `/teachers/projects/feedback?msg=Projekt erfolgreich erstellt&status=success`
   )
 }
 

@@ -218,7 +218,12 @@ const ProjectDetailView = () => {
           >
             <Printer className="h-4 w-4" /> Ausdrucken
           </Button>
-          <Button className="flex items-center gap-2">
+          <Button
+            className="flex items-center gap-2"
+            onClick={() =>
+              router.push(`/teachers/projects/${project?.id}/edit`)
+            }
+          >
             <Edit className="h-4 w-4" /> Bearbeiten
           </Button>
           {(project?.teachers?.length || 0) > 1 ? (
@@ -231,14 +236,10 @@ const ProjectDetailView = () => {
           ) : (
             <TooltipProvider>
               <Tooltip delayDuration={0}>
-                <TooltipTrigger className="w-full">
-                  <Button
-                    className="flex items-center gap-2 w-full"
-                    onClick={handleLeave}
-                    disabled
-                  >
+                <TooltipTrigger className="w-full" asChild>
+                  <div className="flex items-center gap-2 w-full bg-slate-900/50 text-white justify-center rounded-md p-2 cursor-not-allowed">
                     <DoorOpen className="h-4 w-4" /> Verlassen
-                  </Button>
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent>
                   {(project?.teachers?.length || 0) <= 1

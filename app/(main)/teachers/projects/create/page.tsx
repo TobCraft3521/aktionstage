@@ -90,11 +90,7 @@ const MultiStepForm = () => {
   const [imgError, setImgError] = useState<string | undefined>()
 
   // File upload logic
-  const [file, setFile] = useState<File | null>(null)
   const [fileTooLarge, setFileTooLarge] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [fileUploadError, setFileUploadError] = useState<string | undefined>()
-  const [fileUploadSuccess, setFileUploadSuccess] = useState(false)
   // Teacher adding logic
   const [isTeacherSelectOpen, setIsTeacherSelectOpen] = useState(false)
   const [addedTeachers, setAddedTeachers] = useState<Partial<Account>[]>([])
@@ -118,6 +114,11 @@ const MultiStepForm = () => {
   // other
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Analytics
+  useEffect(() => {
+    posthog.capture("project_creation_session_started")
+  }, [])
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
     { label: "Titel", fields: ["title"] },
@@ -194,12 +195,37 @@ const MultiStepForm = () => {
 
   const onSubmit = async (data: FormData) => {
     // merge location type
-    const mergedData = {
-      ...data,
-      room: room?.id,
-    }
+    // const mergedData = {
+    //   ...data,
+    //   room: room?.id,
+    // }
     setIsSubmitting(true)
-    await createProject(mergedData)
+    // await createProject(mergedData)
+
+    const formData = new FormData()
+    formData.append("title", data.title)
+    formData.append("description", data.description)
+    formData.append("emoji", data.emoji)
+    formData.append("date", data.date)
+    formData.append("time", data.time)
+    formData.append("location", data.location)
+    formData.append("price", data.price.toString())
+    formData.append("maxStudents", data.maxStudents.toString())
+    formData.append("minGrade", data.minGrade.toString())
+    formData.append("maxGrade", data.maxGrade.toString())
+    formData.append("banner", data.banner)
+    formData.append("teachers", (data.teachers || []).join(","))
+    formData.append("room", room?.id || "")
+
+    const res = await fetch("/api/projects", {
+      method: "POST",
+      body: formData,
+    })
+    const { redirectUrl } = await res.json()
+    if (redirectUrl) {
+      router.push(redirectUrl)
+    }
+
     // redirects to projects page anyway
     setIsSubmitting(false)
   }
@@ -221,7 +247,7 @@ const MultiStepForm = () => {
         const isValid = await isValidImage(debouncedUrl)
         if (isValid) {
           // Register the valid URL with react-hook-form
-          setValue("banner", debouncedUrl)
+          setValue("banner", debouncedUrl, { shouldValidate: true })
           // Reset the error message
           setImgError(undefined)
         } else {
@@ -237,12 +263,8 @@ const MultiStepForm = () => {
   }, [debouncedUrl, setValue])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFileUploadError(undefined)
-    setFileUploadSuccess(false)
     const cFile = e.target.files?.[0]
-
     if (!cFile) return
-    setFile(cFile)
 
     // Check file size (limit to 5MB) - also checked through presigned POST (server side)
     const MAX_SIZE_MB = 5
@@ -250,67 +272,16 @@ const MultiStepForm = () => {
 
     if (cFile.size > MAX_SIZE_BYTES) {
       setFileTooLarge(true)
+      setValue("banner", "", {
+        shouldValidate: true,
+      })
       return
     }
 
     setFileTooLarge(false)
-  }
-
-  const handleUpload = async () => {
-    if (!file) {
-      setFileUploadError("[will be replaced]")
-      return
-    }
-
-    setIsUploading(true)
-    setFileUploadError(undefined)
-
-    try {
-      // Call the server action to get presigned POST data
-      const {
-        url,
-        fields,
-        publicUrl,
-        error: serverError,
-      } = await getPresignedUploadPost(file.type)
-
-      if (serverError) {
-        setFileUploadError("[Failed to get upload URL. - will be replaced]")
-        console.error(serverError)
-        setIsUploading(false)
-        return
-      }
-
-      // Prepare form data
-      const formData = new FormData()
-      Object.entries(fields).forEach(([key, value]) => {
-        formData.append(key, value) // Add all fields from presigned POST
-      })
-      formData.append("file", file) // Add the file
-
-      // Perform the POST request
-      const response = await fetch(url, {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        setFileUploadError(`[Upload failed: ${errorText}] - will be replaced`)
-        console.error("Upload failed:", errorText)
-      } else {
-        setFileUploadSuccess(true)
-        console.log("File uploaded successfully!")
-        setValue("banner", publicUrl)
-      }
-    } catch (err) {
-      console.error(err)
-      setFileUploadError(
-        "[An error occurred during the upload.] - will be replaced"
-      )
-    } finally {
-      setIsUploading(false)
-    }
+    setValue("banner", cFile, {
+      shouldValidate: true,
+    })
   }
 
   // Add a teacher
@@ -418,7 +389,11 @@ const MultiStepForm = () => {
       return valid
     }
     if (step === 1) {
-      const valid = description.length > 0 && banner.length > 0
+      const valid =
+        description.length > 0 &&
+        (typeof banner === "string"
+          ? banner.length > 0
+          : banner instanceof File)
       validPages.current[1] = valid
       return valid
     }
@@ -559,8 +534,23 @@ const MultiStepForm = () => {
             {/* either url or upload */}
             <Tabs defaultValue="upload" className="w-[400px] mx-auto">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="upload">Hochladen</TabsTrigger>
-                <TabsTrigger value="url">URL</TabsTrigger>
+                <TabsTrigger
+                  value="upload"
+                  onClick={() => {
+                    setImgUrl(undefined)
+                    setValue("banner", "")
+                  }}
+                >
+                  Hochladen
+                </TabsTrigger>
+                <TabsTrigger
+                  value="url"
+                  onClick={() => {
+                    setValue("banner", "")
+                  }}
+                >
+                  URL
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="upload">
                 <div className="flex flex-row gap-2">
@@ -571,29 +561,11 @@ const MultiStepForm = () => {
                     className="mb-2"
                     onChange={handleFileChange}
                   />
-                  {/* fileTooLarge is also validated server side */}
-                  <Button
-                    disabled={
-                      !file || fileTooLarge || isUploading || fileUploadSuccess
-                    }
-                    onClick={handleUpload}
-                  >
-                    {!fileUploadSuccess &&
-                      !fileUploadError &&
-                      !isUploading &&
-                      "Hochladen"}
-                    {fileUploadError && "Fehler"}
-                    {fileUploadSuccess && <Check />}
-                    {isUploading && <Loader2Icon className="animate-spin" />}
-                  </Button>
                 </div>
                 {fileTooLarge && (
                   <p className="text-yellow-500">
                     ⚠️ Datei darf nicht über 5MB sein
                   </p>
-                )}
-                {fileUploadError && (
-                  <p className="text-red-500">‼️ Fehler beim Hochladen</p>
                 )}
               </TabsContent>
               <TabsContent value="url">
@@ -601,16 +573,12 @@ const MultiStepForm = () => {
                   placeholder="Banner URL"
                   title="Banner URL"
                   type="url"
-                  // {...register("banner")}
                   onChange={handleImgUrlChange}
                   className="mb-2"
                 />
                 {imgError && <p className="text-yellow-500">{imgError}</p>}
               </TabsContent>
             </Tabs>
-            {errors.banner && (
-              <p className="text-red-500">{errors.banner.message}</p>
-            )}
           </div>
         )}
 

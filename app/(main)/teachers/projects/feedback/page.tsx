@@ -34,6 +34,7 @@ export default function FeedbackPage({ searchParams }: FeedbackPageProps) {
   }
 
   useEffect(() => {
+    if (!(status === "success")) return
     const end = Date.now() + 500
     const colors = ["#40ff00", "#caff38"]
     setTimeout(async function frame() {
