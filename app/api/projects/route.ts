@@ -13,6 +13,7 @@ export const POST = async (request: Request) => {
   if (!id) return Response.json({ redirectUrl: "/login" })
 
   const formData = await request.formData() // Read FormData
+  const sessionTracker = formData.get("sessionTracker") as string
 
   // Convert FormData to a plain object
   const rawData: Record<string, any> = {}
@@ -92,6 +93,7 @@ export const POST = async (request: Request) => {
       maxGrade: data.maxGrade,
       location: data.location,
       price: data.price,
+      sessionTracker,
     },
     distinctId: id,
   })
@@ -349,6 +351,7 @@ export const POST = async (request: Request) => {
       maxGrade: data.maxGrade,
       location: data.location,
       price: data.price,
+      sessionTracker,
     },
     distinctId: id,
   })

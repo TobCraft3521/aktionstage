@@ -64,6 +64,8 @@ import { z } from "zod"
 import "./range-slider-styles.css"
 import Loader from "@/components/global/loader"
 import { useRouter } from "next/navigation"
+import { set } from "lodash"
+import { randomUUID } from "crypto"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -88,9 +90,10 @@ const MultiStepForm = () => {
   const [imgUrl, setImgUrl] = useState<string | undefined>()
   const debouncedUrl = useDebounce(imgUrl, 500)
   const [imgError, setImgError] = useState<string | undefined>()
-
   // File upload logic
   const [fileTooLarge, setFileTooLarge] = useState(false)
+  // Other banner logic
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>()
   // Teacher adding logic
   const [isTeacherSelectOpen, setIsTeacherSelectOpen] = useState(false)
   const [addedTeachers, setAddedTeachers] = useState<Partial<Account>[]>([])
@@ -116,7 +119,10 @@ const MultiStepForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Analytics
+  const [sessionTracker, setSessionTracker] = useState<string | undefined>()
   useEffect(() => {
+    // Provide a unique session tracker for each project creation session
+    setSessionTracker(randomUUID())
     posthog.capture("project_creation_session_started")
   }, [])
 
@@ -217,6 +223,8 @@ const MultiStepForm = () => {
     formData.append("teachers", (data.teachers || []).join(","))
     formData.append("room", room?.id || "")
 
+    formData.append("sessionTracker", sessionTracker || "")
+
     const res = await fetch("/api/projects", {
       method: "POST",
       body: formData,
@@ -248,11 +256,16 @@ const MultiStepForm = () => {
         if (isValid) {
           // Register the valid URL with react-hook-form
           setValue("banner", debouncedUrl, { shouldValidate: true })
+          setPreviewUrl(debouncedUrl)
           // Reset the error message
           setImgError(undefined)
         } else {
           // Set error message if the URL is invalid
           setImgError("Ungültiger Bild Link")
+          setValue("banner", "", {
+            shouldValidate: true,
+          })
+          setPreviewUrl(undefined)
         }
       }
     }
@@ -275,6 +288,7 @@ const MultiStepForm = () => {
       setValue("banner", "", {
         shouldValidate: true,
       })
+      setPreviewUrl(undefined)
       return
     }
 
@@ -282,6 +296,7 @@ const MultiStepForm = () => {
     setValue("banner", cFile, {
       shouldValidate: true,
     })
+    setPreviewUrl(URL.createObjectURL(cFile))
   }
 
   // Add a teacher
@@ -539,6 +554,7 @@ const MultiStepForm = () => {
                   onClick={() => {
                     setImgUrl(undefined)
                     setValue("banner", "")
+                    setPreviewUrl(undefined)
                   }}
                 >
                   Hochladen
@@ -547,6 +563,8 @@ const MultiStepForm = () => {
                   value="url"
                   onClick={() => {
                     setValue("banner", "")
+                    setPreviewUrl(undefined)
+                    setFileTooLarge(false)
                   }}
                 >
                   URL
@@ -579,6 +597,39 @@ const MultiStepForm = () => {
                 {imgError && <p className="text-yellow-500">{imgError}</p>}
               </TabsContent>
             </Tabs>
+
+            {/* Preview of title + image */}
+            {previewUrl && (
+              <div className="w-[200px] h-[256px] bg-slate-900 rounded-[24px] mt-8 mx-auto drop-shadow-lg relative overflow-hidden">
+                <Image
+                  // hard coded example banner
+                  src={previewUrl}
+                  alt="Example banner"
+                  width={200}
+                  height={256}
+                  className="object-cover rounded-[24px] w-full h-full"
+                  priority
+                ></Image>
+                <div className="absolute bottom-[9%] text-white text-lg z-30 font-semibold w-full px-2 flex flex-col items-center leading-5">
+                  <h1
+                    // split too long text into two lines
+                    className={cn(
+                      "max-w-[150px] break-words text-center",
+                      dmSans.className
+                    )}
+                  >
+                    {getValues("title") || "Vorschau"}
+                  </h1>
+                  <div className="text-sm font-medium opacity-90">Vorschau</div>
+                </div>
+                <div
+                  className="absolute top-full bg-white w-[80%] h-[90px] block z-20 font-thin"
+                  style={{
+                    filter: "drop-shadow(0 -85px 24px rgb(0 0 0 / 1))",
+                  }}
+                ></div>
+              </div>
+            )}
           </div>
         )}
 
