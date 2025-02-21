@@ -24,7 +24,7 @@ model Account {
   id       String  @id @default(cuid())
   userName String  @unique
   name     String
-  password String
+
   role     Role    @default(STUDENT)
   short    String  @default("")
   grade    String?
@@ -33,11 +33,20 @@ model Account {
   ownProjects         Project[]            @relation("ProjectTeacher")
   toturialCompletions TutorialCompletion[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  authDetails AuthDetails?
 
   @@index([userName])
   @@index([role])
+}
+
+model AuthDetails {
+  // to not expose the password on the account object, now require include auth details
+  id        String  @id @default(cuid())
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [id])
+  password  String
 }
 
 enum Day {
@@ -50,7 +59,7 @@ model Project {
   id            String  @id @default(cuid())
   name          String
   description   String
-  imageUrl      String?
+  imageUrl      String
   studentsCount Int
   maxStudents   Int     @default(10)
   price         Float   @default(0)

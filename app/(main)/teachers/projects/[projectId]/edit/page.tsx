@@ -1,30 +1,61 @@
 "use client"
+import ChangeHint from "@/components/global/change-hint"
 import Loader from "@/components/global/loader"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useDebounce } from "@/hooks/use-debounce"
+import {
+  queryAllTeacherLoads,
+  queryTeachers,
+} from "@/lib/actions/queries/accounts"
 import { queryProject } from "@/lib/actions/queries/projects"
+import { queryRooms } from "@/lib/actions/queries/rooms"
 import { ProjectEditSchema } from "@/lib/form-schemas"
 import { isValidImage } from "@/lib/helpers/image"
+import { getChangedFields } from "@/lib/helpers/projectchanges"
 import { cn } from "@/lib/utils"
+import data from "@emoji-mart/data"
+import Picker from "@emoji-mart/react"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Account, Day, Project, Room } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
+import { set } from "lodash"
+import { Ban, Check, ChevronsUpDown, Info, Plus, Trash2 } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
+import RangeSlider from "react-range-slider-input"
+import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
-import data from "@emoji-mart/data"
-import Picker from "@emoji-mart/react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Info } from "lucide-react"
+import "./range-slider-styles.css"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -35,6 +66,28 @@ type Props = {}
 
 type FormData = z.infer<typeof ProjectEditSchema>
 
+type RoomWithProjectWithTeachers = Room & {
+  projects:
+    | (Project & {
+        teachers: Account[] | null
+      })[]
+    | null
+}
+
+const fieldLabels = {
+  title: "Titel",
+  description: "Beschreibung",
+  banner: "Bild",
+  emoji: "Emoji",
+  teachers: "Lehrer",
+  minMaxGrade: "Jahrgangsstufen",
+  maxStudents: "Schülerlimit",
+  location: "Ort",
+  price: "Preis",
+  time: "Zeit",
+  date: "Tag",
+}
+
 const ProjectEditor = ({}: Props) => {
   const [submitError, setSubmitError] = useState("")
   const [success, setSuccess] = useState(false)
@@ -43,8 +96,32 @@ const ProjectEditor = ({}: Props) => {
   const [previewUrl, setPreviewUrl] = useState<string | undefined>()
   // Custom image URL logic
   const [imgUrl, setImgUrl] = useState<string | undefined>()
-  const debouncedUrl = useDebounce(imgUrl, 500)
+  const debouncedUrl = useDebounce<string | undefined>(imgUrl, 500)
   const [imgError, setImgError] = useState<string | undefined>()
+  // Preview changed fields
+  const [changedFields, setChangedFields] = useState<any>({})
+  // Front end day validation (whether or not already a project on each day)
+  const [allTeacherLoads, setAllTeacherLoads] = useState<Record<
+    string,
+    Day[]
+  > | null>(null)
+  const [personalLoad, setPersonalLoad] = useState<Day[] | null>(null)
+  const [day, setDay] = useState<Day | undefined>()
+  // Room logic
+  const [rooms, setRooms] = useState<RoomWithProjectWithTeachers[]>([])
+  const [isRoomSelectOpen, setIsRoomSelectOpen] = useState(false)
+  const [room, setRoom] = useState<RoomWithProjectWithTeachers | undefined>()
+
+  const [replacingLocation, setReplacingLocation] = useState(false)
+  // Teacher adding logic
+  const [isTeacherSelectOpen, setIsTeacherSelectOpen] = useState(false)
+  const [addedTeachers, setAddedTeachers] = useState<Partial<Account>[]>([])
+  const [teachers, setTeachers] = useState<Partial<Account>[]>([])
+  // Time logic
+  const [timeFrom, setTimeFrom] = useState("")
+  const [timeTo, setTimeTo] = useState("")
+  // auth
+  const user = useSession()
 
   const { projectId } = useParams() as { projectId: string }
 
@@ -52,7 +129,27 @@ const ProjectEditor = ({}: Props) => {
     queryKey: ["project", projectId],
     queryFn: async () => {
       const project = await queryProject(projectId)
+      if (!project) return null
+      setValue("title", project.name)
+      setValue("description", project.description)
+      setValue("banner", project.imageUrl) // Only takes effect when overwritten, otherwise ignored on backend
+      setValue("emoji", project.emoji)
+      setValue(
+        "teachers",
+        project.teachers.map((t) => t.id)
+      )
+      setValue("maxStudents", project.maxStudents)
+      setValue("minGrade", project.minGrade)
+      setValue("maxGrade", project.maxGrade)
+      setValue("location", project.location)
+      setValue("price", project.price)
+      setValue("date", project.day)
+      setValue("time", project.time)
       setPreviewUrl(project?.imageUrl)
+      setTimeFrom(project.time.split("-")[0])
+      setTimeTo(project.time.split("-")[1])
+      setDay(project.day)
+      setAddedTeachers(project.teachers)
       return project
     },
   })
@@ -62,7 +159,6 @@ const ProjectEditor = ({}: Props) => {
     register,
     setValue,
     getValues,
-    reset,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof ProjectEditSchema>>({
@@ -71,20 +167,37 @@ const ProjectEditor = ({}: Props) => {
     defaultValues: {},
   })
 
+  // Fetch teachers from the server
   useEffect(() => {
-    if (project) {
-      setValue("title", project.name)
-      setValue("description", project.description)
-      setValue("banner", project.imageUrl)
-      setValue("emoji", project.emoji)
-      setValue(
-        "teachers",
-        project.teachers.map((t) => t.id)
-      )
-      setValue("maxStudents", project.maxStudents)
-      setValue("minGrade", project.minGrade)
+    const fetchTeachers = async () => {
+      const teachers = await queryTeachers()
+      setTeachers(teachers)
     }
-  }, [project, reset, setValue])
+    fetchTeachers()
+  }, [])
+
+  // Fetch teacher load for each day (front end validation, server side validation on submit)
+  useEffect(() => {
+    const fetchAllTeacherLoads = async () => {
+      // query whether or not a teacher already has a project on each day of the Aktionstage
+      const teacherLoads = await queryAllTeacherLoads()
+      setAllTeacherLoads(teacherLoads)
+      // personal teacher load, filter teacher load by current teacher by auth
+      const currentTeacherLoad = teacherLoads?.[user.data?.user.id] || []
+      setPersonalLoad(currentTeacherLoad)
+    }
+    fetchAllTeacherLoads()
+  }, [user.data?.user.id])
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      // query rooms
+      const rooms = await queryRooms()
+      setRooms(rooms)
+    }
+    fetchRooms()
+    // fresh data on page load
+  }, [])
 
   const onSubmit = async (data: FormData) => {
     return new Promise((resolve) => setTimeout(resolve, 1000))
@@ -146,9 +259,71 @@ const ProjectEditor = ({}: Props) => {
     setPreviewUrl(URL.createObjectURL(cFile))
   }
 
+  // Handle time input
+  const handleTime = (from: string, to: string) => {
+    // combine the two time inputs
+    if (from.length === 0 || to.length === 0) {
+      // smart no-error-on-initial-load approach: look at the "old" combined value -> thats only empty on initial load
+      if (!getValues("time")) return
+      setValue("time", "", {
+        shouldValidate: true,
+      })
+      return
+    }
+    const time = `${from}-${to}`
+    setValue("time", time, {
+      shouldValidate: true,
+    })
+  }
+
+  useEffect(() => {
+    handleTime(timeFrom, timeTo)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeFrom, timeTo])
+
   const handleEmojiSelect = (emoji: string) => {
     setValue("emoji", emoji) // Update the form value for the emoji field
   }
+
+  // For live updates, eg preview image and title + for live changes preview
+  const formValues = watch()
+
+  const debouncedFormValues = useDebounce(formValues, 500)
+
+  useEffect(() => {
+    if (!debouncedFormValues) return
+    if (!project) return
+    const changedFields = getChangedFields(project, debouncedFormValues)
+    setChangedFields(changedFields)
+  }, [debouncedFormValues, project])
+
+  // Add a teacher
+  const addTeacher = (teacher: Partial<Account>) => {
+    if (!addedTeachers.find((t) => t.id === teacher.id)) {
+      setAddedTeachers((prev) => [...prev, teacher])
+    }
+    setValue(
+      "teachers",
+      // addition is needed as the state update is async
+      [...addedTeachers, teacher].map(
+        (t) => t.id || "should have been fetched with id"
+      )
+    )
+  }
+
+  // Remove a teacher
+  const removeTeacher = (id: string) => {
+    setAddedTeachers((prev) => prev.filter((t) => t.id !== id))
+    setValue(
+      "teachers",
+      addedTeachers
+        // filter is needed as the state update is async
+        .filter((t) => t.id !== id)
+        .map((t) => t.id || "should have been fetched with id")
+    )
+  }
+
+  const hasChanges = Object.values(changedFields).includes(true)
 
   if (isPending)
     return (
@@ -157,22 +332,26 @@ const ProjectEditor = ({}: Props) => {
       </div>
     )
 
-  // For live updates, eg preview image and title
-  watch()
-
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-5">
+    <div className="max-w-3xl mx-auto mt-10 p-5 mb-10">
       <form onSubmit={handleSubmit(onSubmit)}>
         <h1 className="text-xl font-bold mb-4">Projekt bearbeiten</h1>
+        <Separator className="my-8 h-[0.5px]" />
         <div className="">
-          <h2 className="text-lg font-semibold mt-4 mb-2">Titel</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Titel
+            {changedFields.title && <ChangeHint>Änderung</ChangeHint>}
+          </h2>
           <Input {...register("title")} placeholder="Titel" />
           {errors.title && (
             <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
           )}
         </div>
         <div className="">
-          <h2 className="text-lg font-semibold mt-4 mb-2">Beschreibung</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Beschreibung
+            {changedFields.description && <ChangeHint>Änderung</ChangeHint>}
+          </h2>
           <Input {...register("description")} placeholder="Beschreibung" />
           {errors.description && (
             <p className="text-red-500 text-sm mt-1">
@@ -182,7 +361,10 @@ const ProjectEditor = ({}: Props) => {
         </div>
         {/* Image change (or leave) */}
         <div className="">
-          <h2 className="text-lg font-semibold mt-4 mb-2">Bild Upload</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Bild Upload
+            {changedFields.banner && <ChangeHint>Änderung</ChangeHint>}
+          </h2>
           {replacingImage && (
             // either url or upload
             <Tabs defaultValue="upload" className="w-[400px] mx-auto">
@@ -242,7 +424,6 @@ const ProjectEditor = ({}: Props) => {
               )}
             </Tabs>
           )}
-
           {previewUrl && (
             <div className="w-[200px] h-[256px] bg-slate-900 rounded-[24px] mt-8 mx-auto drop-shadow-lg relative overflow-hidden">
               <Image
@@ -280,6 +461,7 @@ const ProjectEditor = ({}: Props) => {
                 type="button"
                 onClick={() => {
                   setReplacingImage(true)
+                  setValue("banner", "")
                   setPreviewUrl(undefined)
                 }}
                 className="mt-4 w-32"
@@ -289,9 +471,13 @@ const ProjectEditor = ({}: Props) => {
             </div>
           )}
         </div>
+        <Separator className="my-8 h-[0.5px]" />
         {/* emojiii */}
         <div className="">
-          <h2 className="text-lg font-semibold mt-4 mb-2">Emoji</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Emoji
+            {changedFields.emoji && <ChangeHint>Änderung</ChangeHint>}
+          </h2>
           <div className="relative flex justify-center items-center mb-4">
             <Popover>
               <PopoverTrigger>
@@ -317,13 +503,402 @@ const ProjectEditor = ({}: Props) => {
             <p className="text-red-500 text-sm mt-1">{errors.emoji.message}</p>
           )}
         </div>
-        <Alert className="border-yellow-500 text-yellow-500">
-          <Info className="h-4 w-4" color="#eab308" />
-          <AlertTitle>Änderungen</AlertTitle>
-          <AlertDescription>
-            Es wurden die Felder Titel, Beschreibung und Emoji geändert.
-          </AlertDescription>
-        </Alert>
+        <Separator className="my-8 h-[0.5px]" />
+        <div className="">
+          <h2 className="text-lg font-semibold mt-4 mb-2">Tag</h2>
+          <div className="p-4 border-slate-200 border rounded-lg inline-block mb-2">
+            <ToggleGroup
+              type="single"
+              onValueChange={(value) => {
+                setDay(value as Day)
+                // reset room choice
+                setRoom(undefined)
+                setValue("location", "") // reset custom location
+                setReplacingLocation(true)
+                setValue("date", value as Day, { shouldValidate: true })
+              }} // non empty
+              value={getValues("date")}
+            >
+              {Object.values(Day).map((day) => {
+                const dayNames = {
+                  [Day.MON]: "Montag",
+                  [Day.TUE]: "Dienstag",
+                  [Day.WED]: "Mittwoch",
+                }
+                return (
+                  <div
+                    key={day}
+                    // blur on hover when already a project on that day
+                    // className={personalLoad?.indexOf(day) === undefined ? "hover:blur-[1px]" : ""}
+                    style={{
+                      cursor: personalLoad?.includes(day)
+                        ? "not-allowed"
+                        : undefined,
+                    }}
+                  >
+                    <ToggleGroupItem
+                      value={day}
+                      aria-label={`Wechseln zu ${dayNames[day]}`}
+                      disabled={
+                        personalLoad?.includes(day) && !(project?.day === day)
+                      } // allow to change back to the same day
+                    >
+                      {dayNames[day]}
+                    </ToggleGroupItem>
+                  </div>
+                )
+              })}
+            </ToggleGroup>
+          </div>
+        </div>
+
+        {errors.date && <p className="text-red-500">{errors.date.message}</p>}
+        <h2 className="text-lg font-semibold mb-2 mt-4">Zeitraum</h2>
+        <div className="flex gap-4 items-center">
+          <p className="">Von</p>
+          <Input
+            placeholder="zB. 7:55"
+            onChange={(e) => {
+              setTimeFrom(e.target.value)
+            }}
+            value={timeFrom}
+            className=""
+          />
+          <p className="">bis</p>
+          <Input
+            placeholder="zB. 12:55"
+            onChange={(e) => {
+              setTimeTo(e.target.value)
+            }}
+            value={timeTo}
+            className=""
+          />
+        </div>
+        {errors.time && (
+          <p className="text-red-500 mt-2">
+            In beiden Zeitraum-feldern ist eine Eingabe benötigt.{" "}
+          </p>
+        )}
+
+        <h2 className="text-lg font-semibold mt-4 mb-2">Ort</h2>
+        {replacingLocation ? (
+          <Tabs defaultValue="room" className="w-[400px] mx-auto">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger
+                value="room"
+                onClick={() => {
+                  setValue("location", "") // reset custom location
+                  setRoom(undefined)
+                }}
+              >
+                Am ASG
+              </TabsTrigger>
+              <TabsTrigger
+                onClick={() => {
+                  setValue("location", "") // reset custom location
+                  setRoom(undefined)
+                }}
+                value="custom"
+              >
+                Freie Eingabe
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="room">
+              <Card className="w-[400px]">
+                <CardHeader>
+                  <CardTitle>Raum</CardTitle>
+                  <CardDescription>Wähle einen Raum am ASG</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Popover
+                    open={isRoomSelectOpen}
+                    onOpenChange={setIsRoomSelectOpen}
+                  >
+                    <PopoverTrigger asChild className="w-full">
+                      <Button
+                        role="combobox"
+                        className="w-[250px] md:w-full justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+                      >
+                        {room
+                          ? rooms.find((cRoom) => cRoom.name === room.name)
+                              ?.name
+                          : "Wähle einen Raum..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0" side="top">
+                      <Command>
+                        <CommandInput placeholder="Raum suchen..." />
+                        <CommandEmpty>
+                          Kein passender Raum gefunden.
+                        </CommandEmpty>
+                        <CommandGroup>
+                          <CommandList>
+                            {rooms?.length > 0 &&
+                              rooms.map(
+                                (cRoom: RoomWithProjectWithTeachers) => (
+                                  <CommandItem
+                                    key={cRoom.id}
+                                    className={cn(
+                                      "cursor-pointer",
+                                      cRoom.id === room?.id ||
+                                        cRoom.projects?.find(
+                                          (p) =>
+                                            p.day === day &&
+                                            !(p.id === project?.id)
+                                        ) /* selected or taken by (other) project */
+                                        ? "opacity-50 pointer-events-none"
+                                        : ""
+                                    )}
+                                    value={cRoom.name}
+                                    onSelect={(currentValue) => {
+                                      setRoom(
+                                        rooms.find(
+                                          (r) => r.name === currentValue
+                                        )
+                                      )
+                                      // rerendered server side (in case of room taken -> just asg)
+                                      setValue("location", "ASG " + cRoom.name)
+                                      setIsRoomSelectOpen(false)
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        cRoom.id === room?.id ? "" : "hidden"
+                                      )}
+                                    />
+                                    <Ban
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        cRoom.projects?.find(
+                                          (p) =>
+                                            p.day === day &&
+                                            !(p.id === project?.id)
+                                        )
+                                          ? ""
+                                          : "hidden"
+                                      )}
+                                    />
+                                    {cRoom.name}
+                                    {cRoom.projects?.find(
+                                      (p) =>
+                                        p.day === day && !(p.id === project?.id)
+                                    ) &&
+                                      " (belegt: " +
+                                        cRoom.projects?.find(
+                                          (p) => p.day === day
+                                        )?.name +
+                                        ", " +
+                                        (cRoom.projects?.find(
+                                          (p) => p.day === day
+                                        )?.teachers?.[0]?.name || "unbekannt") +
+                                        ")"}
+                                    {cRoom.projects?.find(
+                                      (p) =>
+                                        p.id === project?.id && p.day === day
+                                    ) && " (bisheriger Raum)"}
+                                  </CommandItem>
+                                )
+                              )}
+                          </CommandList>
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="custom">
+              <Input
+                placeholder="Ort zB. unterwasser (beim Uboot fahren ;) )"
+                {...register("location")}
+                className="mb-2"
+              />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <Button type="button" onClick={() => setReplacingLocation(true)}>
+            Ort ändern
+          </Button>
+        )}
+        <Separator className="my-8 h-[0.5px]" />
+        <div className="">
+          <h2 className="text-lg font-semibold mb-3">Lehrer</h2>
+          {/* Display Added Teachers */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {addedTeachers.length > 0 ? (
+              addedTeachers.map((teacher) => (
+                <Badge
+                  key={teacher.id}
+                  variant="outline"
+                  className="flex items-center gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop"
+                  onClick={() => removeTeacher(teacher.id || "")}
+                >
+                  {teacher.name}
+                  <span className="text-red-500 hover:text-red-700">
+                    <Trash2 className="h-4 w-4" />
+                  </span>
+                </Badge>
+              ))
+            ) : (
+              <p className="text-slate-500">Keine anderen Lehrer mehr.</p>
+            )}
+          </div>
+          {/* Teacher Search Popover */}
+          <Popover
+            open={isTeacherSelectOpen}
+            onOpenChange={setIsTeacherSelectOpen}
+          >
+            <PopoverTrigger
+              className={cn("", addedTeachers.length < 2 && "w-8")}
+              disabled={addedTeachers.length >= 2}
+            >
+              {addedTeachers.length < 2 ? (
+                <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer hover:bg-slate-200">
+                  <Plus className="text-slate-500" />
+                </Button>
+              ) : (
+                // 2/2 reached
+                <span className="bg-slate-100 p-2 mt-2 rounded-lg text-sm">
+                  ⚠️ 2/2 weiteren Lehrern
+                </span>
+              )}
+            </PopoverTrigger>
+            <PopoverContent className="w-[250px] p-0">
+              <Command>
+                <CommandInput placeholder="Search teachers..." />
+                <CommandEmpty>No teachers found.</CommandEmpty>
+                <CommandGroup>
+                  <CommandList>
+                    {teachers.length > 0 &&
+                      teachers.map((teacher: Partial<Account>) => (
+                        <CommandItem
+                          key={teacher.id}
+                          className={cn(
+                            "cursor-pointer",
+                            (addedTeachers.find((t) => t.id === teacher.id) ||
+                              day === undefined ||
+                              allTeacherLoads?.[teacher.id || ""]?.includes(
+                                day
+                              ) ||
+                              teacher.id === user.data?.user.id) &&
+                              !project?.teachers.find(
+                                (t) =>
+                                  t.id === teacher.id &&
+                                  !addedTeachers.find(
+                                    (t) => t.id === teacher.id
+                                  )
+                              )
+                              ? "opacity-50 pointer-events-none"
+                              : ""
+                          )}
+                          value={teacher.name}
+                          onSelect={(currentValue) => {
+                            if (currentValue === teacher.name) {
+                              addTeacher(teacher)
+                              setIsTeacherSelectOpen(false)
+                            }
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              addedTeachers.find((t) => t.id === teacher.id)
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {teacher.name}
+                        </CommandItem>
+                      ))}
+                  </CommandList>
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          {errors.teachers && (
+            <p className="text-red-500">{errors.teachers.message}</p>
+          )}
+        </div>
+        <Separator className="my-8 h-[0.5px]" />
+        {/* Details */}
+        <div className="">
+          <h2 className="text-lg font-semibold mt-4 mb-2">Jahrgangsstufen</h2>
+          <p className="text-gray-500 mb-8">
+            Wähle die Jahrgangsstufen für dein Projekt
+          </p>
+          <div className="w-full max-w-lg mx-auto flex flex-col gap-4">
+            <div className="flex justify-between mx-2">
+              <span>{getValues("minGrade") || 5}. Klasse</span>
+              <span>{getValues("maxGrade") || 11}. Klasse</span>
+            </div>
+            <div className="w-full">
+              <RangeSlider
+                min={5}
+                max={11}
+                step={1}
+                // keep default values in sync with the form values when switching steps
+                defaultValue={[
+                  getValues("minGrade") || 5,
+                  getValues("maxGrade") || 11,
+                ]}
+                id="rangeSlider"
+                onInput={(values: any) => {
+                  setValue("minGrade", values[0])
+                  setValue("maxGrade", values[1])
+                }}
+              />
+            </div>
+          </div>
+          {(errors.minGrade || errors.maxGrade) && (
+            <p className="text-red-500">
+              {errors.minGrade?.message || errors.maxGrade?.message}
+            </p>
+          )}
+
+          {/* max students */}
+          <h2 className="text-lg font-semibold mt-8 mb-2">Schülerlimit</h2>
+          <Input
+            placeholder="Maximale Schüleranzahl"
+            {...register("maxStudents", { valueAsNumber: true })}
+            type="number"
+            className="mb-2"
+          />
+          {errors.maxStudents && (
+            <p className="text-red-500">{errors.maxStudents.message}</p>
+          )}
+
+          {/* price */}
+          <h2 className="text-lg font-semibold mt-8 mb-2">Kosten</h2>
+          <Input
+            placeholder="Preis"
+            {...register("price", { valueAsNumber: true })}
+            type="number"
+            className="mb-2"
+          />
+          {errors.price && (
+            <p className="text-red-500">{errors.price.message}</p>
+          )}
+        </div>
+        <Separator className="my-8 h-[0.5px]" />
+        {hasChanges && (
+          <Alert className="border-yellow-500 text-yellow-500">
+            <Info className="h-4 w-4" color="#eab308" />
+            <AlertTitle>Änderungen</AlertTitle>
+            <AlertDescription>
+              Es wurden die Felder{" "}
+              {Object.entries(changedFields)
+                .filter(([field, changed]) => changed)
+                .map(
+                  ([field]) => fieldLabels[field as keyof typeof fieldLabels]
+                )
+                .join(", ")}{" "}
+              geändert.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="flex justify-between mt-8">
           <Button variant={"secondary"} type="button">
             Abbrechen

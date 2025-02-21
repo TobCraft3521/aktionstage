@@ -378,7 +378,8 @@ const MultiStepForm = () => {
       return valid
     }
     if (step === 1) {
-      const valid = description.length > 0 && banner.length > 0
+      const valid =
+        description.length > 0 && (banner instanceof File || banner.length > 0)
       validPages.current[1] = valid
       return valid
     }

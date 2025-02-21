@@ -1,5 +1,6 @@
 "use client"
 
+import Loader from "@/components/global/loader"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,12 +30,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useDebounce } from "@/hooks/use-debounce"
 import { suggestEmoji } from "@/lib/actions/ai/emoji-sug"
-import { getPresignedUploadPost } from "@/lib/actions/aws/upload"
 import {
   queryAllTeacherLoads,
   queryTeachers,
 } from "@/lib/actions/queries/accounts"
-import { createProject } from "@/lib/actions/queries/projects"
 import { queryRooms } from "@/lib/actions/queries/rooms"
 import { CreateProjectSchema } from "@/lib/form-schemas"
 import { isValidImage } from "@/lib/helpers/image"
@@ -43,18 +42,19 @@ import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Account, Day, Project, Room } from "@prisma/client"
+import { randomUUID } from "crypto"
 import {
   Ban,
   Check,
   ChevronsUpDown,
-  Loader2Icon,
   PartyPopper,
   Plus,
-  Trash2,
+  Trash2
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import posthog from "posthog-js"
 import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -62,10 +62,6 @@ import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
-import Loader from "@/components/global/loader"
-import { useRouter } from "next/navigation"
-import { set } from "lodash"
-import { randomUUID } from "crypto"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -743,7 +739,6 @@ const MultiStepForm = () => {
               </p>
             )}
 
-            {/* TODO: custom location picker */}
             <h2 className="text-lg font-semibold mt-4 mb-2">Ort</h2>
             <Tabs defaultValue="room" className="w-[400px] mx-auto">
               <TabsList className="grid w-full grid-cols-2">
@@ -791,7 +786,7 @@ const MultiStepForm = () => {
                       </PopoverTrigger>
                       <PopoverContent className="w-[400px] p-0" side="top">
                         <Command>
-                          <CommandInput placeholder="Search teachers..." />
+                          <CommandInput placeholder="Raum suchen..." />
                           <CommandEmpty>
                             Kein passender Raum gefunden.
                           </CommandEmpty>
@@ -902,7 +897,7 @@ const MultiStepForm = () => {
                   </Badge>
                 ))
               ) : (
-                <p className="text-slate-500">Noch keine anderen Leher.</p>
+                <p className="text-slate-500">Noch keine anderen Lehrer.</p>
               )}
             </div>
             {/* Teacher Search Popover */}
@@ -1013,9 +1008,7 @@ const MultiStepForm = () => {
             )}
 
             {/* max students */}
-            <h2 className="text-lg font-semibold mt-8 mb-2">
-              Maximale Schüleranzahl
-            </h2>
+            <h2 className="text-lg font-semibold mt-8 mb-2">Schülerlimit</h2>
             <Input
               placeholder="Maximale Schüleranzahl"
               {...register("maxStudents", { valueAsNumber: true })}

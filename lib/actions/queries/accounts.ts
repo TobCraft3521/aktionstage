@@ -16,13 +16,7 @@ export const queryTeachers = async () => {
       ],
     },
   })
-  // never return the password!!!
-  return teachers.map((teacher) => {
-    return {
-      id: teacher.id,
-      name: teacher.name,
-    }
-  })
+  return teachers
 }
 
 export const queryUser = async () => {
