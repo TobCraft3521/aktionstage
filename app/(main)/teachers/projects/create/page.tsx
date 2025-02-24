@@ -49,7 +49,7 @@ import {
   ChevronsUpDown,
   PartyPopper,
   Plus,
-  Trash2
+  Trash2,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
@@ -62,6 +62,14 @@ import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
+import {
+  isCurrentUser,
+  isTeacherAlreadyAdded,
+  isTeacherAssignedToProject,
+  isTeacherAssignedToProjectSingleProject,
+  isTeacherFreeOnDay,
+  isTeacherUnavailable,
+} from "@/lib/helpers/availability"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -92,8 +100,8 @@ const MultiStepForm = () => {
   const [previewUrl, setPreviewUrl] = useState<string | undefined>()
   // Teacher adding logic
   const [isTeacherSelectOpen, setIsTeacherSelectOpen] = useState(false)
-  const [addedTeachers, setAddedTeachers] = useState<Partial<Account>[]>([])
-  const [teachers, setTeachers] = useState<Partial<Account>[]>([])
+  const [addedTeachers, setAddedTeachers] = useState<Account[]>([])
+  const [teachers, setTeachers] = useState<Account[]>([])
   // Time logic
   const [timeFrom, setTimeFrom] = useState("")
   const [timeTo, setTimeTo] = useState("")
@@ -296,7 +304,7 @@ const MultiStepForm = () => {
   }
 
   // Add a teacher
-  const addTeacher = (teacher: Partial<Account>) => {
+  const addTeacher = (teacher: Account) => {
     if (!addedTeachers.find((t) => t.id === teacher.id)) {
       setAddedTeachers((prev) => [...prev, teacher])
     }
@@ -675,6 +683,9 @@ const MultiStepForm = () => {
                   setRoom(undefined)
                   setValue("location", "") // reset custom location
                   setValue("date", value as Day, { shouldValidate: true })
+                  // reset added teachers
+                  setAddedTeachers([])
+                  setValue("teachers", [])
                 }} // non empty
                 value={getValues("date")}
               >
@@ -927,39 +938,46 @@ const MultiStepForm = () => {
                   <CommandGroup>
                     <CommandList>
                       {teachers.length > 0 &&
-                        teachers.map((teacher: Partial<Account>) => (
-                          <CommandItem
-                            key={teacher.id}
-                            className={cn(
-                              "cursor-pointer",
-                              addedTeachers.find((t) => t.id === teacher.id) ||
-                                day === undefined ||
-                                allTeacherLoads?.[teacher.id || ""]?.includes(
-                                  day
-                                ) ||
-                                teacher.id === user.data?.user.id
-                                ? "opacity-50 pointer-events-none"
-                                : ""
-                            )}
-                            value={teacher.name}
-                            onSelect={(currentValue) => {
-                              if (currentValue === teacher.name) {
-                                addTeacher(teacher)
-                                setIsTeacherSelectOpen(false)
-                              }
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                addedTeachers.find((t) => t.id === teacher.id)
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {teacher.name}
-                          </CommandItem>
-                        ))}
+                        teachers.map((teacher: Account) => {
+                          const { id, name } = teacher
+                          if (!id || !allTeacherLoads || !day) {
+                            return null // Skip rendering if there's no valid ID
+                          }
+                          // Check if the teacher is unavailable, already added, or assigned
+                          const isDisabled =
+                            isTeacherAlreadyAdded(id, addedTeachers) ||
+                            isTeacherUnavailable(id, day, allTeacherLoads) ||
+                            isCurrentUser(id, user.data?.user.id) ||
+                            isTeacherAssignedToProjectSingleProject(
+                              id,
+                              addedTeachers
+                            ) ||
+                            !isTeacherFreeOnDay(id, day, allTeacherLoads) // Using the isTeacherFreeOnDay helper
+
+                          return (
+                            <CommandItem
+                              key={id}
+                              disabled={isDisabled} // Use disabled prop
+                              value={name}
+                              onSelect={(currentValue) => {
+                                if (currentValue === name) {
+                                  addTeacher(teacher)
+                                  setIsTeacherSelectOpen(false)
+                                }
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  isTeacherAlreadyAdded(id, addedTeachers)
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {name}
+                            </CommandItem>
+                          )
+                        })}
                     </CommandList>
                   </CommandGroup>
                 </Command>

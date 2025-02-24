@@ -2,6 +2,10 @@ import { z } from "zod"
 import { ProjectWithTeachers } from "../types"
 import { ProjectEditSchema } from "../form-schemas"
 
+export type ChangedFields = {
+  [Key in keyof z.infer<typeof ProjectEditSchema>]: boolean
+}
+
 export const getChangedFields = (
   currentProject: ProjectWithTeachers,
   newProject: z.infer<typeof ProjectEditSchema>
@@ -65,22 +69,30 @@ export const getChangedFields = (
     newTeacherIds
   )
 
-  const minMaxGrade =
-    currentProject.minGrade !== newProject.minGrade ||
-    currentProject.maxGrade !== newProject.maxGrade
+  const minGrade = currentProject.minGrade !== newProject.minGrade
   console.log(
-    "Min/Max Grade changed:",
-    minMaxGrade,
+    "Min Grade changed:",
+    minGrade,
     "|",
     {
-      maxStudents: currentProject.maxStudents,
       minGrade: currentProject.minGrade,
+    },
+    "→",
+    {
+      minGrade: newProject.minGrade,
+    }
+  )
+
+  const maxGrade = currentProject.maxGrade !== newProject.maxGrade
+  console.log(
+    "Max Grade changed:",
+    maxGrade,
+    "|",
+    {
       maxGrade: currentProject.maxGrade,
     },
     "→",
     {
-      maxStudents: newProject.maxStudents,
-      minGrade: newProject.minGrade,
       maxGrade: newProject.maxGrade,
     }
   )
@@ -133,11 +145,12 @@ export const getChangedFields = (
     banner,
     emoji,
     teachers,
-    minMaxGrade,
+    minGrade,
+    maxGrade,
     maxStudents,
     location,
     price,
     time,
     date,
-  }
+  } as ChangedFields
 }

@@ -14,7 +14,9 @@ export const changePassword = async (
     where: {
       id,
       // check if the old password is correct
-      password: md5(oldPassword),
+      authDetails: {
+        password: md5(oldPassword),
+      },
     },
   })
   if (!user)
@@ -27,7 +29,11 @@ export const changePassword = async (
       id,
     },
     data: {
-      password: md5(newPassword),
+      authDetails: {
+        update: {
+          password: md5(newPassword),
+        },
+      },
     },
   })
   return {

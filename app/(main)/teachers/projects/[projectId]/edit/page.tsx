@@ -37,7 +37,7 @@ import { queryProject } from "@/lib/actions/queries/projects"
 import { queryRooms } from "@/lib/actions/queries/rooms"
 import { ProjectEditSchema } from "@/lib/form-schemas"
 import { isValidImage } from "@/lib/helpers/image"
-import { getChangedFields } from "@/lib/helpers/projectchanges"
+import { ChangedFields, getChangedFields } from "@/lib/helpers/projectchanges"
 import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
@@ -56,6 +56,13 @@ import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
+import {
+  isCurrentUser,
+  isTeacherAlreadyAdded,
+  isTeacherAssignedToProject,
+  isTeacherFreeOnDay,
+  isTeacherUnavailable,
+} from "@/lib/helpers/availability"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -80,7 +87,8 @@ const fieldLabels = {
   banner: "Bild",
   emoji: "Emoji",
   teachers: "Lehrer",
-  minMaxGrade: "Jahrgangsstufen",
+  minGrade: "Jahrgangsstufen (Minimum)",
+  maxGrade: "Jahrgangsstufen (Maximum)",
   maxStudents: "Schülerlimit",
   location: "Ort",
   price: "Preis",
@@ -99,13 +107,14 @@ const ProjectEditor = ({}: Props) => {
   const debouncedUrl = useDebounce<string | undefined>(imgUrl, 500)
   const [imgError, setImgError] = useState<string | undefined>()
   // Preview changed fields
-  const [changedFields, setChangedFields] = useState<any>({})
+  const [changedFields, setChangedFields] = useState<
+    ChangedFields | undefined
+  >()
   // Front end day validation (whether or not already a project on each day)
   const [allTeacherLoads, setAllTeacherLoads] = useState<Record<
     string,
     Day[]
   > | null>(null)
-  const [personalLoad, setPersonalLoad] = useState<Day[] | null>(null)
   const [day, setDay] = useState<Day | undefined>()
   // Room logic
   const [rooms, setRooms] = useState<RoomWithProjectWithTeachers[]>([])
@@ -115,8 +124,8 @@ const ProjectEditor = ({}: Props) => {
   const [replacingLocation, setReplacingLocation] = useState(false)
   // Teacher adding logic
   const [isTeacherSelectOpen, setIsTeacherSelectOpen] = useState(false)
-  const [addedTeachers, setAddedTeachers] = useState<Partial<Account>[]>([])
-  const [teachers, setTeachers] = useState<Partial<Account>[]>([])
+  const [addedTeachers, setAddedTeachers] = useState<Account[]>([])
+  const [teachers, setTeachers] = useState<Account[]>([])
   // Time logic
   const [timeFrom, setTimeFrom] = useState("")
   const [timeTo, setTimeTo] = useState("")
@@ -182,12 +191,9 @@ const ProjectEditor = ({}: Props) => {
       // query whether or not a teacher already has a project on each day of the Aktionstage
       const teacherLoads = await queryAllTeacherLoads()
       setAllTeacherLoads(teacherLoads)
-      // personal teacher load, filter teacher load by current teacher by auth
-      const currentTeacherLoad = teacherLoads?.[user.data?.user.id] || []
-      setPersonalLoad(currentTeacherLoad)
     }
     fetchAllTeacherLoads()
-  }, [user.data?.user.id])
+  }, [])
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -298,7 +304,7 @@ const ProjectEditor = ({}: Props) => {
   }, [debouncedFormValues, project])
 
   // Add a teacher
-  const addTeacher = (teacher: Partial<Account>) => {
+  const addTeacher = (teacher: Account) => {
     if (!addedTeachers.find((t) => t.id === teacher.id)) {
       setAddedTeachers((prev) => [...prev, teacher])
     }
@@ -323,7 +329,7 @@ const ProjectEditor = ({}: Props) => {
     )
   }
 
-  const hasChanges = Object.values(changedFields).includes(true)
+  const hasChanges = Object.values(changedFields ?? {}).includes(true)
 
   if (isPending)
     return (
@@ -340,7 +346,7 @@ const ProjectEditor = ({}: Props) => {
         <div className="">
           <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
             Titel
-            {changedFields.title && <ChangeHint>Änderung</ChangeHint>}
+            {changedFields?.title && <ChangeHint>Änderung</ChangeHint>}
           </h2>
           <Input {...register("title")} placeholder="Titel" />
           {errors.title && (
@@ -350,7 +356,7 @@ const ProjectEditor = ({}: Props) => {
         <div className="">
           <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
             Beschreibung
-            {changedFields.description && <ChangeHint>Änderung</ChangeHint>}
+            {changedFields?.description && <ChangeHint>Änderung</ChangeHint>}
           </h2>
           <Input {...register("description")} placeholder="Beschreibung" />
           {errors.description && (
@@ -363,7 +369,7 @@ const ProjectEditor = ({}: Props) => {
         <div className="">
           <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
             Bild Upload
-            {changedFields.banner && <ChangeHint>Änderung</ChangeHint>}
+            {changedFields?.banner && <ChangeHint>Änderung</ChangeHint>}
           </h2>
           {replacingImage && (
             // either url or upload
@@ -476,7 +482,7 @@ const ProjectEditor = ({}: Props) => {
         <div className="">
           <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
             Emoji
-            {changedFields.emoji && <ChangeHint>Änderung</ChangeHint>}
+            {changedFields?.emoji && <ChangeHint>Änderung</ChangeHint>}
           </h2>
           <div className="relative flex justify-center items-center mb-4">
             <Popover>
@@ -505,7 +511,9 @@ const ProjectEditor = ({}: Props) => {
         </div>
         <Separator className="my-8 h-[0.5px]" />
         <div className="">
-          <h2 className="text-lg font-semibold mt-4 mb-2">Tag</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Tag {changedFields?.date && <ChangeHint>Änderung</ChangeHint>}
+          </h2>
           <div className="p-4 border-slate-200 border rounded-lg inline-block mb-2">
             <ToggleGroup
               type="single"
@@ -529,18 +537,29 @@ const ProjectEditor = ({}: Props) => {
                   <div
                     key={day}
                     // blur on hover when already a project on that day
-                    // className={personalLoad?.indexOf(day) === undefined ? "hover:blur-[1px]" : ""}
-                    style={{
-                      cursor: personalLoad?.includes(day)
-                        ? "not-allowed"
-                        : undefined,
-                    }}
+                    className={
+                      !project?.teachers.every((teacher) =>
+                        isTeacherFreeOnDay(
+                          teacher.id,
+                          day,
+                          allTeacherLoads ?? {}
+                        )
+                      )
+                        ? "cursor-not-allowed"
+                        : ""
+                    }
                   >
                     <ToggleGroupItem
                       value={day}
                       aria-label={`Wechseln zu ${dayNames[day]}`}
                       disabled={
-                        personalLoad?.includes(day) && !(project?.day === day)
+                        !project?.teachers.every((teacher) =>
+                          isTeacherFreeOnDay(
+                            teacher.id,
+                            day,
+                            allTeacherLoads ?? {}
+                          )
+                        )
                       } // allow to change back to the same day
                     >
                       {dayNames[day]}
@@ -550,10 +569,16 @@ const ProjectEditor = ({}: Props) => {
               })}
             </ToggleGroup>
           </div>
+          <p className="">
+            ℹ️ Verfügbarkeit der Lehrer beachten, falls nötig weitere Lehrer
+            entfernen.
+          </p>
         </div>
 
         {errors.date && <p className="text-red-500">{errors.date.message}</p>}
-        <h2 className="text-lg font-semibold mb-2 mt-4">Zeitraum</h2>
+        <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+          Zeitraum {changedFields?.time && <ChangeHint>Änderung</ChangeHint>}
+        </h2>
         <div className="flex gap-4 items-center">
           <p className="">Von</p>
           <Input
@@ -580,7 +605,9 @@ const ProjectEditor = ({}: Props) => {
           </p>
         )}
 
-        <h2 className="text-lg font-semibold mt-4 mb-2">Ort</h2>
+        <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+          Ort {changedFields?.location && <ChangeHint>Änderung</ChangeHint>}
+        </h2>
         {replacingLocation ? (
           <Tabs defaultValue="room" className="w-[400px] mx-auto">
             <TabsList className="grid w-full grid-cols-2">
@@ -724,7 +751,10 @@ const ProjectEditor = ({}: Props) => {
         )}
         <Separator className="my-8 h-[0.5px]" />
         <div className="">
-          <h2 className="text-lg font-semibold mb-3">Lehrer</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Lehrer{" "}
+            {changedFields?.teachers && <ChangeHint>Änderung</ChangeHint>}
+          </h2>
           {/* Display Added Teachers */}
           <div className="flex flex-wrap gap-2 mb-3">
             {addedTeachers.length > 0 ? (
@@ -772,46 +802,48 @@ const ProjectEditor = ({}: Props) => {
                 <CommandGroup>
                   <CommandList>
                     {teachers.length > 0 &&
-                      teachers.map((teacher: Partial<Account>) => (
-                        <CommandItem
-                          key={teacher.id}
-                          className={cn(
-                            "cursor-pointer",
-                            (addedTeachers.find((t) => t.id === teacher.id) ||
-                              day === undefined ||
-                              allTeacherLoads?.[teacher.id || ""]?.includes(
-                                day
-                              ) ||
-                              teacher.id === user.data?.user.id) &&
-                              !project?.teachers.find(
-                                (t) =>
-                                  t.id === teacher.id &&
-                                  !addedTeachers.find(
-                                    (t) => t.id === teacher.id
-                                  )
-                              )
-                              ? "opacity-50 pointer-events-none"
-                              : ""
-                          )}
-                          value={teacher.name}
-                          onSelect={(currentValue) => {
-                            if (currentValue === teacher.name) {
-                              addTeacher(teacher)
-                              setIsTeacherSelectOpen(false)
-                            }
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              addedTeachers.find((t) => t.id === teacher.id)
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {teacher.name}
-                        </CommandItem>
-                      ))}
+                      teachers.map((teacher: Account) => {
+                        const { id, name } = teacher
+                        if (!id || !allTeacherLoads || !day) {
+                          return null // Skip rendering if there's no valid ID
+                        }
+                        // Check if the teacher is unavailable, already added, or assigned
+                        const isDisabled =
+                          isTeacherAlreadyAdded(id, addedTeachers) ||
+                          isTeacherUnavailable(id, day, allTeacherLoads) ||
+                          isCurrentUser(id, user.data?.user.id) ||
+                          isTeacherAssignedToProject(
+                            id,
+                            project?.teachers || [],
+                            addedTeachers
+                          ) ||
+                          !isTeacherFreeOnDay(id, day, allTeacherLoads) // Using the isTeacherFreeOnDay helper
+
+                        return (
+                          <CommandItem
+                            key={id}
+                            disabled={isDisabled} // Use disabled prop
+                            value={name}
+                            onSelect={(currentValue) => {
+                              if (currentValue === name) {
+                                addTeacher(teacher)
+                                setIsTeacherSelectOpen(false)
+                              }
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                isTeacherAlreadyAdded(id, addedTeachers)
+                                  ? // To keep spacing consistent
+                                    "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {name}
+                          </CommandItem>
+                        )
+                      })}
                   </CommandList>
                 </CommandGroup>
               </Command>
@@ -824,7 +856,12 @@ const ProjectEditor = ({}: Props) => {
         <Separator className="my-8 h-[0.5px]" />
         {/* Details */}
         <div className="">
-          <h2 className="text-lg font-semibold mt-4 mb-2">Jahrgangsstufen</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Jahrgangsstufen{" "}
+            {(changedFields?.minGrade || changedFields?.maxGrade) && (
+              <ChangeHint>Änderung</ChangeHint>
+            )}
+          </h2>
           <p className="text-gray-500 mb-8">
             Wähle die Jahrgangsstufen für dein Projekt
           </p>
@@ -858,7 +895,10 @@ const ProjectEditor = ({}: Props) => {
           )}
 
           {/* max students */}
-          <h2 className="text-lg font-semibold mt-8 mb-2">Schülerlimit</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Schülerlimit{" "}
+            {changedFields?.maxStudents && <ChangeHint>Änderung</ChangeHint>}
+          </h2>
           <Input
             placeholder="Maximale Schüleranzahl"
             {...register("maxStudents", { valueAsNumber: true })}
@@ -870,7 +910,9 @@ const ProjectEditor = ({}: Props) => {
           )}
 
           {/* price */}
-          <h2 className="text-lg font-semibold mt-8 mb-2">Kosten</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
+            Kosten {changedFields?.price && <ChangeHint>Änderung</ChangeHint>}
+          </h2>
           <Input
             placeholder="Preis"
             {...register("price", { valueAsNumber: true })}
@@ -888,7 +930,7 @@ const ProjectEditor = ({}: Props) => {
             <AlertTitle>Änderungen</AlertTitle>
             <AlertDescription>
               Es wurden die Felder{" "}
-              {Object.entries(changedFields)
+              {Object.entries(changedFields ?? {})
                 .filter(([field, changed]) => changed)
                 .map(
                   ([field]) => fieldLabels[field as keyof typeof fieldLabels]
