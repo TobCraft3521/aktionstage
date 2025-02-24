@@ -3,6 +3,3 @@
 - remove with when no other teacher
 - change aws cors under bucket/policies/ on the bottom in production
 - show day on project detail view
-
-- missing fields not displayed in project editor
-- when switching day not checking teacher load
