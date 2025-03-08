@@ -36,13 +36,17 @@ import {
 } from "@/lib/actions/queries/accounts"
 import { queryRooms } from "@/lib/actions/queries/rooms"
 import { CreateProjectSchema } from "@/lib/form-schemas"
+import {
+  isCurrentUser,
+  isTeacherAlreadyAdded,
+  isTeacherAvailable,
+} from "@/lib/helpers/availability"
 import { isValidImage } from "@/lib/helpers/image"
 import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Account, Day, Project, Room } from "@prisma/client"
-import { randomUUID } from "crypto"
 import {
   Ban,
   Check,
@@ -60,16 +64,9 @@ import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
+import { v4 as uuid } from "uuid"
 import { z } from "zod"
 import "./range-slider-styles.css"
-import {
-  isCurrentUser,
-  isTeacherAlreadyAdded,
-  isTeacherAssignedToProject,
-  isTeacherAssignedToProjectSingleProject,
-  isTeacherFreeOnDay,
-  isTeacherUnavailable,
-} from "@/lib/helpers/availability"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -126,8 +123,12 @@ const MultiStepForm = () => {
   const [sessionTracker, setSessionTracker] = useState<string | undefined>()
   useEffect(() => {
     // Provide a unique session tracker for each project creation session
-    setSessionTracker(randomUUID())
-    posthog.capture("project_creation_session_started")
+    if (sessionTracker) return
+    const sessionTrackerL = uuid()
+    setSessionTracker(sessionTrackerL)
+    posthog.capture("project_creation_session_started", {
+      sessionTrackerL,
+    })
   }, [])
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
@@ -946,13 +947,9 @@ const MultiStepForm = () => {
                           // Check if the teacher is unavailable, already added, or assigned
                           const isDisabled =
                             isTeacherAlreadyAdded(id, addedTeachers) ||
-                            isTeacherUnavailable(id, day, allTeacherLoads) ||
-                            isCurrentUser(id, user.data?.user.id) ||
-                            isTeacherAssignedToProjectSingleProject(
-                              id,
-                              addedTeachers
-                            ) ||
-                            !isTeacherFreeOnDay(id, day, allTeacherLoads) // Using the isTeacherFreeOnDay helper
+                            !isTeacherAvailable(id, day, allTeacherLoads)
+                          // Using the isTeacherFreeOnDay helper
+                          isCurrentUser(id, user.data?.user.id)
 
                           return (
                             <CommandItem

@@ -5,18 +5,12 @@ export const isTeacherAlreadyAdded = (
   addedTeachers: { id: string }[]
 ) => addedTeachers.some((t) => t.id === teacherId)
 
-export const isTeacherUnavailable = (
-  teacherId: string,
-  day: string | undefined,
-  allTeacherLoads: Record<string, string[]>
-) => day === undefined || allTeacherLoads?.[teacherId || ""]?.includes(day)
-
 export const isCurrentUser = (
   teacherId: string,
   currentUserId: string | undefined
 ) => teacherId === currentUserId
 
-export const isTeacherAssignedToProject = (
+export const wasPreviouslyAdded = (
   teacherId: string,
   projectTeachers: { id: string }[],
   addedTeachers: { id: string }[]
@@ -25,16 +19,14 @@ export const isTeacherAssignedToProject = (
     (t) => t.id === teacherId && !addedTeachers.some((t) => t.id === teacherId)
   )
 
-export const isTeacherAssignedToProjectSingleProject = (
-  teacherId: string,
-  addedTeachers: { id: string }[]
-) => addedTeachers.some((t) => t.id === teacherId)
-
 // Check whether or not teachers already have a project on the given date
-export const isTeacherFreeOnDay = (
+export const isTeacherAvailable = (
   teacherId: string,
-  day: string,
+  day: string | undefined,
   teacherLoads: Record<string, string[]>
 ) => {
-  return !teacherLoads[teacherId]?.includes(day)
-}
+  if (day === undefined) {
+    return false;
+  }
+  return !teacherLoads[teacherId]?.includes(day);
+};

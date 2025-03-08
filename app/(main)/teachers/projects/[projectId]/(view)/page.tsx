@@ -24,7 +24,7 @@ import {
 import { deleteProject } from "@/lib/actions/delete/project"
 import { queryProjectStudents } from "@/lib/actions/queries/accounts"
 import { queryOwnProjects } from "@/lib/actions/queries/projects"
-import { leaveProject } from "@/lib/actions/updates/projects"
+import { leaveProject } from "@/lib/actions/updates/project"
 import { cn } from "@/lib/utils"
 import { useConfirmModal } from "@/stores/confirm-modal"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"

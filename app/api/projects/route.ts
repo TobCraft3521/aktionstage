@@ -48,7 +48,7 @@ export const POST = async (request: Request) => {
   const {
     success,
     data: parsedData,
-    error,
+    // error,
   } = CreateProjectSchema.safeParse(rawData)
   const data = {
     ...parsedData,

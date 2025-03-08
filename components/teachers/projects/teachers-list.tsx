@@ -20,7 +20,7 @@ import { queryOwnProjects } from "@/lib/actions/queries/projects"
 import {
   addTeacherToProject,
   removeTeacherFromProject,
-} from "@/lib/actions/updates/projects"
+} from "@/lib/actions/updates/project"
 import { cn } from "@/lib/utils"
 import { Account } from "@prisma/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"

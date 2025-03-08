@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Account, Project } from "@prisma/client"
+import { Account, Day, Project } from "@prisma/client"
 import { AnimatePresence, motion, spring, useAnimation } from "motion/react"
 import Image from "next/image"
 import { ArrowDown, X } from "lucide-react"
@@ -21,6 +21,12 @@ interface ProjectCompProps {
       teachers: Account[]
     }
   >
+}
+
+const dayToGerman: Record<Day, string> = {
+  [Day.MON]: "Montag",
+  [Day.TUE]: "Dienstag",
+  [Day.WED]: "Mittwoch",
 }
 
 const ProjectComp = ({ project }: ProjectCompProps) => {
@@ -151,7 +157,10 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                     text: `${project.studentsCount}/${project.maxStudents}`,
                   },
                   { icon: "📍", text: project.location },
-                  { icon: "🕑", text: "8.15-12.00" },
+                  {
+                    icon: "🕑",
+                    text: dayToGerman[project.day || "MON"] + " 8.15-12.00",
+                  },
                   { icon: "💵", text: "2€" },
                 ].map((item, index) => (
                   <div

@@ -62,7 +62,8 @@ const LoginForm = () => {
         // posthog.group("role", user.role)
         // posthog.group("grade", user.grade)
         router.push("/projects")
-        // window.location.reload()
+        // trigger reload to rerender tutorials
+        window.location.reload()
       } else {
         setSubmitError("Falscher Benutzername oder Passwort 😒")
       }

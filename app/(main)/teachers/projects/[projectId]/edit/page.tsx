@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useDebounce } from "@/hooks/use-debounce"
 import {
@@ -36,6 +37,12 @@ import {
 import { queryProject } from "@/lib/actions/queries/projects"
 import { queryRooms } from "@/lib/actions/queries/rooms"
 import { ProjectEditSchema } from "@/lib/form-schemas"
+import {
+  isCurrentUser,
+  isTeacherAlreadyAdded,
+  isTeacherAvailable,
+  wasPreviouslyAdded,
+} from "@/lib/helpers/availability"
 import { isValidImage } from "@/lib/helpers/image"
 import { ChangedFields, getChangedFields } from "@/lib/helpers/projectchanges"
 import { cn } from "@/lib/utils"
@@ -44,7 +51,6 @@ import Picker from "@emoji-mart/react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Account, Day, Project, Room } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
-import { set } from "lodash"
 import { Ban, Check, ChevronsUpDown, Info, Plus, Trash2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
@@ -56,13 +62,6 @@ import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
-import {
-  isCurrentUser,
-  isTeacherAlreadyAdded,
-  isTeacherAssignedToProject,
-  isTeacherFreeOnDay,
-  isTeacherUnavailable,
-} from "@/lib/helpers/availability"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -143,10 +142,6 @@ const ProjectEditor = ({}: Props) => {
       setValue("description", project.description)
       setValue("banner", project.imageUrl) // Only takes effect when overwritten, otherwise ignored on backend
       setValue("emoji", project.emoji)
-      setValue(
-        "teachers",
-        project.teachers.map((t) => t.id)
-      )
       setValue("maxStudents", project.maxStudents)
       setValue("minGrade", project.minGrade)
       setValue("maxGrade", project.maxGrade)
@@ -158,9 +153,20 @@ const ProjectEditor = ({}: Props) => {
       setTimeFrom(project.time.split("-")[0])
       setTimeTo(project.time.split("-")[1])
       setDay(project.day)
-      setAddedTeachers(project.teachers)
+      // exclude the current teacher from the list of teachers
+      const otherTeachers = project.teachers.filter((t) => {
+        return t.id !== user.data?.user.id
+      })
+      setAddedTeachers(otherTeachers)
+      // the form value teachers includes the current teacher, the rendered teachers list does not (addedTeachers)
+      setValue(
+        "teachers",
+        project.teachers.map((t) => t.id || "should have been fetched with id")
+      )
       return project
     },
+    // otherwise runs before session is loaded
+    enabled: user.status === "authenticated",
   })
 
   const {
@@ -311,9 +317,12 @@ const ProjectEditor = ({}: Props) => {
     setValue(
       "teachers",
       // addition is needed as the state update is async
-      [...addedTeachers, teacher].map(
-        (t) => t.id || "should have been fetched with id"
-      )
+      [
+        ...addedTeachers,
+        teacher,
+        // current teacher
+        ...(project?.teachers || []).filter((t) => t.id === user.data?.user.id),
+      ].map((t) => t.id || "should have been fetched with id")
     )
   }
 
@@ -322,7 +331,11 @@ const ProjectEditor = ({}: Props) => {
     setAddedTeachers((prev) => prev.filter((t) => t.id !== id))
     setValue(
       "teachers",
-      addedTeachers
+      [
+        ...addedTeachers,
+        // current teacher
+        ...(project?.teachers || []).filter((t) => t.id === user.data?.user.id),
+      ]
         // filter is needed as the state update is async
         .filter((t) => t.id !== id)
         .map((t) => t.id || "should have been fetched with id")
@@ -358,7 +371,7 @@ const ProjectEditor = ({}: Props) => {
             Beschreibung
             {changedFields?.description && <ChangeHint>Änderung</ChangeHint>}
           </h2>
-          <Input {...register("description")} placeholder="Beschreibung" />
+          <Textarea {...register("description")} placeholder="Beschreibung" />
           {errors.description && (
             <p className="text-red-500 text-sm mt-1">
               {errors.description.message}
@@ -536,15 +549,16 @@ const ProjectEditor = ({}: Props) => {
                 return (
                   <div
                     key={day}
-                    // blur on hover when already a project on that day
                     className={
-                      !project?.teachers.every((teacher) =>
-                        isTeacherFreeOnDay(
-                          teacher.id,
+                      !getValues("teachers").every((teacher) => {
+                        const isFree = isTeacherAvailable(
+                          teacher,
                           day,
                           allTeacherLoads ?? {}
                         )
-                      )
+                        // console.log(isFree, teacher.name, day)
+                        return isFree
+                      })
                         ? "cursor-not-allowed"
                         : ""
                     }
@@ -553,9 +567,9 @@ const ProjectEditor = ({}: Props) => {
                       value={day}
                       aria-label={`Wechseln zu ${dayNames[day]}`}
                       disabled={
-                        !project?.teachers.every((teacher) =>
-                          isTeacherFreeOnDay(
-                            teacher.id,
+                        !getValues("teachers").every((teacher) =>
+                          isTeacherAvailable(
+                            teacher,
                             day,
                             allTeacherLoads ?? {}
                           )
@@ -809,15 +823,14 @@ const ProjectEditor = ({}: Props) => {
                         }
                         // Check if the teacher is unavailable, already added, or assigned
                         const isDisabled =
-                          isTeacherAlreadyAdded(id, addedTeachers) ||
-                          isTeacherUnavailable(id, day, allTeacherLoads) ||
-                          isCurrentUser(id, user.data?.user.id) ||
-                          isTeacherAssignedToProject(
-                            id,
-                            project?.teachers || [],
-                            addedTeachers
-                          ) ||
-                          !isTeacherFreeOnDay(id, day, allTeacherLoads) // Using the isTeacherFreeOnDay helper
+                          ((isTeacherAlreadyAdded(id, addedTeachers) ||
+                            !isTeacherAvailable(id, day, allTeacherLoads)) && // Using the isTeacherFreeOnDay helper
+                            !wasPreviouslyAdded(
+                              id,
+                              project?.teachers || [],
+                              addedTeachers
+                            )) ||
+                          isCurrentUser(id, user.data?.user.id)
 
                         return (
                           <CommandItem

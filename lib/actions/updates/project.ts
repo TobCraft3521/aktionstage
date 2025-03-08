@@ -1,17 +1,6 @@
 "use server"
 import { auth } from "@/lib/auth/auth"
 import { db } from "@/lib/db"
-import { Project } from "@prisma/client"
-
-export const updateProject = async (id: string, data: Partial<Project>) => {
-  const user = (await auth())?.user
-  if (!user) return null
-  const project = await db.project.findUnique({
-    where: { id, teachers: { some: { id: user.id } } },
-  })
-  if (!project) return null
-  return db.project.update({ where: { id }, data })
-}
 
 export const removeTeacherFromProject = async (
   projectId: string,
