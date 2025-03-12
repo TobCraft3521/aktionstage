@@ -55,7 +55,7 @@ import { Ban, Check, ChevronsUpDown, Info, Plus, Trash2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
 import Image from "next/image"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import RangeSlider from "react-range-slider-input"
@@ -130,8 +130,11 @@ const ProjectEditor = ({}: Props) => {
   const [timeTo, setTimeTo] = useState("")
   // auth
   const user = useSession()
+  // Because otherwise every button triggers a submit, even the ones from external libraries
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { projectId } = useParams() as { projectId: string }
+  const router = useRouter()
 
   const { data: project, isPending } = useQuery({
     queryKey: ["project", projectId],
@@ -170,12 +173,12 @@ const ProjectEditor = ({}: Props) => {
   })
 
   const {
-    handleSubmit,
+    // handleSubmit, // doesnt work because all external ui elements would trigger a submit -> custom submit
     register,
     setValue,
     getValues,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<z.infer<typeof ProjectEditSchema>>({
     mode: "onChange",
     resolver: zodResolver(ProjectEditSchema),
@@ -212,7 +215,32 @@ const ProjectEditor = ({}: Props) => {
   }, [])
 
   const onSubmit = async (data: FormData) => {
-    return new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsSubmitting(true)
+    const formData = new FormData()
+    formData.append("title", data.title)
+    formData.append("description", data.description)
+    formData.append("emoji", data.emoji)
+    formData.append("date", data.date)
+    formData.append("time", data.time)
+    formData.append("location", data.location)
+    formData.append("price", data.price.toString())
+    formData.append("maxStudents", data.maxStudents.toString())
+    formData.append("minGrade", data.minGrade.toString())
+    formData.append("maxGrade", data.maxGrade.toString())
+    formData.append("banner", data.banner)
+    formData.append("teachers", (data.teachers || []).join(","))
+    formData.append("room", room?.id || "")
+
+    const res = await fetch(`/api/projects/${projectId}`, {
+      method: "PATCH",
+      body: formData,
+    })
+    const { redirectUrl } = await res.json()
+    if (redirectUrl) {
+      router.push(redirectUrl)
+    }
+    // Redirects anyways
+    setIsSubmitting(false)
   }
 
   // Handle URL input change
@@ -353,7 +381,7 @@ const ProjectEditor = ({}: Props) => {
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-5 mb-10">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={(e) => e.preventDefault()}>
         <h1 className="text-xl font-bold mb-4">Projekt bearbeiten</h1>
         <Separator className="my-8 h-[0.5px]" />
         <div className="">
@@ -477,7 +505,6 @@ const ProjectEditor = ({}: Props) => {
           {!replacingImage && (
             <div className="mx-auto w-32">
               <Button
-                type="button"
                 onClick={() => {
                   setReplacingImage(true)
                   setValue("banner", "")
@@ -534,7 +561,7 @@ const ProjectEditor = ({}: Props) => {
                 setDay(value as Day)
                 // reset room choice
                 setRoom(undefined)
-                setValue("location", "") // reset custom location
+                setValue("location", "", { shouldValidate: true }) // reset custom location
                 setReplacingLocation(true)
                 setValue("date", value as Day, { shouldValidate: true })
               }} // non empty
@@ -550,7 +577,7 @@ const ProjectEditor = ({}: Props) => {
                   <div
                     key={day}
                     className={
-                      !getValues("teachers").every((teacher) => {
+                      !getValues("teachers")?.every((teacher) => {
                         const isFree = isTeacherAvailable(
                           teacher,
                           day,
@@ -567,7 +594,7 @@ const ProjectEditor = ({}: Props) => {
                       value={day}
                       aria-label={`Wechseln zu ${dayNames[day]}`}
                       disabled={
-                        !getValues("teachers").every((teacher) =>
+                        !getValues("teachers")?.every((teacher) =>
                           isTeacherAvailable(
                             teacher,
                             day,
@@ -628,7 +655,9 @@ const ProjectEditor = ({}: Props) => {
               <TabsTrigger
                 value="room"
                 onClick={() => {
-                  setValue("location", "") // reset custom location
+                  setValue("location", "", {
+                    shouldValidate: true,
+                  }) // reset custom location
                   setRoom(undefined)
                 }}
               >
@@ -636,7 +665,9 @@ const ProjectEditor = ({}: Props) => {
               </TabsTrigger>
               <TabsTrigger
                 onClick={() => {
-                  setValue("location", "") // reset custom location
+                  setValue("location", "", {
+                    shouldValidate: true,
+                  }) // reset custom location
                   setRoom(undefined)
                 }}
                 value="custom"
@@ -699,7 +730,13 @@ const ProjectEditor = ({}: Props) => {
                                         )
                                       )
                                       // rerendered server side (in case of room taken -> just asg)
-                                      setValue("location", "ASG " + cRoom.name)
+                                      setValue(
+                                        "location",
+                                        "ASG " + cRoom.name,
+                                        {
+                                          shouldValidate: true,
+                                        }
+                                      )
                                       setIsRoomSelectOpen(false)
                                     }}
                                   >
@@ -759,9 +796,7 @@ const ProjectEditor = ({}: Props) => {
             </TabsContent>
           </Tabs>
         ) : (
-          <Button type="button" onClick={() => setReplacingLocation(true)}>
-            Ort ändern
-          </Button>
+          <Button onClick={() => setReplacingLocation(true)}>Ort ändern</Button>
         )}
         <Separator className="my-8 h-[0.5px]" />
         <div className="">
@@ -955,13 +990,14 @@ const ProjectEditor = ({}: Props) => {
         )}
 
         <div className="flex justify-between mt-8">
-          <Button variant={"secondary"} type="button">
-            Abbrechen
-          </Button>
+          <Button variant={"secondary"}>Abbrechen</Button>
           <Button
             className="flex items-center gap-2"
-            type="submit"
-            disabled={isSubmitting}
+            onClick={() => {
+              onSubmit(getValues())
+              // console.log(errors)
+            }}
+            disabled={isSubmitting || Object.keys(errors).length > 0}
           >
             {!isSubmitting ? "Speichern" : <Loader />}
           </Button>

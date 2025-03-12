@@ -159,7 +159,8 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                   { icon: "📍", text: project.location },
                   {
                     icon: "🕑",
-                    text: dayToGerman[project.day || "MON"] + " 8.15-12.00",
+                    text:
+                      dayToGerman[project.day || "MON"] + " " + project.time,
                   },
                   { icon: "💵", text: "2€" },
                 ].map((item, index) => (

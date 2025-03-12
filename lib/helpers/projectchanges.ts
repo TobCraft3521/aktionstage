@@ -60,14 +60,6 @@ export const getChangedFields = (
   const newTeacherIds = (newProject.teachers || []).sort()
   const teachers =
     JSON.stringify(currentTeacherIds) !== JSON.stringify(newTeacherIds)
-  console.log(
-    "Teachers changed:",
-    teachers,
-    "|",
-    currentTeacherIds,
-    "→",
-    newTeacherIds
-  )
 
   const minGrade = currentProject.minGrade !== newProject.minGrade
   // console.log(

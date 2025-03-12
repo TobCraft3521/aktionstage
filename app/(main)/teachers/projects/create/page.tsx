@@ -129,6 +129,7 @@ const MultiStepForm = () => {
     posthog.capture("project_creation_session_started", {
       sessionTrackerL,
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const steps: { label: string; fields: (keyof FormData)[] }[] = [
@@ -205,13 +206,7 @@ const MultiStepForm = () => {
   }
 
   const onSubmit = async (data: FormData) => {
-    // merge location type
-    // const mergedData = {
-    //   ...data,
-    //   room: room?.id,
-    // }
     setIsSubmitting(true)
-    // await createProject(mergedData)
 
     const formData = new FormData()
     formData.append("title", data.title)

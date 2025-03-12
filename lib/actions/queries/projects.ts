@@ -8,6 +8,7 @@ import { redirect } from "next/navigation"
 import { cache } from "react"
 import { z } from "zod"
 import { serverSideUpload } from "../aws/upload"
+import { Prisma } from "@prisma/client"
 
 type FormData = z.infer<typeof CreateProjectSchema>
 
@@ -23,7 +24,7 @@ export const queryProjects = cache(async () => {
 
 export const queryOwnProjects = async () => {
   const id = (await auth())?.user?.id
-  const ownProjects = await db.account.findUnique({
+  const teacher = await db.account.findUnique({
     where: {
       id,
       OR: [{ role: "ADMIN" }, { role: "TEACHER" }],
@@ -36,8 +37,13 @@ export const queryOwnProjects = async () => {
       },
     },
   })
-  if (!ownProjects) return []
-  return ownProjects.ownProjects
+  if (!teacher) return redirect("/login")
+  // Order for display
+  return teacher.ownProjects.sort(
+    (a, b) =>
+      ["MON", "TUE", "WED"].indexOf(a.day) -
+      ["MON", "TUE", "WED"].indexOf(b.day)
+  )
 }
 
 export const createProject = async (formData: FormData & { room?: string }) => {

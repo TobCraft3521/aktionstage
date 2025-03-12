@@ -21,39 +21,35 @@ export const POST = async (request: Request) => {
     rawData[key] = value
   })
 
-  // convert strings to numbers and teachers to array
+  // Convert strings to numbers and teachers to array
   rawData.teachers = rawData.teachers ? rawData.teachers.split(",") : []
   rawData.price = parseFloat(rawData.price)
   rawData.maxStudents = parseInt(rawData.maxStudents)
   rawData.minGrade = parseInt(rawData.minGrade)
   rawData.maxGrade = parseInt(rawData.maxGrade)
 
-  // ultimative debugger 🤭
-  console.log(`🚀 Creating project:
-    🔤\tName: ${rawData.title}
-    📝\tDescription: ${rawData.description}
-    🏫\tRoom: ${rawData.room || "Not specified"}
-    🖼️\tBanner: ${rawData.banner}
-    🤭\tEmoji: ${rawData.emoji}
-    🧑🏻‍🏫\tTeachers: ${rawData.teachers}
-    📅\tDate: ${rawData.date}
-    🕒\tTime: ${rawData.time}
-    🫂\tMaxStudents: ${rawData.maxStudents}
-    🎓\tGrades: ${rawData.minGrade} - ${rawData.maxGrade}
-    📍\tLocation: ${rawData.location}
-    🫰🏻\tPrice: ${rawData.price}
-    `)
+  // Ultimative debugger 🤭
+  // console.log(`🚀 Creating project:
+  //   🔤\tName: ${rawData.title}
+  //   📝\tDescription: ${rawData.description}
+  //   🏫\tRoom: ${rawData.room || "Not specified"}
+  //   🖼️\tBanner: ${rawData.banner}
+  //   🤭\tEmoji: ${rawData.emoji}
+  //   🧑🏻‍🏫\tTeachers: ${rawData.teachers}
+  //   📅\tDate: ${rawData.date}
+  //   🕒\tTime: ${rawData.time}
+  //   🫂\tMaxStudents: ${rawData.maxStudents}
+  //   🎓\tGrades: ${rawData.minGrade} - ${rawData.maxGrade}
+  //   📍\tLocation: ${rawData.location}
+  //   🫰🏻\tPrice: ${rawData.price}
+  //   `)
 
   // Validate & transform data using Zod
   const {
     success,
-    data: parsedData,
+    data,
     // error,
   } = CreateProjectSchema.safeParse(rawData)
-  const data = {
-    ...parsedData,
-    room: rawData.room || undefined,
-  }
 
   // console.log(error) // Debug
 
@@ -70,13 +66,6 @@ export const POST = async (request: Request) => {
         "/teachers/projects/feedback?msg=Ungültige Daten&status=error",
     })
   }
-
-  // check if user is teacher or admin
-  const user = await db.account.findUnique({
-    where: {
-      id,
-    },
-  })
 
   posthog.capture({
     event: "attempt_create_project",
@@ -97,6 +86,14 @@ export const POST = async (request: Request) => {
     },
     distinctId: id,
   })
+
+  // check if user is teacher or admin
+  const user = await db.account.findUnique({
+    where: {
+      id,
+    },
+  })
+
   if (!user || (user.role !== "TEACHER" && user.role !== "ADMIN")) {
     posthog.capture({
       event: "create_project_failed",
@@ -110,9 +107,7 @@ export const POST = async (request: Request) => {
     })
   }
 
-  // validate form data
-  // this could be done using zod [server side] but this is more customisable
-
+  // For typescript, already checked above
   if (
     !data.title ||
     !data.description ||
@@ -168,29 +163,8 @@ export const POST = async (request: Request) => {
     },
   })
 
-  // If room is specified, check if it exists
-  if (data.room) {
-    const room = await db.room.findUnique({
-      where: {
-        id: data.room,
-      },
-    })
-    if (!room) {
-      posthog.capture({
-        event: "create_project_failed",
-        properties: {
-          reason: "room_not_found",
-        },
-        distinctId: id,
-      })
-      return Response.json({
-        redirectUrl: `/teachers/projects/feedback?msg=Raum nicht gefunden&status=error`,
-      })
-    }
-  }
-
   // Check if teacher already has a project on this day
-  const projects = await db.project.findMany({
+  const conflictingProjects = await db.project.findMany({
     where: {
       day: data.date,
       teachers: {
@@ -202,7 +176,7 @@ export const POST = async (request: Request) => {
       },
     },
   })
-  if (projects.length > 0) {
+  if (conflictingProjects.length > 0) {
     posthog.capture({
       event: "create_project_failed",
       properties: {
@@ -256,11 +230,20 @@ export const POST = async (request: Request) => {
         projects: true,
       },
     })
-    // Just for typescript, already checked above
-    if (!room)
-      return Response.json({
-        redirectUrl: `/teachers/projects/feedback?msg=Raum nicht gefunden&status=error`,
+    if (!room) {
+      await db.project.update({
+        where: {
+          id: project.id,
+        },
+        data: {
+          // Teacher is responsible to edit this
+          location: `Keine Ahnung`,
+        },
       })
+      return Response.json({
+        redirectUrl: `/teachers/projects/feedback?msg=Raum nicht gefunden. Projekt wurde trotzdem erstellt. Bitte bearbeiten.&status=error`,
+      })
+    }
     if (room.projects.find((p) => p.day === data.date)) {
       // Update project location
       await db.project.update({
@@ -268,6 +251,7 @@ export const POST = async (request: Request) => {
           id: project.id,
         },
         data: {
+          // Teacher is responsible to edit this
           location: `Keine Ahnung`,
         },
       })
@@ -304,6 +288,7 @@ export const POST = async (request: Request) => {
         id: project.id,
       },
       data: {
+        // E.g ASG 226
         location: `ASG ${room.name}`,
       },
     })
@@ -321,7 +306,7 @@ export const POST = async (request: Request) => {
         distinctId: id,
       })
       return Response.json({
-        redirectUrl: `/teachers/projects/feedback?msg=Bild konnte nicht hochgeladen werden, Projekt wurde trotzdem erstellt. Bitte bearbeiten.&status=error`,
+        redirectUrl: `/teachers/projects/feedback?msg=Bild konnte nicht hochgeladen werden, Projekt wurde trotzdem erstellt. Bitte bearbeiten.&status=warning`,
       })
     } else {
       await db.project.update({

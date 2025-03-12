@@ -59,7 +59,7 @@ export default function FeedbackPage({ searchParams }: FeedbackPageProps) {
       } else {
       }
     }, 200)
-  }, [])
+  }, [status])
 
   const currentStyle = styles[status] || styles.info
 

@@ -55,7 +55,7 @@ const OwnProjectCard = ({ imageUrl, title, teachers, day, id }: Props) => {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/90 to-transparent" />
       <motion.h1
-        className={cn("absolute top-4 left-4 text-white font-semibold z-10")}
+        className={cn("absolute top-4 left-4 right-4 text-white font-semibold z-10")}
         layoutId={`title-${id}`}
       >
         {title}

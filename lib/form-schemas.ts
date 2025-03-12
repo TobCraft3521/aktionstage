@@ -13,6 +13,7 @@ export const LoginFormSchema = z.object({
 export const CreateProjectSchema = z.object({
   title: z.string().min(1, "Kein Name angegeben").max(32, "Name zu lang"),
   description: z.string().min(1, "Keine Beschreibung angegeben"),
+  // File or URL
   banner: z.union([
     z
       .string()
@@ -40,6 +41,7 @@ export const CreateProjectSchema = z.object({
   price: z.number().min(0, "Preis muss größer oder gleich 0 sein"),
   time: z.string().min(1, "Keine Zeit angegeben"),
   date: z.enum([Day.MON, Day.TUE, Day.WED], { message: "Kein Tag ausgewählt" }),
+  room: z.string().optional(),
 })
 
 export const ChangePasswordSchema = z.object({
