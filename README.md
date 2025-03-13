@@ -37,6 +37,7 @@ To clone and run locally, just run git clone ...; npm i; and set up the env:
 
 UX fixes such as
 
+- Faster lcp (largest contentful paint) through chunk loading projects on explore page (tanstack useInfiniteQuery)
 - Page redirected you to many times
 - Confirm form resubmission (php issues)
 

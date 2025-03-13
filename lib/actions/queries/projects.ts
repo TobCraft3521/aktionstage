@@ -22,6 +22,31 @@ export const queryProjects = cache(async () => {
   return projects
 })
 
+export async function queryInfiniteProjects({
+  pageParam: cursor,
+}: {
+  pageParam: string | undefined
+}) {
+  const pageSize = 12
+  const projects = await db.project.findMany({
+    take: pageSize,
+    skip: cursor ? 1 : 0,
+    cursor: cursor ? { id: cursor } : undefined,
+    orderBy: { id: "asc" },
+    include: {
+      teachers: true,
+    },
+  })
+
+  return {
+    items: projects,
+    nextCursor:
+      projects.length === pageSize
+        ? projects[projects.length - 1].id
+        : undefined,
+  }
+}
+
 export const queryOwnProjects = async () => {
   const id = (await auth())?.user?.id
   const teacher = await db.account.findUnique({
