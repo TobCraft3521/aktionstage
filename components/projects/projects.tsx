@@ -146,7 +146,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
             <div className="w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12">
               <h1
                 className={cn(
-                  "ml-[24px] tracking-tighter text-slate-800",
+                  "ml-[20 px] tracking-tighter text-slate-800",
                   dmSans.className
                 )}
               >
@@ -224,7 +224,6 @@ const ProjectsComp = ({ id }: { id?: string }) => {
           )}
         </AnimatePresence>
       </div>
-
       <Footer />
     </div>
   )
