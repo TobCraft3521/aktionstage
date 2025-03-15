@@ -136,7 +136,7 @@ const ProjectDetailView = () => {
 
   return (
     <div className="w-full flex-1 min-h-0 left-0 top-0 bg-slate-50 flex flex-col">
-      <div className="top-0 left-0 h-[30vh] p-16 w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]">
+      <div className="top-0 left-0 h-[25vh] p-16 w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]">
         <Button
           variant="ghost"
           className=""
@@ -165,7 +165,7 @@ const ProjectDetailView = () => {
           <h1 className={cn(`${dmSans.className} text-2xl mb-4`)}>
             Anmeldungen ({students?.length || 0})
           </h1>
-          <ScrollArea className="bg-slate-100 h-full rounded-xl border border-slate-200 w-screen max-w-[400px]">
+          <ScrollArea className="bg-slate-100 h-full rounded-lg border border-slate-200 w-screen max-w-[400px]">
             <Table>
               <TableHeader>
                 <TableRow>

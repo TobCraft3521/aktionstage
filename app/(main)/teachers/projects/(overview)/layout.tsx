@@ -38,7 +38,7 @@ const Teachers = ({ children }: Props) => {
         <div className="block">
           <TeachersSidebar />
         </div>
-        <div className="flex flex-1 bg-slate-100 rounded-tl-xl mt-2 relative overflow-hidden min-h-0 flex-col">
+        <div className="flex-1 bg-slate-100 rounded-xl m-2 ml-0 relative overflow-hidden">
           <AnimatePresence>{children}</AnimatePresence>
         </div>
       </div>

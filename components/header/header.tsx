@@ -74,7 +74,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
     >
       <div className="z-10 flex gap-16 items-center">
         <AsgLogo />
-        <div className="md:flex font-medium hidden flex-row">
+        <div className="lg:flex font-medium hidden flex-row">
           <AnimatedBackground
             defaultValue={TABS.find((tab) => tab.current)?.name || "Projekte"}
             className="rounded-lg bg-slate-100"

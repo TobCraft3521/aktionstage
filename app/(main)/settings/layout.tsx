@@ -1,6 +1,7 @@
 import Header from "@/components/header/header"
 import SettingsSidebar from "@/components/settings/settings-sidebar"
 import { CreditCard, Lock, User, Users } from "lucide-react"
+import { AnimatePresence } from "motion/react"
 import Link from "next/link"
 
 const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
@@ -11,8 +12,8 @@ const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="block">
           <SettingsSidebar />
         </div>
-        <div className="flex-1 bg-slate-100 rounded-tl-xl mt-2 relative overflow-hidden">
-          {children}
+        <div className="flex-1 bg-slate-50 rounded-xl m-2 ml-0 relative overflow-hidden">
+          <AnimatePresence>{children}</AnimatePresence>
         </div>
       </div>
     </div>

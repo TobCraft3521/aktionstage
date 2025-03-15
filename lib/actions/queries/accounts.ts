@@ -87,3 +87,12 @@ export const queryProjectStudents = async (projectId: string) => {
     }
   })
 }
+
+export const queryStudents = async () => {
+  const students = await db.account.findMany({
+    where: {
+      role: Role.STUDENT,
+    },
+  })
+  return students
+}
