@@ -91,19 +91,20 @@ export const queryStudents = async () => {
   return students
 }
 
-export const queryStudentsWithProjects = async () => {
+export const queryStudentsWithProjectsAndPasswords = async () => {
   const students = await db.account.findMany({
     where: {
       role: Role.STUDENT,
     },
     include: {
       projects: true,
+      authDetails: true,
     },
   })
   return students
 }
 
-export const queryTeachersWithProjects = async () => {
+export const queryTeachersWithProjectsAndPasswords = async () => {
   const teachers = await db.account.findMany({
     where: {
       OR: [
@@ -117,6 +118,7 @@ export const queryTeachersWithProjects = async () => {
     },
     include: {
       ownProjects: true,
+      authDetails: true,
     },
   })
   return teachers

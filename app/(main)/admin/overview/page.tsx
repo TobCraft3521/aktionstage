@@ -1,14 +1,22 @@
 "use client"
 import AdminTable from "@/components/admin/data/table"
 import {
-  queryStudentsWithProjects,
-  queryTeachersWithProjects,
+  queryStudentsWithProjectsAndPasswords,
+  queryTeachersWithProjectsAndPasswords,
 } from "@/lib/actions/queries/accounts"
+import { queryProjectsWithStudentsAndTeachers } from "@/lib/actions/queries/projects"
 import {
-  queryProjects,
-  queryProjectsWithStudentsAndTeachers,
-} from "@/lib/actions/queries/projects"
+  queryRooms,
+  queryRoomsWithProjectsWithTeachers,
+} from "@/lib/actions/queries/rooms"
+import {
+  exportProjects,
+  exportRooms,
+  exportStudents,
+  exportTeachers,
+} from "@/lib/helpers/data-exports"
 import { cn } from "@/lib/utils"
+import { Role } from "@prisma/client"
 import { Layers } from "lucide-react"
 import { useState } from "react"
 
@@ -23,7 +31,7 @@ const Overview = (props: Props) => {
         <AdminTable
           title="Schüler"
           queryKey="students"
-          queryFn={queryStudentsWithProjects}
+          queryFn={queryStudentsWithProjectsAndPasswords}
           columns={[
             { label: "Name", render: (s) => s.name },
             { label: "Klasse", render: (s) => s.grade },
@@ -31,6 +39,9 @@ const Overview = (props: Props) => {
           ]}
           importFn={() => {}}
           addFn={() => {}}
+          exportFn={(students) => {
+            exportStudents(students)
+          }}
         />
       ),
     },
@@ -40,14 +51,31 @@ const Overview = (props: Props) => {
         <AdminTable
           title="Lehrer"
           queryKey="teachers"
-          queryFn={queryTeachersWithProjects}
+          queryFn={queryTeachersWithProjectsAndPasswords}
           columns={[
             { label: "Name", render: (t) => t.name },
             { label: "Kürzel", render: (t) => t.short },
+            {
+              label: "Rolle",
+              render: (t) => {
+                return (
+                  (
+                    {
+                      [Role.TEACHER]: "Lehrer",
+                      [Role.ADMIN]: "💥 Admin 💥",
+                    } as any
+                  ) /* only admin and teacher are returned */[t.role] ||
+                  "Unbekannt"
+                )
+              },
+            },
             { label: "Projekte", render: (t) => t.ownProjects?.length },
           ]}
           importFn={() => {}}
           addFn={() => {}}
+          exportFn={(teachers) => {
+            exportTeachers(teachers)
+          }}
         />
       ),
     },
@@ -65,6 +93,24 @@ const Overview = (props: Props) => {
           ]}
           importFn={() => {}}
           addFn={() => {}}
+          exportFn={(projects) => exportProjects(projects)}
+        />
+      ),
+    },
+    {
+      title: "Räume",
+      content: (
+        <AdminTable
+          title="Räume"
+          queryKey="rooms"
+          queryFn={() => queryRoomsWithProjectsWithTeachers()}
+          columns={[
+            { label: "Name", render: (r) => r.name },
+            { label: "Projekte", render: (r) => r.projects?.length },
+          ]}
+          importFn={() => {}}
+          addFn={() => {}}
+          exportFn={(rooms) => exportRooms(rooms)}
         />
       ),
     },

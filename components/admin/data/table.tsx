@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -14,8 +15,7 @@ import {
 } from "@/components/ui/table"
 import { useQuery } from "@tanstack/react-query"
 import { Check, Copy, Upload } from "lucide-react"
-import { useState, useMemo, useEffect } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useEffect, useMemo, useState } from "react"
 
 type Column<T> = {
   label: string
@@ -29,6 +29,7 @@ type Props<T> = {
   queryFn: () => Promise<T[]>
   importFn: () => void
   addFn: () => void
+  exportFn: (data: T[]) => void
   columns: Column<T>[]
 }
 
@@ -38,6 +39,7 @@ const AdminTable = <T extends { id: string; name: string }>({
   queryFn,
   importFn,
   addFn,
+  exportFn,
   columns,
 }: Props<T>) => {
   const {
@@ -89,11 +91,13 @@ const AdminTable = <T extends { id: string; name: string }>({
         <Button onClick={addFn} variant="secondary">
           Hinzufügen
         </Button>
-        <Button variant="secondary">Exportieren</Button>
+        <Button variant="secondary" onClick={() => exportFn(rows || [])}>
+          Exportieren
+        </Button>
       </div>
 
       {/* Table */}
-      <ScrollArea className="bg-slate-100 h-full rounded-xl border border-slate-200 w-full">
+      <ScrollArea className="bg-slate-100 h-full rounded-lg border border-slate-200 w-full">
         <Table>
           <TableHeader>
             <TableRow>
