@@ -79,13 +79,7 @@ export const queryProjectStudents = async (projectId: string) => {
     },
   })
   if (!project) return null
-  return project.students.map((student) => {
-    return {
-      id: student.id,
-      name: student.name,
-      grade: student.grade,
-    }
-  })
+  return project.students
 }
 
 export const queryStudents = async () => {
@@ -95,4 +89,35 @@ export const queryStudents = async () => {
     },
   })
   return students
+}
+
+export const queryStudentsWithProjects = async () => {
+  const students = await db.account.findMany({
+    where: {
+      role: Role.STUDENT,
+    },
+    include: {
+      projects: true,
+    },
+  })
+  return students
+}
+
+export const queryTeachersWithProjects = async () => {
+  const teachers = await db.account.findMany({
+    where: {
+      OR: [
+        {
+          role: Role.TEACHER,
+        },
+        {
+          role: Role.ADMIN,
+        },
+      ],
+    },
+    include: {
+      ownProjects: true,
+    },
+  })
+  return teachers
 }

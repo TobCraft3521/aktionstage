@@ -44,7 +44,9 @@ export const ConfirmModal: React.FC = () => {
         </DialogHeader>
         <p>{message}</p>
         <DialogFooter>
-          <Button onClick={handleCancel}>{cancelText}</Button>
+          <Button onClick={handleCancel} variant="secondary">
+            {cancelText}
+          </Button>
           <Button onClick={handleConfirm} variant={"destructive"}>
             {!isLoading ? confirmText : <Loader />}
           </Button>

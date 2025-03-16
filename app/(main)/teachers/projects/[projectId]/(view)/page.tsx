@@ -136,10 +136,10 @@ const ProjectDetailView = () => {
 
   return (
     <div className="w-full flex-1 min-h-0 left-0 top-0 bg-slate-50 flex flex-col">
-      <div className="top-0 left-0 h-[25vh] p-16 w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]">
+      <div className="top-0 left-0 h-[25vh] p-16 pt-12 w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]">
         <Button
           variant="ghost"
-          className=""
+          className="h-8"
           onClick={() => router.push("/teachers/projects")}
         >
           <ChevronLeft className="w-5 h-5" /> Zurück
@@ -209,6 +209,7 @@ const ProjectDetailView = () => {
           <h1 className={cn(`${dmSans.className} text-2xl mb-4`)}>Projekt</h1>
           <Button
             className="flex items-center gap-2"
+            variant="secondary"
             onClick={() => {
               posthog.capture("print_project_signups", {
                 project_id: project?.id,
@@ -220,6 +221,7 @@ const ProjectDetailView = () => {
           </Button>
           <Button
             className="flex items-center gap-2"
+            variant="secondary"
             onClick={() =>
               router.push(`/teachers/projects/${project?.id}/edit`)
             }
@@ -230,6 +232,7 @@ const ProjectDetailView = () => {
             <Button
               className="flex items-center gap-2 w-full"
               onClick={handleLeave}
+              variant="secondary"
             >
               <DoorOpen className="h-4 w-4" /> Verlassen
             </Button>
@@ -249,7 +252,12 @@ const ProjectDetailView = () => {
               </Tooltip>
             </TooltipProvider>
           )}
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            className="flex items-center gap-2 w-full"
+          >
+            <Trash2 className="h-4 w-4" />
             Löschen
           </Button>
         </div>

@@ -22,6 +22,17 @@ export const queryProjects = cache(async () => {
   return projects
 })
 
+export const queryProjectsWithStudentsAndTeachers = async () => {
+  const projects = await db.project.findMany({
+    include: {
+      teachers: true,
+      students: true,
+    },
+  })
+
+  return projects
+}
+
 export async function queryInfiniteProjects({
   pageParam: cursor,
 }: {

@@ -21,13 +21,13 @@ enum Role {
 }
 
 model Account {
-  id       String  @id @default(cuid())
-  userName String  @unique
+  id       String @id @default(cuid())
+  userName String @unique
   name     String
 
-  role     Role    @default(STUDENT)
-  short    String  @default("")
-  grade    String?
+  role  Role    @default(STUDENT)
+  short String  @default("")
+  grade String?
 
   projects            Project[]            @relation("ProjectAccount")
   ownProjects         Project[]            @relation("ProjectTeacher")
@@ -43,10 +43,11 @@ model Account {
 
 model AuthDetails {
   // to not expose the password on the account object, now require include auth details
-  id        String  @id @default(cuid())
-  accountId String  @unique
-  account   Account @relation(fields: [accountId], references: [id])
-  password  String
+  id              String  @id @default(cuid())
+  accountId       String  @unique
+  account         Account @relation(fields: [accountId], references: [id])
+  password        String
+  initialPassword String
 }
 
 enum Day {
@@ -56,20 +57,20 @@ enum Day {
 }
 
 model Project {
-  id            String  @id @default(cuid())
+  id            String @id @default(cuid())
   name          String
   description   String
   imageUrl      String
   studentsCount Int
-  maxStudents   Int     @default(10)
-  price         Float   @default(0)
-  time          String  @default("7:55-12.55")
-  emoji         String  @default("🤗")
+  maxStudents   Int    @default(10)
+  price         Float  @default(0)
+  time          String @default("7:55-12.55")
+  emoji         String @default("🤗")
   // custom location or room rendered to string
-  location      String  @default("ASG")
-  day           Day     @default(MON)
-  minGrade      Int     @default(5)
-  maxGrade      Int     @default(11)
+  location      String @default("ASG")
+  day           Day    @default(MON)
+  minGrade      Int    @default(5)
+  maxGrade      Int    @default(11)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

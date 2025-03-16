@@ -1,7 +1,13 @@
 "use client"
-import Projects from "@/components/admin/projects/projects"
-import Students from "@/components/admin/students/students"
-import Teachers from "@/components/admin/teachers/teachers"
+import AdminTable from "@/components/admin/data/table"
+import {
+  queryStudentsWithProjects,
+  queryTeachersWithProjects,
+} from "@/lib/actions/queries/accounts"
+import {
+  queryProjects,
+  queryProjectsWithStudentsAndTeachers,
+} from "@/lib/actions/queries/projects"
 import { cn } from "@/lib/utils"
 import { Layers } from "lucide-react"
 import { useState } from "react"
@@ -13,15 +19,54 @@ const Overview = (props: Props) => {
   const tabs = [
     {
       title: "Schüler",
-      content: <Students />,
+      content: (
+        <AdminTable
+          title="Schüler"
+          queryKey="students"
+          queryFn={queryStudentsWithProjects}
+          columns={[
+            { label: "Name", render: (s) => s.name },
+            { label: "Klasse", render: (s) => s.grade },
+            { label: "Projekte", render: (s) => s.projects.length },
+          ]}
+          importFn={() => {}}
+          addFn={() => {}}
+        />
+      ),
     },
     {
       title: "Lehrer",
-      content: <Teachers />,
+      content: (
+        <AdminTable
+          title="Lehrer"
+          queryKey="teachers"
+          queryFn={queryTeachersWithProjects}
+          columns={[
+            { label: "Name", render: (t) => t.name },
+            { label: "Kürzel", render: (t) => t.short },
+            { label: "Projekte", render: (t) => t.ownProjects?.length },
+          ]}
+          importFn={() => {}}
+          addFn={() => {}}
+        />
+      ),
     },
     {
       title: "Projekte",
-      content: <Projects />,
+      content: (
+        <AdminTable
+          title="Projekte"
+          queryKey="projects"
+          queryFn={queryProjectsWithStudentsAndTeachers}
+          columns={[
+            { label: "Name", render: (p) => p.name },
+            { label: "Lehrer", render: (p) => p.teachers?.length },
+            { label: "Schüler", render: (p) => p.students?.length },
+          ]}
+          importFn={() => {}}
+          addFn={() => {}}
+        />
+      ),
     },
   ]
   return (
