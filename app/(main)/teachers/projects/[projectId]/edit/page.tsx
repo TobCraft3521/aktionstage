@@ -49,7 +49,7 @@ import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Account, Day, Project, Room } from "@prisma/client"
+import { Account, Day, Project, Role, Room } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { Ban, Check, ChevronsUpDown, Info, Plus, Trash2 } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -62,6 +62,7 @@ import RangeSlider from "react-range-slider-input"
 import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
+import { RoomWithProjectsWithParticipants } from "@/lib/types"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -71,14 +72,6 @@ const dmSans = DM_Sans({
 type Props = {}
 
 type FormData = z.infer<typeof ProjectEditSchema>
-
-type RoomWithProjectWithTeachers = Room & {
-  projects:
-    | (Project & {
-        teachers: Account[] | null
-      })[]
-    | null
-}
 
 const fieldLabels = {
   title: "Titel",
@@ -116,9 +109,11 @@ const ProjectEditor = ({}: Props) => {
   > | null>(null)
   const [day, setDay] = useState<Day | undefined>()
   // Room logic
-  const [rooms, setRooms] = useState<RoomWithProjectWithTeachers[]>([])
+  const [rooms, setRooms] = useState<RoomWithProjectsWithParticipants[]>([])
   const [isRoomSelectOpen, setIsRoomSelectOpen] = useState(false)
-  const [room, setRoom] = useState<RoomWithProjectWithTeachers | undefined>()
+  const [room, setRoom] = useState<
+    RoomWithProjectsWithParticipants | undefined
+  >()
 
   const [replacingLocation, setReplacingLocation] = useState(false)
   // Teacher adding logic
@@ -157,14 +152,19 @@ const ProjectEditor = ({}: Props) => {
       setTimeTo(project.time.split("-")[1])
       setDay(project.day)
       // exclude the current teacher from the list of teachers
-      const otherTeachers = project.teachers.filter((t) => {
-        return t.id !== user.data?.user.id
+      const otherTeachers = project.participants.filter((t) => {
+        return (
+          t.id !== user.data?.user.id &&
+          (t.role === "TEACHER" || t.role === "ADMIN")
+        )
       })
       setAddedTeachers(otherTeachers)
       // the form value teachers includes the current teacher, the rendered teachers list does not (addedTeachers)
       setValue(
         "teachers",
-        project.teachers.map((t) => t.id || "should have been fetched with id")
+        project.participants
+          .filter((t) => t.role === Role.TEACHER || t.role == Role.ADMIN)
+          .map((t) => t.id || "should have been fetched with id")
       )
       return project
     },
@@ -349,7 +349,9 @@ const ProjectEditor = ({}: Props) => {
         ...addedTeachers,
         teacher,
         // current teacher
-        ...(project?.teachers || []).filter((t) => t.id === user.data?.user.id),
+        ...(project?.participants || []).filter(
+          (t) => t.id === user.data?.user.id
+        ),
       ].map((t) => t.id || "should have been fetched with id")
     )
   }
@@ -362,7 +364,9 @@ const ProjectEditor = ({}: Props) => {
       [
         ...addedTeachers,
         // current teacher
-        ...(project?.teachers || []).filter((t) => t.id === user.data?.user.id),
+        ...(project?.participants || []).filter(
+          (t) => t.id === user.data?.user.id
+        ),
       ]
         // filter is needed as the state update is async
         .filter((t) => t.id !== id)
@@ -708,7 +712,7 @@ const ProjectEditor = ({}: Props) => {
                           <CommandList>
                             {rooms?.length > 0 &&
                               rooms.map(
-                                (cRoom: RoomWithProjectWithTeachers) => (
+                                (cRoom: RoomWithProjectsWithParticipants) => (
                                   <CommandItem
                                     key={cRoom.id}
                                     className={cn(
@@ -768,9 +772,13 @@ const ProjectEditor = ({}: Props) => {
                                           (p) => p.day === day
                                         )?.name +
                                         ", " +
-                                        (cRoom.projects?.find(
-                                          (p) => p.day === day
-                                        )?.teachers?.[0]?.name || "unbekannt") +
+                                        (cRoom.projects
+                                          ?.find((p) => p.day === day)
+                                          ?.participants.filter(
+                                            (p) =>
+                                              p.role === Role.TEACHER ||
+                                              p.role === Role.ADMIN
+                                          )?.[0]?.name || "unbekannt") +
                                         ")"}
                                     {cRoom.projects?.find(
                                       (p) =>
@@ -862,7 +870,7 @@ const ProjectEditor = ({}: Props) => {
                             !isTeacherAvailable(id, day, allTeacherLoads)) && // Using the isTeacherFreeOnDay helper
                             !wasPreviouslyAdded(
                               id,
-                              project?.teachers || [],
+                              project?.participants || [],
                               addedTeachers
                             )) ||
                           isCurrentUser(id, user.data?.user.id)

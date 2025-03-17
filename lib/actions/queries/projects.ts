@@ -15,7 +15,11 @@ type FormData = z.infer<typeof CreateProjectSchema>
 export const queryProjects = cache(async () => {
   const projects = await db.project.findMany({
     include: {
-      teachers: true,
+      participants: {
+        where: {
+          OR: [{ role: "TEACHER" }, { role: "ADMIN" }],
+        },
+      },
     },
   })
 
@@ -25,8 +29,7 @@ export const queryProjects = cache(async () => {
 export const queryProjectsWithStudentsAndTeachers = async () => {
   const projects = await db.project.findMany({
     include: {
-      teachers: true,
-      students: true,
+      participants: true,
     },
   })
 
@@ -45,7 +48,11 @@ export async function queryInfiniteProjects({
     cursor: cursor ? { id: cursor } : undefined,
     orderBy: { id: "asc" },
     include: {
-      teachers: true,
+      participants: {
+        where: {
+          OR: [{ role: "TEACHER" }, { role: "ADMIN" }],
+        },
+      },
     },
   })
 
@@ -58,7 +65,7 @@ export async function queryInfiniteProjects({
   }
 }
 
-export const queryOwnProjects = async () => {
+export const queryTeachersProjects = async () => {
   const id = (await auth())?.user?.id
   const teacher = await db.account.findUnique({
     where: {
@@ -66,16 +73,16 @@ export const queryOwnProjects = async () => {
       OR: [{ role: "ADMIN" }, { role: "TEACHER" }],
     },
     include: {
-      ownProjects: {
+      projects: {
         include: {
-          teachers: true,
+          participants: true,
         },
       },
     },
   })
   if (!teacher) return redirect("/login")
   // Order for display
-  return teacher.ownProjects.sort(
+  return teacher.projects.sort(
     (a, b) =>
       ["MON", "TUE", "WED"].indexOf(a.day) -
       ["MON", "TUE", "WED"].indexOf(b.day)
@@ -196,7 +203,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
     },
     select: {
       id: true,
-      ownProjects: true,
+      projects: true,
     },
   })
 
@@ -225,7 +232,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
   const projects = await db.project.findMany({
     where: {
       day: formData.date,
-      teachers: {
+      participants: {
         some: {
           id: {
             in: teachers.map((teacher) => teacher.id),
@@ -270,7 +277,7 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       maxGrade: formData.maxGrade,
       location: formData.location,
       price: formData.price,
-      teachers: {
+      participants: {
         connect: teachers.map((teacher) => ({
           id: teacher.id,
         })),
@@ -388,7 +395,7 @@ export const queryProject = async (id: string) => {
       id,
     },
     include: {
-      teachers: true,
+      participants: true,
     },
   })
   return project

@@ -2,10 +2,9 @@
 import { motion } from "motion/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Account, Project } from "@prisma/client"
+import { Account, Project, Role } from "@prisma/client"
 import { cn } from "@/lib/utils"
-import { useEffect, useRef, useState } from "react"
-import { useAppState } from "@/stores/use-app-state"
+import { useEffect, useMemo, useRef, useState } from "react"
 import styles from "./styles.module.css"
 import { DM_Sans } from "next/font/google"
 
@@ -20,7 +19,7 @@ const SmallCard = ({
 }: {
   project: Partial<
     Project & {
-      teachers: Account[]
+      participants: Account[]
     }
   >
   index: number
@@ -29,6 +28,13 @@ const SmallCard = ({
   const cardRef = useRef<any>(null)
   const shadowRef = useRef<any>(null)
   const imageRef = useRef<any>(null)
+  const projectTeachers = useMemo(
+    () =>
+      project?.participants?.filter(
+        (p) => p.role === Role.TEACHER || p.role === Role.ADMIN
+      ),
+    [project.participants]
+  )
   return (
     // add drop-shadow-lg that doesnt render during animation
     <motion.div
@@ -94,7 +100,7 @@ const SmallCard = ({
           {project.name}
         </motion.h1>
         <div className="text-xs font-medium opacity-90">
-          {project.teachers?.map((teacher) => teacher.short).join(" ") ||
+          {projectTeachers?.map((teacher) => teacher.short).join(" ") ||
             "Kein Lehrer"}
           , {project.studentsCount}/{project.maxStudents}
         </div>

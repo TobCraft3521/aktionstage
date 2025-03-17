@@ -16,7 +16,7 @@ import {
   queryAllTeacherLoads,
   queryTeachers,
 } from "@/lib/actions/queries/accounts"
-import { queryOwnProjects } from "@/lib/actions/queries/projects"
+import { queryTeachersProjects } from "@/lib/actions/queries/projects"
 import {
   addTeacherToProject,
   removeTeacherFromProject,
@@ -34,9 +34,9 @@ const TeachersList = () => {
   const { projectId: id } = useParams() // Get the project ID from the URL
   const user = useSession().data?.user
   const queryClient = useQueryClient()
-  const { data: ownProjects } = useQuery({
+  const { data: projects } = useQuery({
     queryKey: ["teacher-projects"],
-    queryFn: () => queryOwnProjects(),
+    queryFn: () => queryTeachersProjects(),
   })
   const { data: allTeacherLoads } = useQuery({
     queryKey: ["teacher-loads"],
@@ -48,13 +48,14 @@ const TeachersList = () => {
   })
   const [isTeacherSelectOpen, setIsTeacherSelectOpen] = useState(false)
   const project = useMemo(
-    () => ownProjects?.find((p) => p.id === id),
-    [ownProjects, id]
+    () => projects?.find((p) => p.id === id),
+    [projects, id]
   )
   const teachers = useMemo(() => {
-    const allTeachers = project?.teachers || []
-    return allTeachers.filter((teacher) => teacher.id !== user?.id)
-  }, [project?.teachers, user?.id])
+    return project?.participants.filter(
+      (teacher) => teacher.id !== user?.id && teacher.role === "TEACHER"
+    )
+  }, [project?.participants, user?.id])
 
   const { mutateAsync: removeTeacher, isPending: isRemovingTeacher } =
     useMutation({
@@ -138,7 +139,7 @@ const TeachersList = () => {
     <div className="mt-4 flex flex-row gap-4 items-center">
       <p className="text-base">mit</p>
       <div className="flex flex-wrap gap-2 justify-center">
-        {teachers.map((teacher) => (
+        {teachers?.map((teacher) => (
           <Badge
             key={1}
             variant="outline"
@@ -160,15 +161,21 @@ const TeachersList = () => {
           open={isTeacherSelectOpen}
           onOpenChange={setIsTeacherSelectOpen}
         >
-          <PopoverTrigger disabled={teachers.length >= 2}>
+          <PopoverTrigger disabled={(teachers?.length || 0) >= 2}>
             <Badge
               variant="outline"
               className={cn(
                 "hover:bg-slate-100 border-slate-300 h-[25px]",
-                teachers.length < 2 ? "cursor-pointer" : "cursor-no-drop"
+                (teachers?.length || 0) < 2
+                  ? "cursor-pointer"
+                  : "cursor-no-drop"
               )}
             >
-              {teachers.length < 2 ? <Plus className="h-4 w-4" /> : "2 / 2"}
+              {(teachers?.length || 0) < 2 ? (
+                <Plus className="h-4 w-4" />
+              ) : (
+                "2 / 2"
+              )}
             </Badge>
           </PopoverTrigger>
           <PopoverContent className="w-[250px] p-0">
@@ -183,7 +190,7 @@ const TeachersList = () => {
                         key={teacher.id}
                         className={cn(
                           "cursor-pointer",
-                          teachers.find((t) => t.id === teacher.id) ||
+                          teachers?.find((t) => t.id === teacher.id) ||
                             project?.day === undefined ||
                             allTeacherLoads?.[teacher.id || ""]?.includes(
                               project?.day
@@ -206,7 +213,7 @@ const TeachersList = () => {
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
-                            teachers.find((t) => t.id === teacher.id)
+                            teachers?.find((t) => t.id === teacher.id)
                               ? "opacity-100"
                               : "opacity-0"
                           )}

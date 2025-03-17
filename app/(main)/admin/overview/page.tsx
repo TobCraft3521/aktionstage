@@ -1,19 +1,17 @@
 "use client"
 import AdminTable from "@/components/admin/data/table"
 import {
-  queryStudentsWithProjectsAndPasswords,
+  queryAcccountsComplete,
+  queryStudentsWithProjects,
   queryTeachersWithProjectsAndPasswords,
 } from "@/lib/actions/queries/accounts"
 import { queryProjectsWithStudentsAndTeachers } from "@/lib/actions/queries/projects"
+import { queryRoomsWithProjectsWithTeachers } from "@/lib/actions/queries/rooms"
+import { importAccounts } from "@/lib/data/import/account"
 import {
-  queryRooms,
-  queryRoomsWithProjectsWithTeachers,
-} from "@/lib/actions/queries/rooms"
-import {
+  exportAccounts,
   exportProjects,
   exportRooms,
-  exportStudents,
-  exportTeachers,
 } from "@/lib/helpers/data-exports"
 import { cn } from "@/lib/utils"
 import { Role } from "@prisma/client"
@@ -31,16 +29,19 @@ const Overview = (props: Props) => {
         <AdminTable
           title="Schüler"
           queryKey="students"
-          queryFn={queryStudentsWithProjectsAndPasswords}
+          queryFn={queryStudentsWithProjects}
           columns={[
             { label: "Name", render: (s) => s.name },
             { label: "Klasse", render: (s) => s.grade },
             { label: "Projekte", render: (s) => s.projects.length },
           ]}
-          importFn={() => {}}
+          importFn={(data) => {
+            importAccounts(data)
+          }}
           addFn={() => {}}
-          exportFn={(students) => {
-            exportStudents(students)
+          exportFn={async () => {
+            const accounts = await queryAcccountsComplete()
+            exportAccounts(accounts || [])
           }}
         />
       ),
@@ -69,12 +70,13 @@ const Overview = (props: Props) => {
                 )
               },
             },
-            { label: "Projekte", render: (t) => t.ownProjects?.length },
+            { label: "Projekte", render: (t) => t.projects?.length },
           ]}
           importFn={() => {}}
           addFn={() => {}}
-          exportFn={(teachers) => {
-            exportTeachers(teachers)
+          exportFn={async () => {
+            const accounts = await queryAcccountsComplete()
+            exportAccounts(accounts || [])
           }}
         />
       ),
@@ -88,8 +90,20 @@ const Overview = (props: Props) => {
           queryFn={queryProjectsWithStudentsAndTeachers}
           columns={[
             { label: "Name", render: (p) => p.name },
-            { label: "Lehrer", render: (p) => p.teachers?.length },
-            { label: "Schüler", render: (p) => p.students?.length },
+            {
+              label: "Lehrer",
+              render: (p) =>
+                p.participants.filter(
+                  (t) => t.role === Role.TEACHER || t.role === Role.ADMIN
+                ).length,
+            },
+            {
+              label: "Schüler",
+              render: (p) =>
+                p.participants.filter(
+                  (s) => s.role === Role.STUDENT || s.role === Role.VIP
+                )?.length,
+            },
           ]}
           importFn={() => {}}
           addFn={() => {}}

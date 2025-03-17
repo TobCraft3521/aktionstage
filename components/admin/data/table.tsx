@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Copy, Upload } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
@@ -27,8 +27,8 @@ type Props<T> = {
   title: string
   queryKey: string
   queryFn: () => Promise<T[]>
-  importFn: () => void
-  addFn: () => void
+  importFn: (data: File) => void
+  addFn: (data: File) => void
   exportFn: (data: T[]) => void
   columns: Column<T>[]
 }
@@ -53,6 +53,7 @@ const AdminTable = <T extends { id: string; name: string }>({
 
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
+  const queryClient = useQueryClient()
 
   // Filter data based on search term
   const filteredRows = useMemo(() => {
@@ -85,11 +86,21 @@ const AdminTable = <T extends { id: string; name: string }>({
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <Separator orientation="vertical" className="h-full" />
-        <Button onClick={importFn} className="flex items-center gap-2">
-          <Upload size={16} /> Importieren
+        <Button className="p-0">
+          <label
+            htmlFor="import-csv"
+            className="flex items-center gap-2 p-2 px-4 cursor-pointer"
+          >
+            <Upload size={16} /> Importieren
+          </label>
         </Button>
-        <Button onClick={addFn} variant="secondary">
-          Hinzufügen
+        <Button variant="secondary" className="p-0">
+          <label
+            htmlFor="add-csv"
+            className="flex items-center gap-2 p-2 px-4 cursor-pointer"
+          >
+            Hinzufügen
+          </label>
         </Button>
         <Button variant="secondary" onClick={() => exportFn(rows || [])}>
           Exportieren
@@ -168,6 +179,37 @@ const AdminTable = <T extends { id: string; name: string }>({
           </TableBody>
         </Table>
       </ScrollArea>
+      {/* hidden file inputs */}
+      <input
+        type="file"
+        id="import-csv"
+        accept=".csv"
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files?.length === 0 || !e.target.files) return
+          importFn(e.target.files[0])
+          queryClient.invalidateQueries({
+            queryKey: [queryKey],
+          })
+          // Clear the input for the next file
+          e.target.value = ""
+        }}
+      />
+      <input
+        type="file"
+        id="add-csv"
+        accept=".csv"
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files?.length === 0 || !e.target.files) return
+          addFn(e.target.files[0])
+          queryClient.invalidateQueries({
+            queryKey: [queryKey],
+          })
+          // Clear the input for the next file
+          e.target.value = ""
+        }}
+      />
     </div>
   )
 }

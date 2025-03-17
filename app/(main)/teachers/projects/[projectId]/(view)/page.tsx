@@ -1,11 +1,8 @@
 "use client"
 import { StudentsOverview } from "@/components/teachers/projects/printable"
 import TeachersList from "@/components/teachers/projects/teachers-list"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -22,21 +19,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { deleteProject } from "@/lib/actions/delete/project"
-import { queryProjectStudents } from "@/lib/actions/queries/accounts"
-import { queryOwnProjects } from "@/lib/actions/queries/projects"
+import { queryProjectParticipants } from "@/lib/actions/queries/accounts"
+import { queryTeachersProjects } from "@/lib/actions/queries/projects"
 import { leaveProject } from "@/lib/actions/updates/project"
 import { cn } from "@/lib/utils"
 import { useConfirmModal } from "@/stores/confirm-modal"
+import { Role } from "@prisma/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  ChevronLeft,
-  DoorOpen,
-  Edit,
-  Loader2,
-  Plus,
-  Printer,
-  Trash2,
-} from "lucide-react"
+import { ChevronLeft, DoorOpen, Edit, Printer, Trash2 } from "lucide-react"
 import { motion } from "motion/react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
@@ -61,17 +51,17 @@ const ProjectDetailView = () => {
     documentTitle: "Print Page Title",
   })
   const queryClient = useQueryClient()
-  const { data: ownProjects } = useQuery({
+  const { data: projects } = useQuery({
     queryKey: ["teacher-projects"],
-    queryFn: () => queryOwnProjects(),
+    queryFn: () => queryTeachersProjects(),
   })
   const project = useMemo(
-    () => ownProjects?.find((p) => p.id === id),
-    [ownProjects, id]
+    () => projects?.find((p) => p.id === id),
+    [projects, id]
   )
-  const { data: students, isPending: isStudentsLoading } = useQuery({
-    queryKey: ["students", project?.id],
-    queryFn: () => queryProjectStudents(project?.id || ""),
+  const { data: participants, isPending: isParticipantsLoading } = useQuery({
+    queryKey: ["participants", project?.id],
+    queryFn: () => queryProjectParticipants(project?.id || ""),
     refetchInterval: 5000,
   })
   const { mutateAsync: deleteProjectMutation, isPending: isDeletingProject } =
@@ -121,6 +111,18 @@ const ProjectDetailView = () => {
     },
   })
 
+  const projectTeachers = useMemo(() => {
+    return project?.participants.filter(
+      (p) => p.role === Role.TEACHER || p.role === Role.ADMIN
+    )
+  }, [project?.participants])
+
+  const projectStudents = useMemo(() => {
+    return project?.participants.filter(
+      (p) => p.role === "STUDENT" || p.role === "VIP"
+    )
+  }, [project?.participants])
+
   const handleLeave = () => {
     openConfirmModal({
       title: "Projekt verlassen",
@@ -163,7 +165,7 @@ const ProjectDetailView = () => {
       <div className="p-16 px-20 flex flex-row gap-10 flex-1 min-h-0">
         <div className="flex flex-1 flex-col min-h-0 w-screen max-w-[400px]">
           <h1 className={cn(`${dmSans.className} text-2xl mb-4`)}>
-            Anmeldungen ({students?.length || 0})
+            Anmeldungen ({projectStudents?.length || 0})
           </h1>
           <ScrollArea className="bg-slate-100 h-full rounded-lg border border-slate-200 w-screen max-w-[400px]">
             <Table>
@@ -175,14 +177,14 @@ const ProjectDetailView = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students?.map((s, i) => (
+                {projectStudents?.map((s, i) => (
                   <TableRow key={i} className={`animate-fade-in`}>
                     <TableCell>{i + 1}</TableCell>
                     <TableCell>{s.name}</TableCell>
                     <TableCell className="text-right">{s.grade}</TableCell>
                   </TableRow>
                 ))}
-                {isStudentsLoading &&
+                {isParticipantsLoading &&
                   new Array(5).fill(0).map((_, i) => (
                     <TableRow key={i}>
                       <TableCell>
@@ -196,7 +198,7 @@ const ProjectDetailView = () => {
                       </TableCell>
                     </TableRow>
                   ))}
-                {!students?.length && !isStudentsLoading && (
+                {!projectStudents?.length && !isParticipantsLoading && (
                   <TableRow>
                     <TableCell colSpan={3}>Keine Anmeldungen</TableCell>
                   </TableRow>
@@ -228,7 +230,7 @@ const ProjectDetailView = () => {
           >
             <Edit className="h-4 w-4" /> Bearbeiten
           </Button>
-          {(project?.teachers?.length || 0) > 1 ? (
+          {(projectTeachers?.length || 0) > 1 ? (
             <Button
               className="flex items-center gap-2 w-full"
               onClick={handleLeave}
@@ -245,7 +247,7 @@ const ProjectDetailView = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {(project?.teachers?.length || 0) <= 1
+                  {(projectTeachers?.length || 0) <= 1
                     ? "Keine weiteren Lehrer"
                     : null}
                 </TooltipContent>

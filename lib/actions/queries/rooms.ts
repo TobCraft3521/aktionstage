@@ -7,7 +7,7 @@ export const queryRooms = async () => {
     include: {
       projects: {
         include: {
-          teachers: true,
+          participants: true,
         },
       },
     },
@@ -19,7 +19,7 @@ export const queryRoomsWithProjectsWithTeachers = async () => {
     include: {
       projects: {
         include: {
-          teachers: true,
+          participants: true,
         },
       },
     },

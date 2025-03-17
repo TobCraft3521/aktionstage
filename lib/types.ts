@@ -1,11 +1,19 @@
 import { Account, AuthDetails, Project, Room } from "@prisma/client"
 
-export type ProjectWithTeachers = Project & { teachers: Account[] }
 export type AccountWithPassword = Account & {
   authDetails: AuthDetails | null
 }
 export type RoomWithProjects = Room & { projects: Project[] }
-export type ProjectWithStudentsWithTeachers = Project & {
-  students: Account[]
-  teachers: Account[]
+export type ProjectWithParticipants = Project & {
+  participants: Account[]
+}
+export type ImportedAccounts = (Partial<Account> & {
+  password: string
+  projectIds: string[]
+})[]
+export type AccountWithProjectsAndPassword = AccountWithPassword & {
+  projects: Project[]
+}
+export type RoomWithProjectsWithParticipants = Room & {
+  projects: ProjectWithParticipants[]
 }

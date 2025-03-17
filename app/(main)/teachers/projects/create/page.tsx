@@ -46,7 +46,7 @@ import { cn } from "@/lib/utils"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Account, Day, Project, Room } from "@prisma/client"
+import { Account, Day, Project, Role, Room } from "@prisma/client"
 import {
   Ban,
   Check,
@@ -67,20 +67,12 @@ import "react-range-slider-input/dist/style.css"
 import { v4 as uuid } from "uuid"
 import { z } from "zod"
 import "./range-slider-styles.css"
+import { RoomWithProjectsWithParticipants } from "@/lib/types"
 
 const dmSans = DM_Sans({
   weight: "800",
   subsets: ["latin"],
 })
-
-type RoomWithProjectWithTeachers = Room & {
-  projects:
-    | (Project & {
-        teachers: Account[] | null
-      })[]
-    | null
-}
-
 type FormData = z.infer<typeof CreateProjectSchema>
 
 const MultiStepForm = () => {
@@ -110,9 +102,11 @@ const MultiStepForm = () => {
   const [personalLoad, setPersonalLoad] = useState<Day[] | null>(null)
   const [day, setDay] = useState<Day | undefined>()
   // Room logic
-  const [rooms, setRooms] = useState<RoomWithProjectWithTeachers[]>([])
+  const [rooms, setRooms] = useState<RoomWithProjectsWithParticipants[]>([])
   const [isRoomSelectOpen, setIsRoomSelectOpen] = useState(false)
-  const [room, setRoom] = useState<RoomWithProjectWithTeachers | undefined>()
+  const [room, setRoom] = useState<
+    RoomWithProjectsWithParticipants | undefined
+  >()
   // auth
   const user = useSession()
   // other
@@ -801,7 +795,7 @@ const MultiStepForm = () => {
                             <CommandList>
                               {rooms?.length > 0 &&
                                 rooms.map(
-                                  (cRoom: RoomWithProjectWithTeachers) => (
+                                  (cRoom: RoomWithProjectsWithParticipants) => (
                                     <CommandItem
                                       key={cRoom.id}
                                       className={cn(
@@ -853,10 +847,13 @@ const MultiStepForm = () => {
                                             (p) => p.day === day
                                           )?.name +
                                           ", " +
-                                          (cRoom.projects?.find(
-                                            (p) => p.day === day
-                                          )?.teachers?.[0]?.name ||
-                                            "unbekannt") +
+                                          (cRoom.projects
+                                            ?.find((p) => p.day === day)
+                                            ?.participants.filter(
+                                              (p) =>
+                                                p.role === Role.TEACHER ||
+                                                p.role === Role.ADMIN
+                                            )?.[0]?.name || "unbekannt") +
                                           ")"}
                                     </CommandItem>
                                   )

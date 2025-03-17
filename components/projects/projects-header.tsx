@@ -1,13 +1,12 @@
 "use client"
-import { useAppState } from "@/stores/use-app-state"
 import { queryTeachers } from "@/lib/actions/queries/accounts"
 import { cn } from "@/lib/utils"
+import { useSearchState } from "@/stores/use-app-state"
 import { Account, Day } from "@prisma/client"
 import { motion } from "framer-motion"
 import { Check, ChevronsUpDown, ChevronUp, Plus, Search, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import AnimatedButton from "../global/some-button"
-import { Button } from "../ui/button"
 import {
   Command,
   CommandEmpty,
@@ -27,10 +26,9 @@ import {
 } from "../ui/select"
 
 const ProjectsHeader = () => {
-  const { search, setSearch } = useAppState()
+  const { search, setSearch } = useSearchState()
   const [teachers, setTeachers] = useState<Partial<Account>[]>([])
   const [teachersOpen, setTeachersOpen] = useState(false)
-  const [rerenderKey, setRerenderKey] = useState(+new Date())
   const [isCollapsed, setIsCollapsed] = useState(false)
   useEffect(() => {
     const fetchData = async () => {
@@ -47,7 +45,6 @@ const ProjectsHeader = () => {
     <motion.div
       layoutId="projects-header"
       transition={{ duration: 0.1 }}
-      key={rerenderKey}
       className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b dark:border-b-0 border-slate-200 sticky top-0 items-center px-6 gap-4 dark:drop-shadow-none z-50 dark:bg-card"
     >
       <div className="relative flex items-center">
@@ -57,7 +54,7 @@ const ProjectsHeader = () => {
           type="text"
           placeholder="Suchen"
           className="w-[250px] bg-slate-200 dark:bg-foreground rounded-lg border-slate-300 dark:border-none py-2 pl-10 pr-4 text-gray-900 focus:outline-none focus:border-indigo-400"
-          value={search.query}
+          value={search.query || ""}
           onChange={(e) =>
             setSearch({
               ...search,
@@ -73,7 +70,6 @@ const ProjectsHeader = () => {
               className=""
               onClick={() => {
                 setSearch({})
-                setRerenderKey(+new Date())
               }}
             >
               Reset
@@ -83,7 +79,7 @@ const ProjectsHeader = () => {
             onValueChange={(value) =>
               setSearch({ ...search, grade: Number(value) })
             }
-            value={search.grade?.toString()}
+            value={search.grade?.toString() || ""}
           >
             <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 border-none">
               <SelectValue placeholder="Jahrgangsstufe" />
@@ -160,7 +156,7 @@ const ProjectsHeader = () => {
             onValueChange={(value) =>
               setSearch({ ...search, day: value as Day })
             }
-            value={search.day}
+            value={search.day ?? ""}
           >
             <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 border-none">
               <SelectValue placeholder="Tag" />
@@ -177,7 +173,6 @@ const ProjectsHeader = () => {
                     className="flex gap-2 text-sm items-center"
                     onClick={(e) => {
                       setSearch({ ...search, day: undefined })
-                      setRerenderKey(+new Date())
                     }}
                   >
                     <X className="w-6 h-6 p-1" />
@@ -272,7 +267,6 @@ const ProjectsHeader = () => {
               className=""
               onClick={() => {
                 setSearch({})
-                setRerenderKey(+new Date())
               }}
             >
               Reset

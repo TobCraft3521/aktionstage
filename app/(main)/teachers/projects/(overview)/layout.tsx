@@ -1,7 +1,8 @@
 "use client"
 import Header from "@/components/header/header"
 import TeachersSidebar from "@/components/teachers/teachers-sidebar"
-import { queryOwnProjects } from "@/lib/actions/queries/projects"
+import { queryTeachersProjects } from "@/lib/actions/queries/projects"
+import { ProjectWithParticipants } from "@/lib/types"
 import { Account, Project } from "@prisma/client"
 import { AnimatePresence } from "motion/react"
 import { useSession } from "next-auth/react"
@@ -17,19 +18,17 @@ type Props = {
   children: React.ReactNode
 }
 
-type ProjectWithTeachers = Project & { teachers: Account[] }
-
 const Teachers = ({ children }: Props) => {
   const id = useSession().data?.user?.id
-  const [ownProjects, setOwnProjects] = useState<
-    ProjectWithTeachers[] | undefined
+  const [projects, setProjects] = useState<
+    ProjectWithParticipants[] | undefined
   >()
   useEffect(() => {
-    const fetchOwnProjects = async () => {
-      const projects = await queryOwnProjects()
-      setOwnProjects(projects)
+    const fetchProjects = async () => {
+      const fetchedProjects = await queryTeachersProjects()
+      setProjects(fetchedProjects)
     }
-    fetchOwnProjects()
+    fetchProjects()
   }, [])
   return (
     <div className="flex flex-col h-screen">

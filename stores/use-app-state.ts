@@ -8,21 +8,12 @@ export interface Search {
   teacher?: string
 }
 
-interface AppStateStore {
-  searchResults: Project[]
-  setSearchResults: (searchResults: Project[]) => void
+interface SearchStateStore {
   search: Search
   setSearch: (search: Search) => void
-  selectedProject: Partial<Project> | null
-  setSelectedProject: (project: Partial<Project> | null) => void
 }
 
-export const useAppState = create<AppStateStore>((set) => ({
-  searchResults: [],
-  setSearchResults: (searchResults) => set({ searchResults }),
+export const useSearchState = create<SearchStateStore>((set) => ({
   search: {},
   setSearch: (search) => set({ search }),
-  selectedProject: null,
-  setSelectedProject: (selectedProject) => set({ selectedProject }),
 }))
-

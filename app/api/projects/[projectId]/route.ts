@@ -29,7 +29,11 @@ export const PATCH = async (req: Request, { params }: Params) => {
     }
 
     // Check access (part of the project)
-    if (!project.teachers.find((t) => t.id === user.id)) {
+    if (
+      !project.participants.find(
+        (t) => t.id === user.id && t.role === "TEACHER"
+      )
+    ) {
       return Response.json({
         redirectUrl: "/teachers/projects?msg=Kein Zugriff&status=error",
       })
@@ -102,7 +106,7 @@ export const PATCH = async (req: Request, { params }: Params) => {
       },
       select: {
         id: true,
-        ownProjects: true,
+        projects: true,
       },
     })
 
@@ -110,7 +114,7 @@ export const PATCH = async (req: Request, { params }: Params) => {
     const conflictingProjects = await db.project.findMany({
       where: {
         day: data.date,
-        teachers: {
+        participants: {
           some: {
             id: {
               in: teachers.map((teacher) => teacher.id),
@@ -146,8 +150,11 @@ export const PATCH = async (req: Request, { params }: Params) => {
         maxGrade: data.maxGrade,
         location: data.location,
         price: data.price,
-        teachers: {
-          set: [...teachers.map((t) => ({ id: t.id }))],
+        participants: {
+          deleteMany: {
+            OR: [{ role: "TEACHER" }, { role: "ADMIN" }],
+          },
+          connect: [...teachers.map((t) => ({ id: t.id }))],
         },
       },
     })

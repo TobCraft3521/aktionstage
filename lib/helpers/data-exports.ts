@@ -1,11 +1,10 @@
-import { Account, Project, Room } from "@prisma/client"
+import { Account } from "@prisma/client"
+import Papa from "papaparse"
 import {
-  AccountWithPassword,
-  ProjectWithStudentsWithTeachers,
-  ProjectWithTeachers,
+  AccountWithProjectsAndPassword,
+  ProjectWithParticipants,
   RoomWithProjects,
 } from "../types"
-import Papa from "papaparse"
 
 // Central download function
 const downloadCSV = (csvString: string, filename: string) => {
@@ -20,37 +19,34 @@ const downloadCSV = (csvString: string, filename: string) => {
   URL.revokeObjectURL(url)
 }
 
-export const exportStudents = async (students: AccountWithPassword[]) => {
+export const exportAccounts = async (
+  students: AccountWithProjectsAndPassword[]
+) => {
   const csv = Papa.unparse({
-    fields: ["Id", "Name", "Klasse", "Password_Hash"],
+    fields: [
+      "Id",
+      "Name",
+      "Klasse",
+      "Password_Hash",
+      "Projekte",
+      "Rolle",
+      "Kuerzel",
+    ],
     data: students.map((s) => [
       s.id,
       s.name,
       s.grade,
       s.authDetails?.password ?? "",
+      s.projects.map((p) => p.id).join(","),
+      s.role,
+      s.short,
     ]),
   })
 
-  downloadCSV(csv, "students.csv")
+  downloadCSV(csv, "accounts.csv")
 }
 
-export const exportTeachers = async (teachers: AccountWithPassword[]) => {
-  const csv = Papa.unparse({
-    fields: ["Id", "Name", "Kürzel", "Password_Hash"],
-    data: teachers.map((t) => [
-      t.id,
-      t.name,
-      t.short,
-      t.authDetails?.password ?? "",
-    ]),
-  })
-
-  downloadCSV(csv, "teachers.csv")
-}
-
-export const exportProjects = async (
-  projects: ProjectWithStudentsWithTeachers[]
-) => {
+export const exportProjects = async (projects: ProjectWithParticipants[]) => {
   const csv = Papa.unparse({
     fields: [
       "Id",
@@ -61,12 +57,11 @@ export const exportProjects = async (
       "Tag",
       "Uhrzeit",
       "Ort",
-      "Lehrer",
       "Preis",
       "Maximale Schüler",
       "Minimale Klasse",
       "Maximale Klasse",
-      "Schüler",
+      "Teilnehmer",
     ],
     data: projects.map((p) => [
       p.id,
@@ -77,12 +72,11 @@ export const exportProjects = async (
       p.day,
       p.time,
       p.location,
-      p.teachers.map((t: Account) => t.id).join(","),
       p.price,
       p.maxStudents,
       p.minGrade,
       p.maxGrade,
-      p.students.map((s: Account) => s.id).join(","),
+      p.participants.map((t) => t.id).join(","),
     ]),
   })
 

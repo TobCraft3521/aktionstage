@@ -1,5 +1,4 @@
 "use client"
-import { useAppState } from "@/stores/use-app-state" // Update the path as per your project structure
 import {
   queryInfiniteProjects,
   queryProjects,
@@ -24,6 +23,9 @@ import { Skeleton } from "../ui/skeleton"
 import ProjectComp from "./project/project"
 import SmallCard from "./project/small"
 import { QueryFunctionContext, useInfiniteQuery } from "@tanstack/react-query"
+import { getRandomNoResultsJoke } from "@/lib/helpers/jokes"
+import { Button } from "../ui/button"
+import { useSearchState } from "@/stores/use-app-state"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -31,7 +33,7 @@ const dmSans = DM_Sans({
 })
 
 const ProjectsComp = ({ id }: { id?: string }) => {
-  const appState = useAppState()
+  const searchState = useSearchState()
   const [filtering, setFiltering] = useState(false)
   const [aboutTutorialDone, setAboutTutorialDone] = useState(false)
   const router = useRouter()
@@ -79,30 +81,32 @@ const ProjectsComp = ({ id }: { id?: string }) => {
       (project) =>
         (project.name
           ?.toLowerCase()
-          .includes(appState.search?.query?.toLowerCase() || "") ||
+          .includes(searchState.search?.query?.toLowerCase() || "") ||
           project.description
             ?.toLowerCase()
-            .includes(appState.search?.query?.toLowerCase() || "")) &&
-        (!appState.search.day || appState.search.day === project.day) &&
-        (!appState.search.grade ||
-          (appState.search.grade >= (project.minGrade || 5) &&
-            appState.search.grade <= (project.maxGrade || 11))) &&
-        (!appState.search.teacher ||
-          project.teachers?.some(
+            .includes(searchState.search?.query?.toLowerCase() || "")) &&
+        (!searchState.search.day || searchState.search.day === project.day) &&
+        (!searchState.search.grade ||
+          (searchState.search.grade >= (project.minGrade || 5) &&
+            searchState.search.grade <= (project.maxGrade || 11))) &&
+        (!searchState.search.teacher ||
+          project.participants?.some(
             (teacher) =>
               teacher.name.toLowerCase() ===
-              appState.search.teacher?.toLocaleLowerCase()
+              searchState.search.teacher?.toLocaleLowerCase()
           ))
     )
     setFiltering(false)
     return filtered
-  }, [projects, appState.search])
+  }, [projects, searchState])
 
   const noProjectsFound =
     !(status === "pending") &&
     !filtering &&
     searchedProjects.length === 0 &&
     projects.length > 0
+
+  const randomNothingFoundJoke = getRandomNoResultsJoke()
 
   let swipeDismissDistance = 0 // Default value for SSR
 
@@ -168,16 +172,37 @@ const ProjectsComp = ({ id }: { id?: string }) => {
               </div>
             )}
           </div>
+        ) : projects.length === 0 ? (
+          <div className="flex-1 flex-col mb-16 flex items-center justify-center text-lg drop-shadow-xl min-h-[40vh] gap-4">
+            <div className="text-7xl">🫗</div>
+            Nichts im Angebot für dich...
+          </div>
         ) : (
           noProjectsFound && (
-            <div className="flex-1 flex-col mb-16 flex items-center justify-center text-lg drop-shadow-xl min-h-[40vh]">
-              😜 Nichts gefunden{" "}
-              <Link
-                href={"https://www.google.com/search?q=snake"}
-                className="underline"
+            <div className="flex-1 flex-col mb-16 flex items-center justify-center text-lg min-h-[40vh] gap-4">
+              <div className="flex-col drop-shadow-xl flex items-center justify-center gap-4">
+                <div className="text-7xl">{randomNothingFoundJoke.emoji}</div>
+                <div className="flex flex-col items-center">
+                  {randomNothingFoundJoke.text}
+                  <div className="flex flex-col items-end w-full text-slate-500">
+                    -ChatGPT
+                  </div>
+                  {/* <Link
+                  href={"https://www.google.com/search?q=snake"}
+                  className="underline"
+                  >
+                  Hier geht&apos;s zu Snake 😉
+                  </Link> */}
+                </div>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  searchState.setSearch({})
+                }}
               >
-                Hier geht&apos;s zu Snake 😉
-              </Link>
+                Zurücksetzen
+              </Button>
             </div>
           )
         )}

@@ -42,7 +42,17 @@ export const queryAllTeacherLoads = async () => {
   const projects = await db.project.findMany({
     select: {
       day: true,
-      teachers: {
+      participants: {
+        where: {
+          OR: [
+            {
+              role: Role.TEACHER,
+            },
+            {
+              role: Role.ADMIN,
+            },
+          ],
+        },
         select: {
           id: true,
         },
@@ -52,7 +62,7 @@ export const queryAllTeacherLoads = async () => {
 
   // create a map with the teacher ids as keys and the days as values
   const teacherDays = projects.reduce((acc, project) => {
-    project.teachers.forEach((teacher) => {
+    project.participants.forEach((teacher) => {
       if (!acc[teacher.id]) acc[teacher.id] = []
       acc[teacher.id].push(project.day)
     })
@@ -62,43 +72,56 @@ export const queryAllTeacherLoads = async () => {
   return teacherDays
 }
 
-export const queryProjectStudents = async (projectId: string) => {
+export const queryProjectParticipants = async (projectId: string) => {
   const id = (await auth())?.user?.id
   if (!id) return null
   const project = await db.project.findUnique({
     where: {
       id: projectId,
-      teachers: {
+      participants: {
         some: {
           id,
         },
       },
     },
     include: {
-      students: true,
+      participants: true,
     },
   })
   if (!project) return null
-  return project.students
+  return project.participants
 }
 
 export const queryStudents = async () => {
   const students = await db.account.findMany({
     where: {
-      role: Role.STUDENT,
+      OR: [
+        {
+          role: Role.STUDENT,
+        },
+        {
+          role: Role.VIP,
+        },
+      ],
     },
   })
   return students
 }
 
-export const queryStudentsWithProjectsAndPasswords = async () => {
+export const queryStudentsWithProjects = async () => {
   const students = await db.account.findMany({
     where: {
-      role: Role.STUDENT,
+      OR: [
+        {
+          role: Role.STUDENT,
+        },
+        {
+          role: Role.VIP,
+        },
+      ],
     },
     include: {
       projects: true,
-      authDetails: true,
     },
   })
   return students
@@ -117,9 +140,22 @@ export const queryTeachersWithProjectsAndPasswords = async () => {
       ],
     },
     include: {
-      ownProjects: true,
+      projects: true,
       authDetails: true,
     },
   })
   return teachers
+}
+
+export const queryAcccountsComplete = async () => {
+  const user = (await auth())?.user
+  if (!user) return
+  if (user.role !== Role.ADMIN) return
+  const accounts = await db.account.findMany({
+    include: {
+      projects: true,
+      authDetails: true,
+    },
+  })
+  return accounts
 }

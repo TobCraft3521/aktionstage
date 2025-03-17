@@ -159,7 +159,7 @@ export const POST = async (request: Request) => {
     },
     select: {
       id: true,
-      ownProjects: true,
+      projects: true,
     },
   })
 
@@ -167,7 +167,7 @@ export const POST = async (request: Request) => {
   const conflictingProjects = await db.project.findMany({
     where: {
       day: data.date,
-      teachers: {
+      participants: {
         some: {
           id: {
             in: teachers.map((teacher) => teacher.id),
@@ -212,7 +212,7 @@ export const POST = async (request: Request) => {
       maxGrade: data.maxGrade,
       location: data.location,
       price: data.price,
-      teachers: {
+      participants: {
         connect: teachers.map((teacher) => ({
           id: teacher.id,
         })),

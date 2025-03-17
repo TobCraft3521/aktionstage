@@ -1,6 +1,6 @@
 // File: /components/ProjectComp.tsx
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Account, Day, Project } from "@prisma/client"
 import { AnimatePresence, motion, spring, useAnimation } from "motion/react"
@@ -18,7 +18,7 @@ const dmSans = DM_Sans({
 interface ProjectCompProps {
   project: Partial<
     Project & {
-      teachers: Account[]
+      participants: Account[]
     }
   >
 }
@@ -38,6 +38,14 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
   useEffect(() => {
     setTimeout(() => setShowContents(true), 400)
   }, [controls])
+
+  const projectTeachers = useMemo(
+    () =>
+      project?.participants?.filter(
+        (p) => p.role === "TEACHER" || p.role === "ADMIN"
+      ),
+    [project.participants]
+  )
 
   return (
     <div className="relative h-full w-full">
@@ -89,12 +97,12 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                   "text-base md:text-3xl px-8 md:px-24 text-white mb-4 md:mb-8"
                 )}
               >
-                {project?.teachers?.map(
+                {projectTeachers?.map(
                   (teacher, i) =>
                     teacher.name.split(" ")[0].substring(0, 1) +
                     ". " +
                     teacher.name.split(" ")[1] +
-                    (i + 1 === project?.teachers?.length ? "" : ", ")
+                    (i + 1 === projectTeachers?.length ? "" : ", ")
                 )}
               </motion.h2>
               <ScrollArea
