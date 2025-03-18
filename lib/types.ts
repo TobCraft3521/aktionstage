@@ -20,3 +20,5 @@ export type RoomWithProjectsWithParticipants = Room & {
 export type ImportedProjects = (Partial<Project> & {
   participantIds: string[]
 })[]
+
+export type ImportedRooms = (Partial<Room> & { projectIds: string[] })[]

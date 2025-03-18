@@ -1,9 +1,10 @@
 import { updateProjects } from "@/lib/actions/import/project"
+import { updateRooms } from "@/lib/actions/import/room"
 import { QueryClient } from "@tanstack/react-query"
 import Papa from "papaparse"
 import toast from "react-hot-toast"
 
-export const importProjects = async (
+export const importRooms = async (
   file: File,
   queryClient: QueryClient,
   add?: boolean
@@ -12,12 +13,10 @@ export const importProjects = async (
     header: true,
     complete: (res) =>
       toast.promise(onData(res, queryClient, add), {
-        loading: add
-          ? "Projekte werden hinzugefügt"
-          : "Projekte werden importiert",
+        loading: add ? "Räume werden hinzugefügt" : "Räume werden importiert",
         success: (data) =>
           (data?.count && data?.count + " ") +
-          "Projekte erfolgreich " +
+          "Räume erfolgreich " +
           (add ? "hinzugefügt" : "importiert"),
         error: (error) =>
           add
@@ -29,6 +28,7 @@ export const importProjects = async (
       console.error(err)
       toast.error("Fehler beim Einlesen der Datei")
     },
+    encoding: "utf-8",
   })
 }
 
@@ -43,24 +43,14 @@ const onData = async (
   if (data.length === 0) {
     throw new Error("Keine Daten")
   }
-  if (res.meta.fields?.length !== 13) {
+  if (res.meta.fields?.length !== 3) {
     throw new Error("Falsche Anzahl an Spalten")
   }
 
   if (
     !res.meta.fields.includes("Id") ||
-    !res.meta.fields.includes("Titel") ||
-    !res.meta.fields.includes("Beschreibung") ||
-    !res.meta.fields.includes("Banner") ||
-    !res.meta.fields.includes("Emoji") ||
-    !res.meta.fields.includes("Tag") ||
-    !res.meta.fields.includes("Uhrzeit") ||
-    !res.meta.fields.includes("Ort") ||
-    !res.meta.fields.includes("Preis") ||
-    !res.meta.fields.includes("Maximale Schüler") ||
-    !res.meta.fields.includes("Minimale Klasse") ||
-    !res.meta.fields.includes("Maximale Klasse") ||
-    !res.meta.fields.includes("Teilnehmer")
+    !res.meta.fields.includes("Name") ||
+    !res.meta.fields.includes("Projekte")
   ) {
     throw new Error("Falsche Spalten")
   }
@@ -71,27 +61,17 @@ const onData = async (
       .map((d) => {
         return {
           id: d.Id,
-          name: d.Titel,
-          description: d.Beschreibung,
-          imageUrl: d.Banner,
-          emoji: d.Emoji,
-          day: d.Tag,
-          time: d.Uhrzeit,
-          location: d.Ort,
-          price: parseFloat(d.Preis),
-          maxStudents: parseInt(d["Maximale Schüler"]),
-          minGrade: parseInt(d["Minimale Klasse"]),
-          maxGrade: parseInt(d["Maximale Klasse"]),
-          participantIds: d.Teilnehmer.split(","),
+          name: d.Name,
+          projectIds: d.Projekte.split(","),
         }
         // Filter out empty entries
       })
       .filter((a) => a.id)
 
-  const result = await updateProjects(projects, add || false)
+  const result = await updateRooms(projects, add || false)
 
   queryClient.invalidateQueries({
-    queryKey: ["projects"],
+    queryKey: ["rooms"],
   })
 
   if (result?.error) {

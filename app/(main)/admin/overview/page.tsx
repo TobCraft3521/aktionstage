@@ -9,6 +9,7 @@ import { queryProjectsWithStudentsAndTeachers } from "@/lib/actions/queries/proj
 import { queryRoomsWithProjectsWithTeachers } from "@/lib/actions/queries/rooms"
 import { importAccounts } from "@/lib/data/import/account"
 import { importProjects } from "@/lib/data/import/project"
+import { importRooms } from "@/lib/data/import/room"
 import {
   exportAccounts,
   exportProjects,
@@ -135,8 +136,12 @@ const Overview = (props: Props) => {
             { label: "Name", render: (r) => r.name },
             { label: "Projekte", render: (r) => r.projects?.length },
           ]}
-          importFn={() => {}}
-          addFn={() => {}}
+          importFn={(data) => {
+            importRooms(data, queryClient)
+          }}
+          addFn={(data) => {
+            importRooms(data, queryClient, true)
+          }}
           exportFn={(rooms) => exportRooms(rooms)}
         />
       ),
