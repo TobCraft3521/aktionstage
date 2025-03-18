@@ -17,3 +17,6 @@ export type AccountWithProjectsAndPassword = AccountWithPassword & {
 export type RoomWithProjectsWithParticipants = Room & {
   projects: ProjectWithParticipants[]
 }
+export type ImportedProjects = (Partial<Project> & {
+  participantIds: string[]
+})[]

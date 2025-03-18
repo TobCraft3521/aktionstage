@@ -30,7 +30,7 @@ export const exportAccounts = async (
       "Password_Hash",
       "Projekte",
       "Rolle",
-      "Kuerzel",
+      "Kürzel",
     ],
     data: students.map((s) => [
       s.id,

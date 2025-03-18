@@ -35,6 +35,10 @@ const SmallCard = ({
       ),
     [project.participants]
   )
+  const studentsCount = useMemo(
+    () => project?.participants?.filter((p) => p.role === Role.STUDENT).length,
+    [project.participants]
+  )
   return (
     // add drop-shadow-lg that doesnt render during animation
     <motion.div
@@ -102,7 +106,7 @@ const SmallCard = ({
         <div className="text-xs font-medium opacity-90">
           {projectTeachers?.map((teacher) => teacher.short).join(" ") ||
             "Kein Lehrer"}
-          , {project.studentsCount}/{project.maxStudents}
+          , {studentsCount}/{project.maxStudents}
         </div>
       </div>
       {/* hide when opening to reduce lag ACTUAL PROBLEM HERE 10% ~*/}

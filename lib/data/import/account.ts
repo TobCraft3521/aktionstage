@@ -1,18 +1,26 @@
 import { updateAccounts } from "@/lib/actions/import/account"
-import { ImportedAccounts } from "@/lib/types"
+import { Role } from "@prisma/client"
+import { QueryClient } from "@tanstack/react-query"
 import md5 from "md5"
 import Papa from "papaparse"
 import toast from "react-hot-toast"
 
-export const importAccounts = async (file: File, add?: boolean) => {
+export const importAccounts = async (
+  file: File,
+  queryClient: QueryClient,
+  add?: boolean
+) => {
   Papa.parse(file, {
     header: true,
     complete: (res) =>
-      toast.promise(onData(res, add), {
+      toast.promise(onData(res, queryClient, add), {
         loading: add
           ? "Accounts werden hinzugefügt"
           : "Accounts werden importiert",
-        success: "Accounts erfolgreich " + (add ? "hinzugefügt" : "importiert"),
+        success: (data) =>
+          (data?.count && data?.count + " ") +
+          "Accounts erfolgreich " +
+          (add ? "hinzugefügt" : "importiert"),
         error: (error) =>
           add
             ? `Fehler beim Hinzufügen: ${error}`
@@ -23,20 +31,22 @@ export const importAccounts = async (file: File, add?: boolean) => {
       console.error(err)
       toast.error("Fehler beim Einlesen der Datei")
     },
+    encoding: "utf-8",
   })
 }
 
-const onData = async (res: Papa.ParseResult<any>, add?: boolean) => {
+const onData = async (
+  res: Papa.ParseResult<any>,
+  queryClient: QueryClient,
+  add?: boolean
+) => {
   const { data } = res
 
   // check headers, dimensions
   if (data.length === 0) {
-    console.log(1)
     throw new Error("Keine Daten")
   }
   if (res.meta.fields?.length !== 7) {
-    console.log(2)
-
     throw new Error("Falsche Anzahl an Spalten")
   }
 
@@ -53,29 +63,52 @@ const onData = async (res: Papa.ParseResult<any>, add?: boolean) => {
     ) ||
     !res.meta.fields.includes("Projekte") ||
     !res.meta.fields.includes("Rolle") ||
-    !res.meta.fields.includes("Kuerzel")
+    !res.meta.fields.includes("Kürzel")
   ) {
-    console.log(3)
-
     throw new Error("Falsche Spalten")
   }
 
-  // Overwrite database entries
-  const accounts: any = // ImportedAccounts
-    data.map((d) => {
-      return {
-        id: d.Id,
-        name: d.Name,
-        grade: d.Klasse,
-        password: d.Password_Hash ?? md5(d.Password),
-        projectIds: d.Projekte?.split(",") || [],
-        userName: d.Name?.split(" ").join("."),
-        role: d.Rolle,
-        short: d.Kuerzel,
-      }
-    })
+  let accounts: any
+
+  try {
+    // Overwrite database entries
+    accounts = // ImportedAccounts
+      data
+        .map((d) => {
+          return {
+            id: d.Id,
+            name: d.Name,
+            grade: d.Klasse,
+            password:
+              d.Password_Hash !== undefined
+                ? d.Password_Hash
+                : md5(d.Password || ""),
+            projectIds: d.Projekte?.split(",") || [],
+            userName: d.Name?.split(" ").join("."),
+            role: Role[d.Rolle as Role] || Role.STUDENT,
+            short: d["Kürzel"],
+          }
+          // Filter out empty entries
+        })
+        .filter((a) => a.id)
+  } catch (error) {
+    console.error(error)
+    throw new Error("Fehler beim Verarbeiten der Daten")
+  }
   const result = await updateAccounts(accounts, add || false)
+
+  queryClient.invalidateQueries({
+    queryKey: ["teachers"],
+  })
+
+  queryClient.invalidateQueries({
+    queryKey: ["students"],
+  })
+
   if (result?.error) {
     throw new Error("Fehler beim Speichern")
+  }
+  return {
+    count: result?.amount,
   }
 }

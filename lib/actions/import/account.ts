@@ -15,6 +15,7 @@ export const updateAccounts = async (
   })
   if (!account) return
   if (account.role !== Role.ADMIN) return
+  let amount = 0
   try {
     // When !add we delete all students
     // AuthDetails and TutorialCompletions are onDelete: Cascade
@@ -23,7 +24,7 @@ export const updateAccounts = async (
     }
 
     // Add students
-    await db.account.createMany({
+    const { count } = await db.account.createMany({
       data: accounts.map((a) => ({
         id: a.id,
         name: a.name || "",
@@ -32,7 +33,10 @@ export const updateAccounts = async (
         userName: a.userName || "",
         short: a.short || "",
       })),
+      skipDuplicates: true,
     })
+
+    amount = count
 
     for (const account of accounts) {
       try {
@@ -61,7 +65,7 @@ export const updateAccounts = async (
     }
   } catch (error) {
     console.error(error)
-    return { error: true }
+    return { error: true, amount }
   }
-  return { error: undefined }
+  return { error: undefined, amount }
 }

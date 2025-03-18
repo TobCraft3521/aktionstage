@@ -8,6 +8,7 @@ import {
 import { queryProjectsWithStudentsAndTeachers } from "@/lib/actions/queries/projects"
 import { queryRoomsWithProjectsWithTeachers } from "@/lib/actions/queries/rooms"
 import { importAccounts } from "@/lib/data/import/account"
+import { importProjects } from "@/lib/data/import/project"
 import {
   exportAccounts,
   exportProjects,
@@ -15,6 +16,7 @@ import {
 } from "@/lib/helpers/data-exports"
 import { cn } from "@/lib/utils"
 import { Role } from "@prisma/client"
+import { useQueryClient } from "@tanstack/react-query"
 import { Layers } from "lucide-react"
 import { useState } from "react"
 
@@ -22,6 +24,7 @@ type Props = {}
 
 const Overview = (props: Props) => {
   const [activeTab, setActiveTab] = useState(0)
+  const queryClient = useQueryClient()
   const tabs = [
     {
       title: "Schüler",
@@ -36,9 +39,11 @@ const Overview = (props: Props) => {
             { label: "Projekte", render: (s) => s.projects.length },
           ]}
           importFn={(data) => {
-            importAccounts(data)
+            importAccounts(data, queryClient)
           }}
-          addFn={() => {}}
+          addFn={(data) => {
+            importAccounts(data, queryClient, true)
+          }}
           exportFn={async () => {
             const accounts = await queryAcccountsComplete()
             exportAccounts(accounts || [])
@@ -72,8 +77,12 @@ const Overview = (props: Props) => {
             },
             { label: "Projekte", render: (t) => t.projects?.length },
           ]}
-          importFn={() => {}}
-          addFn={() => {}}
+          importFn={(data) => {
+            importAccounts(data, queryClient)
+          }}
+          addFn={(data) => {
+            importAccounts(data, queryClient, true)
+          }}
           exportFn={async () => {
             const accounts = await queryAcccountsComplete()
             exportAccounts(accounts || [])
@@ -105,8 +114,12 @@ const Overview = (props: Props) => {
                 )?.length,
             },
           ]}
-          importFn={() => {}}
-          addFn={() => {}}
+          importFn={(data) => {
+            importProjects(data, queryClient)
+          }}
+          addFn={(data) => {
+            importProjects(data, queryClient, true)
+          }}
           exportFn={(projects) => exportProjects(projects)}
         />
       ),
