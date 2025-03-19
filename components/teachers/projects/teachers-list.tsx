@@ -52,7 +52,7 @@ const TeachersList = () => {
     [projects, id]
   )
   const teachers = useMemo(() => {
-    return project?.participants.filter(
+    return project?.participants?.filter(
       (teacher) => teacher.id !== user?.id && teacher.role === "TEACHER"
     )
   }, [project?.participants, user?.id])

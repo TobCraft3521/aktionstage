@@ -152,7 +152,7 @@ const ProjectEditor = ({}: Props) => {
       setTimeTo(project.time.split("-")[1])
       setDay(project.day)
       // exclude the current teacher from the list of teachers
-      const otherTeachers = project.participants.filter((t) => {
+      const otherTeachers = project.participants?.filter((t) => {
         return (
           t.id !== user.data?.user.id &&
           (t.role === "TEACHER" || t.role === "ADMIN")
@@ -774,7 +774,7 @@ const ProjectEditor = ({}: Props) => {
                                         ", " +
                                         (cRoom.projects
                                           ?.find((p) => p.day === day)
-                                          ?.participants.filter(
+                                          ?.participants?.filter(
                                             (p) =>
                                               p.role === Role.TEACHER ||
                                               p.role === Role.ADMIN

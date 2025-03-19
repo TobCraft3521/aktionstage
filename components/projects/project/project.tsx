@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Account, Day, Project } from "@prisma/client"
+import { Account, Day, Project, Role } from "@prisma/client"
 import { AnimatePresence, motion, spring, useAnimation } from "motion/react"
 import Image from "next/image"
 import { ArrowDown, X } from "lucide-react"
@@ -47,6 +47,13 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
     [project.participants]
   )
 
+  const studentsCount = useMemo(
+    () =>
+      project?.participants?.filter(
+        (p) => p.role === Role.STUDENT || p.role === Role.VIP
+      ).length,
+    [project.participants]
+  )
   return (
     <div className="relative h-full w-full">
       <motion.div
@@ -147,7 +154,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 </div>
               </ScrollArea>
               <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
-                {(project.studentsCount || 0) < (project.maxStudents || 0) ? (
+                {(studentsCount || 0) < (project.maxStudents || 0) ? (
                   <Button className="w-full sm:w-[154px] h-[43px] rounded-xl">
                     Anmelden
                   </Button>
@@ -162,7 +169,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 {[
                   {
                     icon: "🙋🏻",
-                    text: `${project.studentsCount}/${project.maxStudents}`,
+                    text: `${studentsCount}/${project.maxStudents}`,
                   },
                   { icon: "📍", text: project.location },
                   {
@@ -170,7 +177,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                     text:
                       dayToGerman[project.day || "MON"] + " " + project.time,
                   },
-                  { icon: "💵", text: "2€" },
+                  { icon: "💵", text: project.price + "€" },
                 ].map((item, index) => (
                   <div
                     key={index}

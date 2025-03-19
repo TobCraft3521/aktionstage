@@ -62,7 +62,7 @@ export const queryAllTeacherLoads = async () => {
 
   // create a map with the teacher ids as keys and the days as values
   const teacherDays = projects.reduce((acc, project) => {
-    project.participants.forEach((teacher) => {
+    project.participants?.forEach((teacher) => {
       if (!acc[teacher.id]) acc[teacher.id] = []
       acc[teacher.id].push(project.day)
     })
@@ -103,6 +103,19 @@ export const queryStudents = async () => {
           role: Role.VIP,
         },
       ],
+    },
+  })
+  return students
+}
+
+export const queryProjectStudents = async (projectId: string) => {
+  const students = await db.account.findMany({
+    where: {
+      projects: {
+        some: {
+          id: projectId,
+        },
+      },
     },
   })
   return students
@@ -158,4 +171,17 @@ export const queryAcccountsComplete = async () => {
     },
   })
   return accounts
+}
+
+export const queryAccount = async (id: string) => {
+  const account = await db.account.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      projects: true,
+      authDetails: true,
+    },
+  })
+  return account
 }

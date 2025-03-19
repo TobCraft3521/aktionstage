@@ -30,7 +30,7 @@ export const PATCH = async (req: Request, { params }: Params) => {
 
     // Check access (part of the project)
     if (
-      !project.participants.find(
+      !project.participants?.find(
         (t) => t.id === user.id && t.role === "TEACHER"
       )
     ) {

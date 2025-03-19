@@ -36,7 +36,10 @@ const SmallCard = ({
     [project.participants]
   )
   const studentsCount = useMemo(
-    () => project?.participants?.filter((p) => p.role === Role.STUDENT).length,
+    () =>
+      project?.participants?.filter(
+        (p) => p.role === Role.STUDENT || p.role === Role.VIP
+      ).length,
     [project.participants]
   )
   return (

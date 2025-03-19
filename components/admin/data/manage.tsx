@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Copy, Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -22,27 +23,22 @@ type Column<T> = {
   label: string
   render: (row: T) => React.ReactNode
   isId?: boolean // Flag to identify ID column
+  noPadding?: boolean
 }
 
 type Props<T> = {
   title: string
   queryKey: string
   queryFn: () => Promise<T[]>
-  importFn: (data: File) => void
-  addFn: (data: File) => void
-  exportFn: (data: T[]) => void
   columns: Column<T>[]
   // => /admin/[manageItem]/[id] for custom route
   manageItem: string
 }
 
-const AdminTable = <T extends { id: string; name: string }>({
+const ManageTable = <T extends { id: string; name: string }>({
   title,
   queryKey,
   queryFn,
-  importFn,
-  addFn,
-  exportFn,
   columns,
   manageItem,
 }: Props<T>) => {
@@ -91,26 +87,6 @@ const AdminTable = <T extends { id: string; name: string }>({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <Separator orientation="vertical" className="h-full" />
-        <Button className="p-0">
-          <label
-            htmlFor="import-csv"
-            className="flex items-center gap-2 p-2 px-4 cursor-pointer"
-          >
-            <Upload size={16} /> Importieren
-          </label>
-        </Button>
-        <Button variant="secondary" className="p-0">
-          <label
-            htmlFor="add-csv"
-            className="flex items-center gap-2 p-2 px-4 cursor-pointer"
-          >
-            Hinzufügen
-          </label>
-        </Button>
-        <Button variant="secondary" onClick={() => exportFn(rows || [])}>
-          Exportieren
-        </Button>
       </div>
 
       {(rows?.length || 0) > 0 || isPending ? (
@@ -163,13 +139,11 @@ const AdminTable = <T extends { id: string; name: string }>({
                   <TableRow
                     key={row.id}
                     className="hover:brightness-95 transition-all bg-slate-100 cursor-pointer"
-                    onClick={
-                      manageItem
-                        ? () => {
-                            router.push(`/admin/${manageItem}/${row.id}?queryKey=${queryKey}`) // Query key for instant data
-                          }
-                        : undefined
-                    }
+                    onClick={() =>
+                      router.push(
+                        `/admin/${manageItem}/${row.id}?queryKey=${queryKey}`
+                      )
+                    } // Query key for instant data
                   >
                     {/* Render ID column first */}
                     <TableCell className="h-12 p-0 pl-4">
@@ -188,7 +162,12 @@ const AdminTable = <T extends { id: string; name: string }>({
 
                     {/* Dynamically render other columns */}
                     {columns.map((col, j) => (
-                      <TableCell key={j}>{col.render(row)}</TableCell>
+                      <TableCell
+                        className={cn(col.noPadding && "h-12 p-0 pl-4")}
+                        key={j}
+                      >
+                        {col.render(row)}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -202,47 +181,10 @@ const AdminTable = <T extends { id: string; name: string }>({
             <div className="text-7xl">🫗</div>
             Nichts im Angebot für dich...
           </div>
-          {/* import */}
-
-          <Button className="p-0">
-            <label
-              htmlFor="import-csv"
-              className="flex items-center gap-2 p-2 px-4 cursor-pointer"
-            >
-              <Upload size={16} /> Importieren
-            </label>
-          </Button>
         </div>
       )}
-      {/* hidden file inputs */}
-      <input
-        type="file"
-        id="import-csv"
-        accept=".csv"
-        className="hidden"
-        onChange={async (e) => {
-          if (e.target.files?.length === 0 || !e.target.files) return
-          await importFn(e.target.files[0])
-          refetch()
-          // Clear the input for the next file
-          e.target.value = ""
-        }}
-      />
-      <input
-        type="file"
-        id="add-csv"
-        accept=".csv"
-        className="hidden"
-        onChange={async (e) => {
-          if (e.target.files?.length === 0 || !e.target.files) return
-          await addFn(e.target.files[0])
-
-          // Clear the input for the next file
-          e.target.value = ""
-        }}
-      />
     </div>
   )
 }
 
-export default AdminTable
+export default ManageTable

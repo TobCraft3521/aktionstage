@@ -26,8 +26,6 @@ export const StudentsOverview = React.forwardRef<
   const { data: students, isPending: isStudentsLoading } = useQuery({
     queryKey: ["students", projectId],
     queryFn: () => queryProjectStudents(projectId),
-    // not needed fo printing
-    // refetchInterval: 5000,
   })
   return (
     <div

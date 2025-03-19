@@ -76,7 +76,7 @@ export const exportProjects = async (projects: ProjectWithParticipants[]) => {
       p.maxStudents,
       p.minGrade,
       p.maxGrade,
-      p.participants.map((t) => t.id).join(","),
+      p.participants?.map((t) => t.id).join(","),
     ]),
   })
 

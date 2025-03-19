@@ -112,13 +112,13 @@ const ProjectDetailView = () => {
   })
 
   const projectTeachers = useMemo(() => {
-    return project?.participants.filter(
+    return project?.participants?.filter(
       (p) => p.role === Role.TEACHER || p.role === Role.ADMIN
     )
   }, [project?.participants])
 
   const projectStudents = useMemo(() => {
-    return project?.participants.filter(
+    return project?.participants?.filter(
       (p) => p.role === "STUDENT" || p.role === "VIP"
     )
   }, [project?.participants])

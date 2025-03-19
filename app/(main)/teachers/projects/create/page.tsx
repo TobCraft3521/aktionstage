@@ -849,7 +849,7 @@ const MultiStepForm = () => {
                                           ", " +
                                           (cRoom.projects
                                             ?.find((p) => p.day === day)
-                                            ?.participants.filter(
+                                            ?.participants?.filter(
                                               (p) =>
                                                 p.role === Role.TEACHER ||
                                                 p.role === Role.ADMIN

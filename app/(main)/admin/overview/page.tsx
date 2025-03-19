@@ -7,6 +7,7 @@ import {
 } from "@/lib/actions/queries/accounts"
 import { queryProjectsWithStudentsAndTeachers } from "@/lib/actions/queries/projects"
 import { queryRoomsWithProjectsWithTeachers } from "@/lib/actions/queries/rooms"
+import { auth } from "@/lib/auth/auth"
 import { importAccounts } from "@/lib/data/import/account"
 import { importProjects } from "@/lib/data/import/project"
 import { importRooms } from "@/lib/data/import/room"
@@ -19,13 +20,16 @@ import { cn } from "@/lib/utils"
 import { Role } from "@prisma/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { Layers } from "lucide-react"
+import { useSession } from "next-auth/react"
 import { useState } from "react"
+import { motion } from "motion/react"
 
 type Props = {}
 
 const Overview = (props: Props) => {
   const [activeTab, setActiveTab] = useState(0)
   const queryClient = useQueryClient()
+  const user = useSession().data?.user
   const tabs = [
     {
       title: "Schüler",
@@ -35,9 +39,14 @@ const Overview = (props: Props) => {
           queryKey="students"
           queryFn={queryStudentsWithProjects}
           columns={[
-            { label: "Name", render: (s) => s.name },
+            {
+              label: "Name",
+              render: (s) => (
+                <motion.h1 layoutId={`account-h1-${s.id}`}>{s.name}</motion.h1>
+              ),
+            },
             { label: "Klasse", render: (s) => s.grade },
-            { label: "Projekte", render: (s) => s.projects.length },
+            { label: "Projekte", render: (s) => s.projects?.length || 0 },
           ]}
           importFn={(data) => {
             importAccounts(data, queryClient)
@@ -49,6 +58,7 @@ const Overview = (props: Props) => {
             const accounts = await queryAcccountsComplete()
             exportAccounts(accounts || [])
           }}
+          manageItem="accounts"
         />
       ),
     },
@@ -76,7 +86,7 @@ const Overview = (props: Props) => {
                 )
               },
             },
-            { label: "Projekte", render: (t) => t.projects?.length },
+            { label: "Projekte", render: (t) => t.projects?.length || 0 },
           ]}
           importFn={(data) => {
             importAccounts(data, queryClient)
@@ -88,6 +98,7 @@ const Overview = (props: Props) => {
             const accounts = await queryAcccountsComplete()
             exportAccounts(accounts || [])
           }}
+          manageItem="accounts"
         />
       ),
     },
@@ -103,14 +114,14 @@ const Overview = (props: Props) => {
             {
               label: "Lehrer",
               render: (p) =>
-                p.participants.filter(
+                p.participants?.filter(
                   (t) => t.role === Role.TEACHER || t.role === Role.ADMIN
                 ).length,
             },
             {
               label: "Schüler",
               render: (p) =>
-                p.participants.filter(
+                p.participants?.filter(
                   (s) => s.role === Role.STUDENT || s.role === Role.VIP
                 )?.length,
             },
@@ -122,6 +133,7 @@ const Overview = (props: Props) => {
             importProjects(data, queryClient, true)
           }}
           exportFn={(projects) => exportProjects(projects)}
+          manageItem=""
         />
       ),
     },
@@ -143,10 +155,20 @@ const Overview = (props: Props) => {
             importRooms(data, queryClient, true)
           }}
           exportFn={(rooms) => exportRooms(rooms)}
+          manageItem=""
         />
       ),
     },
   ]
+  if (user?.role && user.role !== Role.ADMIN)
+    // This is just for UX: Everything is back-end protected
+    return (
+      <div className="w-full h-full flex items-center justify-center text-center">
+        Halt 🫷🏻🛑! Kleiner Hacker oder ein großer Software Bug 🪳🪲🐛?
+        <br />
+        Ein {user?.role} hat sich hierher wohl verirrt.
+      </div>
+    )
   return (
     <div className="relative min-h-0 w-full flex-1 flex flex-col">
       <div className="h-[25vh] w-full flex flex-col pt-16 border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]">

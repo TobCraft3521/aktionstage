@@ -36,6 +36,20 @@ export const queryProjectsWithStudentsAndTeachers = async () => {
   return projects
 }
 
+export const queryProjectsForAccount = async (accountId: string) => {
+  const projects = await db.project.findMany({
+    where: {
+      participants: {
+        some: {
+          id: accountId,
+        },
+      },
+    },
+  })
+
+  return projects
+}
+
 export async function queryInfiniteProjects({
   pageParam: cursor,
 }: {
@@ -48,11 +62,7 @@ export async function queryInfiniteProjects({
     cursor: cursor ? { id: cursor } : undefined,
     orderBy: { id: "asc" },
     include: {
-      participants: {
-        where: {
-          OR: [{ role: "TEACHER" }, { role: "ADMIN" }],
-        },
-      },
+      participants: true,
     },
   })
 
@@ -272,7 +282,6 @@ export const createProject = async (formData: FormData & { room?: string }) => {
       day: formData.date,
       time: formData.time,
       maxStudents: formData.maxStudents,
-      studentsCount: 0,
       minGrade: formData.minGrade,
       maxGrade: formData.maxGrade,
       location: formData.location,

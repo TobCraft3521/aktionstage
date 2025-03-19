@@ -36,6 +36,18 @@ export const getRandomNoResultsJoke = () => {
       emoji: "🏞️",
       text: "Filter aus, das produziert nur CO₂.",
     },
+    {
+      emoji: "🚨",
+      text: "Suchpolizei hier! Verhaftet wegen zu strenger Filter!",
+    },
+    {
+      emoji: "👽",
+      text: "Selbst Aliens finden hier nichts. Vielleicht auf Mars probieren?",
+    },
+    {
+      emoji: "🏝️",
+      text: "Du hast eine geheime Schatzkarte gefunden! 🗺️ Leider ohne Schatz. 🤷‍♂️",
+    },
   ]
 
   return jokes[Math.floor(Math.random() * jokes.length)]
