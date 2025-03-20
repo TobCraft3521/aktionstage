@@ -42,7 +42,28 @@ const Overview = (props: Props) => {
             {
               label: "Name",
               render: (s) => (
-                <motion.h1 layoutId={`account-h1-${s.id}`}>{s.name}</motion.h1>
+                <motion.h1
+                  layoutId={`account-h1-${s.id}`}
+                  className="flex flex-row gap-2 items-center"
+                >
+                  <p
+                    className={cn(
+                      s.name === "Tobias Hackenberg" && "text-orange-500 font-extrabold"
+                    )}
+                  >
+                    {s?.name || `1`}
+                  </p>
+                  {s.role === Role.VIP && (
+                    <span className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
+                      👑 VIP
+                    </span>
+                  )}
+                  {s.name === "Tobias Hackenberg" && (
+                    <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
+                      Aktionstage App by ✨ Tobias ✨
+                    </span>
+                  )}
+                </motion.h1>
               ),
             },
             { label: "Klasse", render: (s) => s.grade },
@@ -70,22 +91,23 @@ const Overview = (props: Props) => {
           queryKey="teachers"
           queryFn={queryTeachersWithProjectsAndPasswords}
           columns={[
-            { label: "Name", render: (t) => t.name },
-            { label: "Kürzel", render: (t) => t.short },
             {
-              label: "Rolle",
-              render: (t) => {
-                return (
-                  (
-                    {
-                      [Role.TEACHER]: "Lehrer",
-                      [Role.ADMIN]: "💥 Admin 💥",
-                    } as any
-                  ) /* only admin and teacher are returned */[t.role] ||
-                  "Unbekannt"
-                )
-              },
+              label: "Name",
+              render: (t) => (
+                <motion.h1
+                  layoutId={`account-h1-${t.id}`}
+                  className="flex flex-row gap-2 items-center"
+                >
+                  <p className="">{t?.name || `1`}</p>
+                  {t.role === Role.ADMIN && (
+                    <span className="bg-gradient-to-r from-red-500 to-yellow-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
+                      💥 Admin 💥
+                    </span>
+                  )}
+                </motion.h1>
+              ),
             },
+            { label: "Kürzel", render: (t) => t.short },
             { label: "Projekte", render: (t) => t.projects?.length || 0 },
           ]}
           importFn={(data) => {

@@ -28,7 +28,7 @@ type Column<T> = {
 
 type Props<T> = {
   title: string
-  queryKey: string
+  queryKey: string[]
   queryFn: () => Promise<T[]>
   columns: Column<T>[]
   // => /admin/[manageItem]/[id] for custom route
@@ -48,7 +48,7 @@ const ManageTable = <T extends { id: string; name: string }>({
     error,
     refetch,
   } = useQuery({
-    queryKey: [queryKey],
+    queryKey: [...queryKey],
     queryFn: async () => queryFn(), // ✅ Wrapped properly
   })
 

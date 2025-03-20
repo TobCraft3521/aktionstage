@@ -63,6 +63,7 @@ import "react-range-slider-input/dist/style.css"
 import { z } from "zod"
 import "./range-slider-styles.css"
 import { RoomWithProjectsWithParticipants } from "@/lib/types"
+import { lookUpDay } from "@/lib/helpers/lookupname"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -572,11 +573,6 @@ const ProjectEditor = ({}: Props) => {
               value={getValues("date")}
             >
               {Object.values(Day).map((day) => {
-                const dayNames = {
-                  [Day.MON]: "Montag",
-                  [Day.TUE]: "Dienstag",
-                  [Day.WED]: "Mittwoch",
-                }
                 return (
                   <div
                     key={day}
@@ -596,7 +592,7 @@ const ProjectEditor = ({}: Props) => {
                   >
                     <ToggleGroupItem
                       value={day}
-                      aria-label={`Wechseln zu ${dayNames[day]}`}
+                      aria-label={`Wechseln zu ${lookUpDay[day]}`}
                       disabled={
                         !getValues("teachers")?.every((teacher) =>
                           isTeacherAvailable(
@@ -607,7 +603,7 @@ const ProjectEditor = ({}: Props) => {
                         )
                       } // allow to change back to the same day
                     >
-                      {dayNames[day]}
+                      {lookUpDay[day]}
                     </ToggleGroupItem>
                   </div>
                 )

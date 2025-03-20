@@ -7,16 +7,21 @@ import {
   queryStudents,
   queryTeachers,
 } from "@/lib/actions/queries/accounts"
-import { queryProjectsForAccount } from "@/lib/actions/queries/projects"
+import {
+  kickStudent,
+  queryProjectsForAccount,
+} from "@/lib/actions/queries/projects"
 import { cn } from "@/lib/utils"
 import { Role } from "@prisma/client"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ChevronLeft, Link2Off } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { motion } from "motion/react"
 import ManageAccountActions from "@/components/admin/manage/accounts"
+import toast from "react-hot-toast"
+import { lookUpDay } from "@/lib/helpers/lookupname"
 
 type Props = {
   params: {
@@ -50,6 +55,37 @@ const ManageAccount = ({
     return accounts?.find((a) => a.id === accountId)
   }, [accountId, accounts])
 
+  const { mutateAsync: kickStudentAsync } = useMutation({
+    mutationFn: async (projectId: string) => {
+      await kickStudent(projectId, accountId)
+    },
+    onMutate: (projectId: string) => {
+      toast.loading("Schüler wird entfernt...", {
+        id: "kick-student",
+      })
+      queryClient.setQueryData(["projects", accountId], (oldData: any) => {
+        return oldData.filter((p: any) => p.id !== projectId)
+      })
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["projects", accountId],
+      })
+      toast.success("Schüler wurde entfernt!", {
+        id: "kick-student",
+        icon: "👋",
+      })
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Entfernen des Schülers!", {
+        id: "kick-student",
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["projects", accountId],
+      })
+    },
+  })
+
   const tabs = [
     {
       title: "Verwalten",
@@ -60,10 +96,11 @@ const ManageAccount = ({
       content: (
         <ManageTable
           title="Projekte"
-          queryKey="projects"
+          queryKey={["projects", accountId]}
           queryFn={() => queryProjectsForAccount(accountId)}
           columns={[
             { label: "Name", render: (p) => p.name },
+            { label: "Tag", render: (p) => lookUpDay[p.day] },
             {
               label: "Aktionen",
               render: (p) => (
@@ -72,7 +109,10 @@ const ManageAccount = ({
                     variant="secondary"
                     className="hover:bg-red-500 hover:text-white bg-slate-200"
                     size="sm"
-                    onClick={(project) => {}}
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      await kickStudentAsync(p.id)
+                    }}
                   >
                     <Link2Off size={16} />
                   </Button>
@@ -114,7 +154,26 @@ const ManageAccount = ({
             className="text-xl font-semibold flex flex-row gap-2 items-center"
           >
             {account?.name ? (
-              account?.name || `1`
+              <div className="flex flex-row gap-2 items-center">
+                <p
+                  className={cn(
+                    account.name === "Tobias Hackenberg" &&
+                      "text-orange-500"
+                  )}
+                >
+                  {account?.name || `1`}
+                </p>
+                {account.role === Role.VIP && (
+                  <span className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-1 px-4 text-sm text-white font-extrabold flex items-center">
+                    👑 VIP
+                  </span>
+                )}
+                {account.name === "Tobias Hackenberg" && (
+                  <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-1 px-4 text-sm text-white font-extrabold flex items-center">
+                    Aktionstage App by ✨ Tobias ✨
+                  </span>
+                )}
+              </div>
             ) : (
               <Skeleton className="w-[146px] h-[25px] bg-slate-300" />
             )}

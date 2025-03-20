@@ -104,7 +104,19 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
           <div className="flex gap-8 items-center">
             {user && (
               <>
-                <div className="font-medium hidden md:inline">{user.name}</div>
+                <div className="font-medium hidden md:flex gap-2">
+                  {user.name}
+                  {user.role === Role.VIP && (
+                    <span className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
+                      👑 VIP
+                    </span>
+                  )}
+                  {/* {user.name === "Tobias Hackenberg" && (
+                    <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
+                      Aktionstage App by ✨ Tobias ✨
+                    </span>
+                  )} */}
+                </div>
                 <div className="font-medium md:hidden">
                   {user.name?.split(" ")[0]}
                 </div>

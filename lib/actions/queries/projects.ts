@@ -47,7 +47,11 @@ export const queryProjectsForAccount = async (accountId: string) => {
     },
   })
 
-  return projects
+  return projects.sort(
+    (a, b) =>
+      ["MON", "TUE", "WED"].indexOf(a.day) -
+      ["MON", "TUE", "WED"].indexOf(b.day)
+  )
 }
 
 export async function queryInfiniteProjects({
@@ -97,6 +101,41 @@ export const queryTeachersProjects = async () => {
       ["MON", "TUE", "WED"].indexOf(a.day) -
       ["MON", "TUE", "WED"].indexOf(b.day)
   )
+}
+
+export const kickStudent = async (projectId: string, studentId: string) => {
+  const id = (await auth())?.user?.id
+  if (!id) return redirect("/login")
+  const user = await db.account.findUnique({
+    where: {
+      id,
+    },
+  })
+
+  if (!user?.role || user.role !== "ADMIN") return redirect("/login")
+  const project = await db.project.findUnique({
+    where: {
+      id: projectId,
+    },
+    include: {
+      participants: true,
+    },
+  })
+  if (!project) return redirect("/login")
+  if (!project.participants.find((p) => p.id === studentId))
+    return redirect("/login")
+  await db.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      participants: {
+        disconnect: {
+          id: studentId,
+        },
+      },
+    },
+  })
 }
 
 export const createProject = async (formData: FormData & { room?: string }) => {

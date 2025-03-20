@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { DM_Sans } from "next/font/google"
 import { cn } from "@/lib/utils"
+import { lookUpDay } from "@/lib/helpers/lookupname"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -21,12 +22,6 @@ interface ProjectCompProps {
       participants: Account[]
     }
   >
-}
-
-const dayToGerman: Record<Day, string> = {
-  [Day.MON]: "Montag",
-  [Day.TUE]: "Dienstag",
-  [Day.WED]: "Mittwoch",
 }
 
 const ProjectComp = ({ project }: ProjectCompProps) => {
@@ -174,8 +169,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                   { icon: "📍", text: project.location },
                   {
                     icon: "🕑",
-                    text:
-                      dayToGerman[project.day || "MON"] + " " + project.time,
+                    text: lookUpDay[project.day || "MON"] + " " + project.time,
                   },
                   { icon: "💵", text: project.price + "€" },
                 ].map((item, index) => (

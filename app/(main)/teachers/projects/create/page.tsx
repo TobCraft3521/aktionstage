@@ -68,6 +68,7 @@ import { v4 as uuid } from "uuid"
 import { z } from "zod"
 import "./range-slider-styles.css"
 import { RoomWithProjectsWithParticipants } from "@/lib/types"
+import { lookUpDay } from "@/lib/helpers/lookupname"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -680,11 +681,6 @@ const MultiStepForm = () => {
                 value={getValues("date")}
               >
                 {Object.values(Day).map((day) => {
-                  const dayNames = {
-                    [Day.MON]: "Montag",
-                    [Day.TUE]: "Dienstag",
-                    [Day.WED]: "Mittwoch",
-                  }
                   return (
                     <div
                       key={day}
@@ -698,10 +694,10 @@ const MultiStepForm = () => {
                     >
                       <ToggleGroupItem
                         value={day}
-                        aria-label={`Wechseln zu ${dayNames[day]}`}
+                        aria-label={`Wechseln zu ${lookUpDay[day]}`}
                         disabled={personalLoad?.includes(day)}
                       >
-                        {dayNames[day]}
+                        {lookUpDay[day]}
                       </ToggleGroupItem>
                     </div>
                   )
