@@ -47,15 +47,14 @@ export const updateAccounts = async (
               ? {
                   create: {
                     password: account.password,
-                    initialPassword: account.password,
+                    initialPassword: account.initialPassword,
                   },
                 }
               : undefined,
-            ...(account.projectIds?.length > 0 && {
-              projects: {
-                connect: account.projectIds.map((id) => ({ id })),
-              },
-            }),
+
+            projects: {
+              connect: account.projectIds.map((id) => ({ id })),
+            },
           },
         })
       } catch (error) {

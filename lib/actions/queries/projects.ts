@@ -8,23 +8,19 @@ import { redirect } from "next/navigation"
 import { cache } from "react"
 import { z } from "zod"
 import { serverSideUpload } from "../aws/upload"
-import { Prisma } from "@prisma/client"
+import { Prisma, Role } from "@prisma/client"
 
 type FormData = z.infer<typeof CreateProjectSchema>
 
-export const queryProjects = cache(async () => {
+export const queryProjects = async () => {
   const projects = await db.project.findMany({
     include: {
-      participants: {
-        where: {
-          OR: [{ role: "TEACHER" }, { role: "ADMIN" }],
-        },
-      },
+      participants: true,
     },
   })
 
   return projects
-})
+}
 
 export const queryProjectsWithStudentsAndTeachers = async () => {
   const projects = await db.project.findMany({
@@ -103,7 +99,7 @@ export const queryTeachersProjects = async () => {
   )
 }
 
-export const kickStudent = async (projectId: string, studentId: string) => {
+export const kickAccount = async (projectId: string, accountId: string) => {
   const id = (await auth())?.user?.id
   if (!id) return redirect("/login")
   const user = await db.account.findUnique({
@@ -122,7 +118,7 @@ export const kickStudent = async (projectId: string, studentId: string) => {
     },
   })
   if (!project) return redirect("/login")
-  if (!project.participants.find((p) => p.id === studentId))
+  if (!project.participants.find((p) => p.id === accountId))
     return redirect("/login")
   await db.project.update({
     where: {
@@ -131,11 +127,47 @@ export const kickStudent = async (projectId: string, studentId: string) => {
     data: {
       participants: {
         disconnect: {
-          id: studentId,
+          id: accountId,
         },
       },
     },
   })
+}
+
+export const assignAccount = async (projectId: string, accountId: string) => {
+  const id = (await auth())?.user?.id
+  if (!id) return { error: "no id[ea] haha" }
+  const user = await db.account.findUnique({
+    where: {
+      id,
+    },
+  })
+
+  if (!user?.role || user.role !== Role.ADMIN) return { error: "no admin" }
+  const project = await db.project.findUnique({
+    where: {
+      id: projectId,
+    },
+    include: {
+      participants: true,
+    },
+  })
+  if (!project) return { error: "no project" }
+  if (project.participants.find((p) => p.id === accountId))
+    return { error: "account already in project" }
+  await db.project.update({
+    where: {
+      id: projectId,
+    },
+    data: {
+      participants: {
+        connect: {
+          id: accountId,
+        },
+      },
+    },
+  })
+  return { error: false }
 }
 
 export const createProject = async (formData: FormData & { room?: string }) => {

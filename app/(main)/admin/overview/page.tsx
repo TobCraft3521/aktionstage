@@ -30,6 +30,7 @@ const Overview = (props: Props) => {
   const [activeTab, setActiveTab] = useState(0)
   const queryClient = useQueryClient()
   const user = useSession().data?.user
+  const userLoading = useSession().status === "loading"
   const tabs = [
     {
       title: "Schüler",
@@ -48,7 +49,8 @@ const Overview = (props: Props) => {
                 >
                   <p
                     className={cn(
-                      s.name === "Tobias Hackenberg" && "text-orange-500 font-extrabold"
+                      s.name === "Tobias Hackenberg" &&
+                        "text-orange-500 font-extrabold"
                     )}
                   >
                     {s?.name || `1`}
@@ -60,7 +62,7 @@ const Overview = (props: Props) => {
                   )}
                   {s.name === "Tobias Hackenberg" && (
                     <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
-                      Aktionstage App by ✨ Tobias ✨
+                      App by ✨ Tobias ✨
                     </span>
                   )}
                 </motion.h1>
@@ -182,13 +184,13 @@ const Overview = (props: Props) => {
       ),
     },
   ]
-  if (user?.role && user.role !== Role.ADMIN)
+  if (!userLoading && user?.role !== Role.ADMIN)
     // This is just for UX: Everything is back-end protected
     return (
       <div className="w-full h-full flex items-center justify-center text-center">
-        Halt 🫷🏻🛑! Kleiner Hacker oder ein großer Software Bug 🪳🪲🐛?
+        Halt 🫷🏻🛑! Kleiner Hacker oder großer Software Bug 🪳🪲🐛?
         <br />
-        Ein {user?.role} hat sich hierher wohl verirrt.
+        Ein {user?.role || "rollenloser Nutzer"} hat sich hierher wohl verirrt.
       </div>
     )
   return (

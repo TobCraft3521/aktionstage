@@ -15,6 +15,9 @@ export const queryTeachers = async () => {
         },
       ],
     },
+    include: {
+      projects: true,
+    },
   })
   return teachers
 }
@@ -104,6 +107,9 @@ export const queryStudents = async () => {
         },
       ],
     },
+    include: {
+      projects: true,
+    },
   })
   return students
 }
@@ -184,4 +190,49 @@ export const queryAccount = async (id: string) => {
     },
   })
   return account
+}
+
+export const resetPassword = async (accountId: string) => {
+  const user = (await auth())?.user
+  if (!user) return { error: true }
+  const account = await db.account.findUnique({
+    where: { id: user.id },
+  })
+  if (!account) return { error: true }
+  if (account.role !== Role.ADMIN) return { error: true }
+  try {
+    const { initialPassword } = (await db.authDetails.findUnique({
+      where: { accountId },
+    })) as any
+    if (!initialPassword) return { error: true }
+    await db.authDetails.update({
+      where: { accountId },
+      data: {
+        password: initialPassword,
+      },
+    })
+  } catch (error) {
+    console.error(error)
+    return { error: true }
+  }
+  return { error: undefined }
+}
+
+export const deleteAccount = async (accountId: string) => {
+  const user = (await auth())?.user
+  if (!user) return { error: true }
+  const account = await db.account.findUnique({
+    where: { id: user.id },
+  })
+  if (!account) return { error: true }
+  if (account.role !== Role.ADMIN) return { error: true }
+  try {
+    await db.account.delete({
+      where: { id: accountId },
+    })
+  } catch (error) {
+    console.error(error)
+    return { error: true }
+  }
+  return { error: undefined }
 }

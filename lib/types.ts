@@ -9,6 +9,7 @@ export type ProjectWithParticipants = Project & {
 }
 export type ImportedAccounts = (Partial<Account> & {
   password: string
+  initialPassword: string
   projectIds: string[]
 })[]
 export type AccountWithProjectsAndPassword = AccountWithPassword & {
@@ -22,3 +23,4 @@ export type ImportedProjects = (Partial<Project> & {
 })[]
 
 export type ImportedRooms = (Partial<Room> & { projectIds: string[] })[]
+export type AccountWithProjects = Account & { projects: Project[] }

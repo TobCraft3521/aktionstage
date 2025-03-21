@@ -46,7 +46,7 @@ const onData = async (
   if (data.length === 0) {
     throw new Error("Keine Daten")
   }
-  if (res.meta.fields?.length !== 7) {
+  if (res.meta.fields?.length !== 7 && res.meta.fields?.length !== 8) {
     throw new Error("Falsche Anzahl an Spalten")
   }
 
@@ -61,6 +61,7 @@ const onData = async (
         res.meta.fields.includes("Password")
       )
     ) ||
+    // [Initial_Password_Hash is optional]
     !res.meta.fields.includes("Projekte") ||
     !res.meta.fields.includes("Rolle") ||
     !res.meta.fields.includes("Kürzel")
@@ -83,9 +84,18 @@ const onData = async (
               d.Password_Hash !== undefined
                 ? d.Password_Hash
                 : md5(d.Password || ""),
-            projectIds: d.Projekte?.split(",") || [],
+            initialPassword:
+              d.Initial_Password_Hash !== undefined
+                ? d.Initial_Password_Hash
+                : d.Password
+                ? md5(d.Password)
+                : "",
+            projectIds:
+              d.Projekte?.length > 0 ? d.Projekte?.split(",") || [] : [],
             userName: d.Name?.split(" ").join("."),
-            role: Role[d.Rolle as Role] || Role.STUDENT,
+            role:
+              (lookUpVip[d.Name] && Role.VIP) ??
+              (Role[d.Rolle as Role] || Role.STUDENT),
             short: d["Kürzel"],
           }
           // Filter out empty entries
@@ -111,4 +121,13 @@ const onData = async (
   return {
     count: result?.amount,
   }
+}
+
+const lookUpVip: Record<string, boolean> = {
+  "Michael Pawlik": true,
+  "Tobias Hackenberg": true,
+  "Peter Häussler": true,
+  "Sebastian Zillner": true,
+  "Elisa Granitzer": true,
+  "Alexa Zimmermann": true,
 }

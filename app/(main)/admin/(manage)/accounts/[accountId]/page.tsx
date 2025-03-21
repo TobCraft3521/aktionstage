@@ -8,7 +8,7 @@ import {
   queryTeachers,
 } from "@/lib/actions/queries/accounts"
 import {
-  kickStudent,
+  kickAccount,
   queryProjectsForAccount,
 } from "@/lib/actions/queries/projects"
 import { cn } from "@/lib/utils"
@@ -19,7 +19,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { motion } from "motion/react"
-import ManageAccountActions from "@/components/admin/manage/accounts"
+import ManageAccountActions from "@/components/admin/manage/account"
 import toast from "react-hot-toast"
 import { lookUpDay } from "@/lib/helpers/lookupname"
 
@@ -39,6 +39,7 @@ const ManageAccount = ({
   const [activeTab, setActiveTab] = useState(0)
   const queryClient = useQueryClient()
   const user = useSession().data?.user
+  const userLoading = useSession().status === "loading"
   const router = useRouter()
 
   const { data: accounts, isPending } = useQuery({
@@ -55,9 +56,13 @@ const ManageAccount = ({
     return accounts?.find((a) => a.id === accountId)
   }, [accountId, accounts])
 
+  if (!account && !isPending) {
+    router.push("/admin")
+  }
+
   const { mutateAsync: kickStudentAsync } = useMutation({
     mutationFn: async (projectId: string) => {
-      await kickStudent(projectId, accountId)
+      return await kickAccount(projectId, accountId)
     },
     onMutate: (projectId: string) => {
       toast.loading("Schüler wird entfernt...", {
@@ -127,14 +132,13 @@ const ManageAccount = ({
     },
   ]
 
-  if (user?.role && user.role !== Role.ADMIN)
+  if (!userLoading && user?.role !== Role.ADMIN)
     // This is just for UX: Everything is back-end protected
     return (
       <div className="w-full h-full flex items-center justify-center text-center">
-        Halt 🫷🏻🛑! Kleiner Hacker oder ein großer Software Bug 🪳🪲🐛?
+        Halt 🫷🏻🛑! Kleiner Hacker oder großer Software Bug 🪳🪲🐛?
         <br />
-        Ein {user?.role} hat sich hierher wohl verirrt. Lass {account?.name} in
-        Ruhe!
+        Ein {user?.role || "rollenloser Nutzer"} hat sich hierher wohl verirrt.
       </div>
     )
 
@@ -157,8 +161,7 @@ const ManageAccount = ({
               <div className="flex flex-row gap-2 items-center">
                 <p
                   className={cn(
-                    account.name === "Tobias Hackenberg" &&
-                      "text-orange-500"
+                    account.name === "Tobias Hackenberg" && "text-orange-500"
                   )}
                 >
                   {account?.name || `1`}
@@ -170,7 +173,7 @@ const ManageAccount = ({
                 )}
                 {account.name === "Tobias Hackenberg" && (
                   <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-1 px-4 text-sm text-white font-extrabold flex items-center">
-                    Aktionstage App by ✨ Tobias ✨
+                    App by ✨ Tobias ✨
                   </span>
                 )}
               </div>
