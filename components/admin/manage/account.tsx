@@ -20,6 +20,7 @@ import { assignAccount, queryProjects } from "@/lib/actions/queries/projects"
 import { AccountWithProjects, ProjectWithParticipants } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useConfirmModal } from "@/stores/confirm-modal"
+import { Day } from "@prisma/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   ChevronsUpDown,
@@ -52,6 +53,30 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
     return projects?.filter((p) =>
       p.participants?.some((p) => p.id === account?.id)
     ).length
+  }, [account?.id, projects])
+
+  const hasProjectOnMonday = useMemo(() => {
+    return projects
+      ?.filter((project) =>
+        project.participants.find((p) => p.id === account?.id)
+      )
+      .some((p) => p.day === Day.MON)
+  }, [account?.id, projects])
+
+  const hasProjectOnTuesday = useMemo(() => {
+    return projects
+      ?.filter((project) =>
+        project.participants.find((p) => p.id === account?.id)
+      )
+      .some((p) => p.day === Day.TUE)
+  }, [account?.id, projects])
+
+  const hasProjectOnWednesday = useMemo(() => {
+    return projects
+      ?.filter((project) =>
+        project.participants.find((p) => p.id === account?.id)
+      )
+      .some((p) => p.day === Day.WED)
   }, [account?.id, projects])
 
   const resetPasswordFn = async () => {
@@ -162,9 +187,14 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
                         className={cn("cursor-pointer")}
                         value={project.name}
                         onSelect={() => assignAccountFn(project.id)}
-                        disabled={project.participants?.some(
-                          (p) => p.id === account?.id
-                        )}
+                        disabled={
+                          project.participants?.some(
+                            (p) => p.id === account?.id
+                          ) ||
+                          (project.day === Day.MON && hasProjectOnMonday) ||
+                          (project.day === Day.TUE && hasProjectOnTuesday) ||
+                          (project.day === Day.WED && hasProjectOnWednesday)
+                        }
                       >
                         {project.name}
                       </CommandItem>
@@ -212,7 +242,9 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
       </div>
       <div className="">
         <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36">
-          <div className="text-3xl font-extrabold text-slate-800">{projectsCount}</div>
+          <div className="text-3xl font-extrabold text-slate-800">
+            {projectsCount}
+          </div>
           <Separator className="bg-slate-300 w-full" />
           <div className="text-sm text-slate-600 font-medium">Projekte</div>
         </div>
