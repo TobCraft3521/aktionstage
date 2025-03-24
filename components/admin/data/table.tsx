@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Filter } from "@/lib/types"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Copy, Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -34,8 +35,10 @@ type Props<T> = {
   columns: Column<T>[]
   // => /admin/[manageItem]/[id] for custom route
   manageItem: string
+  filters?: Filter<T>[] // Add filters
 }
 
+// Require name to provide search functionality by default. Can be removed for other use cases.
 const AdminTable = <T extends { id: string; name: string }>({
   title,
   queryKey,
@@ -45,6 +48,7 @@ const AdminTable = <T extends { id: string; name: string }>({
   exportFn,
   columns,
   manageItem,
+  filters,
 }: Props<T>) => {
   const {
     data: rows,
@@ -60,14 +64,42 @@ const AdminTable = <T extends { id: string; name: string }>({
   const [searchTerm, setSearchTerm] = useState("")
   const queryClient = useQueryClient()
   const router = useRouter()
-
   // Filter data based on search term
-  const filteredRows = useMemo(() => {
-    if (!searchTerm) return rows // No search term, return all rows
-    return rows?.filter((row) =>
-      row.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const [filterValues, setFilterValues] = useState<Record<string, any>>({})
+
+  // Update function for filters
+  const setFilterValue = (label: string, value: any) => {
+    setFilterValues((prev) => ({ ...prev, [label]: value }))
+  }
+
+  // Reset function
+  const resetFilters = () => {
+    setSearchTerm("") // Reset search input
+
+    if (!filters) return
+    // Dynamically reset each filter based on its type
+    const resetValues = Object.fromEntries(
+      filters.map((f) => [
+        f.label,
+        typeof filterValues[f.label] === "number" ? undefined : "",
+      ])
     )
-  }, [rows, searchTerm])
+
+    setFilterValues(resetValues)
+  }
+
+  const filteredRows = useMemo(() => {
+    return rows
+      ?.filter((row) =>
+        row.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      ?.filter(
+        (row) =>
+          filters?.every((filter) =>
+            filter.filterFn(row, filterValues[filter.label])
+          ) ?? true
+      )
+  }, [rows, searchTerm, filterValues, filters])
 
   useEffect(() => {
     let timeout: NodeJS.Timeout | null = null
@@ -91,6 +123,17 @@ const AdminTable = <T extends { id: string; name: string }>({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        {filters?.map((filter, index) => (
+          <div key={index}>
+            {filter.render(filterValues[filter.label], (val) =>
+              setFilterValue(filter.label, val)
+            )}
+          </div>
+        ))}
+        {/* Reset Filters Button */}
+        <Button variant="default" onClick={resetFilters}>
+          Reset
+        </Button>
         <Separator orientation="vertical" className="h-full" />
         <Button className="p-0">
           <label
@@ -166,7 +209,9 @@ const AdminTable = <T extends { id: string; name: string }>({
                     onClick={
                       manageItem
                         ? () => {
-                            router.push(`/admin/${manageItem}/${row.id}?queryKey=${queryKey}`) // Query key for instant data
+                            router.push(
+                              `/admin/${manageItem}/${row.id}?queryKey=${queryKey}`
+                            ) // Query key for instant data
                           }
                         : undefined
                     }

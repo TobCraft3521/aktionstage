@@ -24,3 +24,9 @@ export type ImportedProjects = (Partial<Project> & {
 
 export type ImportedRooms = (Partial<Room> & { projectIds: string[] })[]
 export type AccountWithProjects = Account & { projects: Project[] }
+
+export type Filter<T> = {
+  label: string
+  render: (value: any, setValue: (val: any) => void) => React.ReactNode
+  filterFn: (row: T, value: any) => boolean
+}
