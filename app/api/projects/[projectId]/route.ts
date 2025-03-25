@@ -7,6 +7,7 @@ import { ProjectEditSchema } from "@/lib/form-schemas"
 type Params = {
   params: {
     projectId: string
+    redirectToAdmin?: boolean
   }
 }
 
@@ -32,7 +33,8 @@ export const PATCH = async (req: Request, { params }: Params) => {
     if (
       !project.participants?.find(
         (t) => t.id === user.id && t.role === "TEACHER"
-      )
+      ) &&
+      user.role !== "ADMIN"
     ) {
       return Response.json({
         redirectUrl: "/teachers/projects?msg=Kein Zugriff&status=error",
@@ -99,13 +101,11 @@ export const PATCH = async (req: Request, { params }: Params) => {
     const teachers = await db.account.findMany({
       where: {
         id: {
-          // Double check current teacher is in the list
-          in: [...otherTeacherIds, user.id],
+          in: otherTeacherIds,
         },
         OR: [{ role: "TEACHER" }, { role: "ADMIN" }],
       },
-      select: {
-        id: true,
+      include: {
         projects: true,
       },
     })
@@ -134,6 +134,19 @@ export const PATCH = async (req: Request, { params }: Params) => {
       })
     }
 
+    await db.project.update({
+      where: {
+        id: project.id,
+      },
+      data: {
+        participants: {
+          disconnect: project.participants
+            .filter((p) => p.role === "TEACHER" || p.role === "ADMIN")
+            .map((p) => ({ id: p.id })),
+        },
+      },
+    })
+
     // Update in database
     await db.project.update({
       where: {
@@ -151,9 +164,6 @@ export const PATCH = async (req: Request, { params }: Params) => {
         location: data.location,
         price: data.price,
         participants: {
-          deleteMany: {
-            OR: [{ role: "TEACHER" }, { role: "ADMIN" }],
-          },
           connect: [...teachers.map((t) => ({ id: t.id }))],
         },
       },
@@ -250,6 +260,7 @@ export const PATCH = async (req: Request, { params }: Params) => {
       redirectUrl: `/teachers/projects/feedback?msg=Änderungen erfolgreich gespeichert!&status=success`,
     })
   } catch (e) {
+    console.log(e)
     return Response.json({
       redirectUrl:
         "/teachers/projects/feedback?msg=Ein Fehler ist aufgetreten&status=error",

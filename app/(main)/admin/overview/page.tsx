@@ -33,11 +33,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import useAdminTabStore from "@/stores/admin-tab"
 
 type Props = {}
 
 const Overview = (props: Props) => {
-  const [activeTab, setActiveTab] = useState(0)
+  const { tab, setTab } = useAdminTabStore()
   const queryClient = useQueryClient()
   const user = useSession().data?.user
   const userLoading = useSession().status === "loading"
@@ -48,7 +49,7 @@ const Overview = (props: Props) => {
       content: (
         <AdminTable
           title="Schüler"
-          queryKey="students"
+          queryKey={["students"]}
           queryFn={queryStudentsWithProjects}
           columns={[
             {
@@ -64,7 +65,7 @@ const Overview = (props: Props) => {
                         "text-orange-500 font-extrabold"
                     )}
                   >
-                    {s?.name || `1`}
+                    {s?.name || `Noname`}
                   </p>
                   {s.role === Role.VIP && (
                     <span className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
@@ -157,7 +158,7 @@ const Overview = (props: Props) => {
       content: (
         <AdminTable
           title="Lehrer"
-          queryKey="teachers"
+          queryKey={["teachers"]}
           queryFn={queryTeachersWithProjectsAndPasswords}
           columns={[
             {
@@ -167,7 +168,7 @@ const Overview = (props: Props) => {
                   layoutId={`account-h1-${t.id}`}
                   className="flex flex-row gap-2 items-center"
                 >
-                  <p className="">{t?.name || `1`}</p>
+                  <p className="">{t?.name || `Noname`}</p>
                   {t.role === Role.ADMIN && (
                     <span className="bg-gradient-to-r from-red-500 to-yellow-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
                       💥 Admin 💥
@@ -198,16 +199,19 @@ const Overview = (props: Props) => {
       content: (
         <AdminTable
           title="Projekte"
-          queryKey="projects"
+          queryKey={["projects"]}
           queryFn={queryProjectsWithStudentsAndTeachers}
           columns={[
-            { label: "Name", render: (p) => p.name },
             {
-              label: "Lehrer",
-              render: (p) =>
-                p.participants?.filter(
-                  (t) => t.role === Role.TEACHER || t.role === Role.ADMIN
-                ).length,
+              label: "Name",
+              render: (p) => (
+                <motion.h1
+                  layoutId={`project-h1-${p.id}`}
+                  className="flex flex-row gap-2 items-center"
+                >
+                  <p className="">{p?.name || `Noname`}</p>
+                </motion.h1>
+              ),
             },
             {
               label: "Schüler",
@@ -215,6 +219,13 @@ const Overview = (props: Props) => {
                 p.participants?.filter(
                   (s) => s.role === Role.STUDENT || s.role === Role.VIP
                 )?.length,
+            },
+            {
+              label: "Lehrer",
+              render: (p) =>
+                p.participants?.filter(
+                  (t) => t.role === Role.TEACHER || t.role === Role.ADMIN
+                ).length,
             },
           ]}
           importFn={(data) => {
@@ -224,7 +235,7 @@ const Overview = (props: Props) => {
             importProjects(data, queryClient, true)
           }}
           exportFn={(projects) => exportProjects(projects)}
-          manageItem=""
+          manageItem="projects"
         />
       ),
     },
@@ -233,7 +244,7 @@ const Overview = (props: Props) => {
       content: (
         <AdminTable
           title="Räume"
-          queryKey="rooms"
+          queryKey={["rooms"]}
           queryFn={() => queryRoomsWithProjectsWithTeachers()}
           columns={[
             { label: "Name", render: (r) => r.name },
@@ -278,12 +289,12 @@ const Overview = (props: Props) => {
               key={i}
               className={cn(
                 "pb-1 select-none",
-                i === activeTab && "border-b-2 border-slate-500"
+                i === tab && "border-b-2 border-slate-500"
               )}
             >
               <div
                 className="w-full h-full hover:bg-slate-200 p-1 px-4 rounded-md transition-all cursor-pointer"
-                onClick={() => setActiveTab(i)}
+                onClick={() => setTab(i)}
               >
                 {t.title}
               </div>
@@ -293,7 +304,7 @@ const Overview = (props: Props) => {
       </div>
       {/* content */}
       <div className="w-full max-w-6xl px-16 2xl:px-0 2xl:mx-auto flex-1 flex py-8 min-h-0">
-        {tabs[activeTab].content}
+        {tabs[tab].content}
       </div>
     </div>
   )

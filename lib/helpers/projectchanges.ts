@@ -1,13 +1,14 @@
 import { z } from "zod"
-import { ProjectWithTeachers } from "../types"
+import { ProjectWithParticipants } from "../types"
 import { ProjectEditSchema } from "../form-schemas"
+import { Account, Role } from "@prisma/client"
 
 export type ChangedFields = {
   [Key in keyof z.infer<typeof ProjectEditSchema>]: boolean
 }
 
 export const getChangedFields = (
-  currentProject: ProjectWithTeachers,
+  currentProject: ProjectWithParticipants,
   newProject: z.infer<typeof ProjectEditSchema>
 ) => {
   // console.log("🔍 Checking for changed fields...")
@@ -56,7 +57,10 @@ export const getChangedFields = (
   //   newProject.emoji
   // )
 
-  const currentTeacherIds = currentProject.teachers.map((t) => t.id).sort()
+  const currentTeacherIds = currentProject.participants
+    .filter((p) => p.role === Role.TEACHER || p.role === Role.ADMIN)
+    ?.map((t: Account) => t.id)
+    .sort()
   const newTeacherIds = (newProject.teachers || []).sort()
   const teachers =
     JSON.stringify(currentTeacherIds) !== JSON.stringify(newTeacherIds)

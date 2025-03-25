@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Filter } from "@/lib/types"
+import { cn } from "@/lib/utils"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Copy, Upload } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -23,15 +24,16 @@ type Column<T> = {
   label: string
   render: (row: T) => React.ReactNode
   isId?: boolean // Flag to identify ID column
+  noPadding?: boolean
 }
 
 type Props<T> = {
   title: string
-  queryKey: string
+  queryKey: string[]
   queryFn: () => Promise<T[]>
-  importFn: (data: File) => void
-  addFn: (data: File) => void
-  exportFn: (data: T[]) => void
+  importFn?: (data: File) => void
+  addFn?: (data: File) => void
+  exportFn?: (data: T[]) => void
   columns: Column<T>[]
   // => /admin/[manageItem]/[id] for custom route
   manageItem: string
@@ -56,7 +58,7 @@ const AdminTable = <T extends { id: string; name: string }>({
     error,
     refetch,
   } = useQuery({
-    queryKey: [queryKey],
+    queryKey: queryKey,
     queryFn: async () => queryFn(), // ✅ Wrapped properly
   })
 
@@ -135,25 +137,32 @@ const AdminTable = <T extends { id: string; name: string }>({
           Reset
         </Button>
         <Separator orientation="vertical" className="h-full" />
-        <Button className="p-0">
-          <label
-            htmlFor="import-csv"
-            className="flex items-center gap-2 p-2 px-4 cursor-pointer"
-          >
-            <Upload size={16} /> Importieren
-          </label>
-        </Button>
-        <Button variant="secondary" className="p-0">
-          <label
-            htmlFor="add-csv"
-            className="flex items-center gap-2 p-2 px-4 cursor-pointer"
-          >
-            Hinzufügen
-          </label>
-        </Button>
-        <Button variant="secondary" onClick={() => exportFn(rows || [])}>
-          Exportieren
-        </Button>
+        {importFn && (
+          <Button className="p-0">
+            <label
+              htmlFor="import-csv"
+              className="flex items-center gap-2 p-2 px-4 cursor-pointer"
+            >
+              <Upload size={16} /> Importieren
+            </label>
+          </Button>
+        )}
+
+        {addFn && (
+          <Button variant="secondary" className="p-0">
+            <label
+              htmlFor="add-csv"
+              className="flex items-center gap-2 p-2 px-4 cursor-pointer"
+            >
+              Hinzufügen
+            </label>
+          </Button>
+        )}
+        {exportFn && (
+          <Button variant="secondary" onClick={() => exportFn(rows || [])}>
+            Exportieren
+          </Button>
+        )}
       </div>
 
       {(rows?.length || 0) > 0 || isPending ? (
@@ -223,7 +232,8 @@ const AdminTable = <T extends { id: string; name: string }>({
                       ) : (
                         <Copy
                           className="hover:bg-slate-200 h-8 w-8 p-2 rounded-lg"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation()
                             setCopiedId(row.id)
                             navigator.clipboard.writeText(row.id)
                           }}
@@ -233,7 +243,12 @@ const AdminTable = <T extends { id: string; name: string }>({
 
                     {/* Dynamically render other columns */}
                     {columns.map((col, j) => (
-                      <TableCell key={j}>{col.render(row)}</TableCell>
+                      <TableCell
+                        key={j}
+                        className={cn(col.noPadding && "h-12 p-0 pl-4")}
+                      >
+                        {col.render(row)}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -247,45 +262,51 @@ const AdminTable = <T extends { id: string; name: string }>({
             <div className="text-7xl">🫗</div>
             Nichts im Angebot für dich...
           </div>
-          {/* import */}
+          {importFn && (
+            // {/* import */}
 
-          <Button className="p-0">
-            <label
-              htmlFor="import-csv"
-              className="flex items-center gap-2 p-2 px-4 cursor-pointer"
-            >
-              <Upload size={16} /> Importieren
-            </label>
-          </Button>
+            <Button className="p-0">
+              <label
+                htmlFor="import-csv"
+                className="flex items-center gap-2 p-2 px-4 cursor-pointer"
+              >
+                <Upload size={16} /> Importieren
+              </label>
+            </Button>
+          )}
         </div>
       )}
-      {/* hidden file inputs */}
-      <input
-        type="file"
-        id="import-csv"
-        accept=".csv"
-        className="hidden"
-        onChange={async (e) => {
-          if (e.target.files?.length === 0 || !e.target.files) return
-          await importFn(e.target.files[0])
-          refetch()
-          // Clear the input for the next file
-          e.target.value = ""
-        }}
-      />
-      <input
-        type="file"
-        id="add-csv"
-        accept=".csv"
-        className="hidden"
-        onChange={async (e) => {
-          if (e.target.files?.length === 0 || !e.target.files) return
-          await addFn(e.target.files[0])
+      {importFn && (
+        // {/* hidden file inputs */}
+        <input
+          type="file"
+          id="import-csv"
+          accept=".csv"
+          className="hidden"
+          onChange={async (e) => {
+            if (e.target.files?.length === 0 || !e.target.files) return
+            await importFn(e.target.files[0])
+            refetch()
+            // Clear the input for the next file
+            e.target.value = ""
+          }}
+        />
+      )}
+      {addFn && (
+        <input
+          type="file"
+          id="add-csv"
+          accept=".csv"
+          className="hidden"
+          onChange={async (e) => {
+            if (e.target.files?.length === 0 || !e.target.files) return
+            await addFn(e.target.files[0])
 
-          // Clear the input for the next file
-          e.target.value = ""
-        }}
-      />
+            // Clear the input for the next file
+            e.target.value = ""
+          }}
+        />
+      )}
     </div>
   )
 }

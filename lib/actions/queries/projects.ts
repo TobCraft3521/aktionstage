@@ -170,6 +170,72 @@ export const assignAccount = async (projectId: string, accountId: string) => {
   return { error: false }
 }
 
+export const queryAccountsForProject = async (projectId: string) => {
+  const accounts = await db.account.findMany({
+    where: {
+      projects: {
+        some: {
+          id: projectId,
+        },
+      },
+    },
+    include: {
+      projects: true,
+    },
+  })
+
+  return accounts
+}
+
+export const queryStudentsForProject = async (projectId: string) => {
+  const accounts = await db.account.findMany({
+    where: {
+      projects: {
+        some: {
+          id: projectId,
+        },
+      },
+      OR: [{ role: Role.VIP }, { role: Role.VIP }],
+    },
+    include: {
+      projects: true,
+    },
+  })
+
+  return accounts
+}
+
+export const queryTeachersForProject = async (projectId: string) => {
+  const accounts = await db.account.findMany({
+    where: {
+      projects: {
+        some: {
+          id: projectId,
+        },
+      },
+      OR: [{ role: Role.TEACHER }, { role: Role.ADMIN }],
+    },
+    include: {
+      projects: true,
+    },
+  })
+
+  return accounts
+}
+
+export const queryProjectRoom = async (projectId: string) => {
+  const project = await db.project.findUnique({
+    where: {
+      id: projectId,
+    },
+    include: {
+      room: true,
+    },
+  })
+
+  return project?.room
+}
+
 export const createProject = async (formData: FormData & { room?: string }) => {
   //Analytics
   const posthog = PostHogClient()

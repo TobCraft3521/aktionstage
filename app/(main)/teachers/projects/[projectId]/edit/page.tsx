@@ -237,6 +237,7 @@ const ProjectEditor = ({}: Props) => {
       body: formData,
     })
     const { redirectUrl } = await res.json()
+    console.log(redirectUrl)
     if (redirectUrl) {
       router.push(redirectUrl)
     }
@@ -329,14 +330,15 @@ const ProjectEditor = ({}: Props) => {
   // For live updates, eg preview image and title + for live changes preview
   const formValues = watch()
 
-  const debouncedFormValues = useDebounce(formValues, 500)
+  const debouncedFormValues = useDebounce(project ? formValues : null, 500)
 
   useEffect(() => {
     if (!debouncedFormValues) return
     if (!project) return
-    const changedFields = getChangedFields(project, debouncedFormValues)
+    const changedFields =
+      !isPending && getChangedFields(project, debouncedFormValues)
     setChangedFields(changedFields)
-  }, [debouncedFormValues, project])
+  }, [debouncedFormValues, project, isPending])
 
   // Add a teacher
   const addTeacher = (teacher: Account) => {

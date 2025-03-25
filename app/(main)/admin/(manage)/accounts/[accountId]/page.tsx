@@ -1,5 +1,4 @@
 "use client"
-import ManageTable from "@/components/admin/data/manage"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -22,6 +21,7 @@ import { motion } from "motion/react"
 import ManageAccountActions from "@/components/admin/manage/account"
 import toast from "react-hot-toast"
 import { lookUpDay } from "@/lib/helpers/lookupname"
+import AdminTable from "@/components/admin/data/table"
 
 type Props = {
   params: {
@@ -99,12 +99,22 @@ const ManageAccount = ({
     {
       title: "Projekte",
       content: (
-        <ManageTable
+        <AdminTable
           title="Projekte"
           queryKey={["projects", accountId]}
           queryFn={() => queryProjectsForAccount(accountId)}
           columns={[
-            { label: "Name", render: (p) => p.name },
+            {
+              label: "Name",
+              render: (p) => (
+                <motion.h1
+                  layoutId={`project-h1-${p.id}`}
+                  className="flex flex-row gap-2 items-center"
+                >
+                  <p className="">{p?.name || `Noname`}</p>
+                </motion.h1>
+              ),
+            },
             { label: "Tag", render: (p) => lookUpDay[p.day] },
             {
               label: "Aktionen",
@@ -174,6 +184,11 @@ const ManageAccount = ({
                 {account.name === "Tobias Hackenberg" && (
                   <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-1 px-4 text-sm text-white font-extrabold flex items-center">
                     App by ✨ Tobias ✨
+                  </span>
+                )}
+                {account.role === Role.ADMIN && (
+                  <span className="bg-gradient-to-r from-red-500 to-yellow-500 rounded-xl p-1 px-4 text-sm text-white font-extrabold flex items-center">
+                    💥 Admin 💥
                   </span>
                 )}
               </div>

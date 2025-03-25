@@ -213,7 +213,7 @@ const ProjectsHeader = () => {
           <Popover open={teachersOpen} onOpenChange={setTeachersOpen}>
             <PopoverTrigger asChild>
               <span
-                className="w-[250px] md:w-[250px] justify-center cursor-pointer text-sm items-center flex rounded-md h-10 bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+                className="w-[250px] md:w-[250px] justify-between px-4 transition cursor-pointer text-sm items-center flex rounded-md h-10 bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
                 aria-label="Lehrer auswählen"
               >
                 {search.teacher
