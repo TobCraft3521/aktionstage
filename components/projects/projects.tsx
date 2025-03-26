@@ -56,6 +56,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
     isFetchingNextPage,
     error,
     status,
+    isPending,
   } = useInfiniteQuery({
     queryKey: ["infinite-projects"], // Specific query key
     queryFn: fetchProjects,
@@ -75,7 +76,16 @@ const ProjectsComp = ({ id }: { id?: string }) => {
     [data]
   )
 
-  const searchedProjects = useMemo(() => {
+  const selectedProject = useMemo(
+    () => projects.find((project) => project.id === id),
+    [projects, id]
+  )
+
+  id && !selectedProject && !isPending && router.push("/projects")
+
+  const [searchedProjects, setSearchedProjects] = useState<Project[]>([])
+
+  useEffect(() => {
     setFiltering(true)
     const filtered = projects.filter(
       (project) =>
@@ -96,8 +106,8 @@ const ProjectsComp = ({ id }: { id?: string }) => {
               searchState.search.teacher?.toLocaleLowerCase()
           ))
     )
+    setSearchedProjects(filtered)
     setFiltering(false)
-    return filtered
   }, [projects, searchState])
 
   const noProjectsFound =
@@ -125,12 +135,16 @@ const ProjectsComp = ({ id }: { id?: string }) => {
     [96, 0, 96]
   )
 
-  // testing
-  if (status && status === "pending")
+  if (isPending)
     return (
       <div className="flex flex-col flex-1">
-        <div className="w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl font-bold mt-12">
-          <Skeleton className="ml-8 w-[146px] h-[40px] bg-slate-200" />
+        <div
+          className={cn(
+            "w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl tracking-tighter font-bold mt-12 text-slate-800 drop-shadow-lg",
+            dmSans.className
+          )}
+        >
+          Projekte
         </div>
         <div className="flex-1 w-full p-2 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
           {new Array(24).fill(0).map((_, i) => (
@@ -150,7 +164,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
             <div className="w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12">
               <h1
                 className={cn(
-                  "ml-[20 px] tracking-tighter text-slate-800",
+                  "tracking-tighter text-slate-800",
                   dmSans.className
                 )}
               >
@@ -208,7 +222,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
         )}
         {/* todo: put motion.div in a separate component */}
         <AnimatePresence>
-          {id && (
+          {id && selectedProject && (
             <div className="">
               <motion.div
                 className="absolute top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white shadow-lg z-[120]"
@@ -241,9 +255,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
                   }
                 }}
               >
-                <ProjectComp
-                  project={projects.find((project) => project.id === id) || {}}
-                />
+                <ProjectComp project={selectedProject} />
               </motion.div>
             </div>
           )}

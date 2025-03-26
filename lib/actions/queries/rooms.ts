@@ -1,6 +1,8 @@
 "use server"
 
+import { auth } from "@/lib/auth/auth"
 import { db } from "@/lib/db"
+import { Role } from "@prisma/client"
 
 export const queryRooms = async () => {
   return await db.room.findMany({
@@ -34,6 +36,34 @@ export const assignProjectToRoom = async (
     await db.project.update({
       where: { id: projectId },
       data: { roomId },
+    })
+    return { error: false }
+  } catch (error) {
+    return { error: true }
+  }
+}
+
+export const deleteRoom = async (roomId: string) => {
+  try {
+    const user = (await auth())?.user
+    if (user?.role !== Role.ADMIN) return { error: true }
+    await db.room.delete({ where: { id: roomId } })
+    return { error: false }
+  } catch (error) {
+    return { error: true }
+  }
+}
+
+export const kickProjectFromRoom = async (
+  projectId: string,
+  roomId: string
+) => {
+  try {
+    const user = (await auth())?.user
+    if (user?.role !== Role.ADMIN) return { error: true }
+    await db.project.update({
+      where: { id: projectId },
+      data: { roomId: null },
     })
     return { error: false }
   } catch (error) {

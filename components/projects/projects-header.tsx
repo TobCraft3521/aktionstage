@@ -229,7 +229,7 @@ const ProjectsHeader = () => {
                 <CommandEmpty>Kein Lehrer gefunden.</CommandEmpty>
                 <CommandGroup>
                   <CommandList>
-                    {teachers.length > 0 &&
+                    {teachers?.length > 0 &&
                       teachers.map((teacher) => (
                         <CommandItem
                           key={teacher.id}

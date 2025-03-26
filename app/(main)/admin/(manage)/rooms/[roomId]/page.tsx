@@ -1,27 +1,8 @@
 "use client"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  queryAcccountsComplete,
-  queryStudents,
-  queryTeachers,
-} from "@/lib/actions/queries/accounts"
-import {
-  kickAccount,
-  queryProjectsForAccount,
-} from "@/lib/actions/queries/projects"
-import { cn } from "@/lib/utils"
-import { Role } from "@prisma/client"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ChevronLeft, Link2Off } from "lucide-react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useMemo, useState } from "react"
-import { motion } from "motion/react"
-import ManageAccountActions from "@/components/admin/manage/account"
-import toast from "react-hot-toast"
-import { lookUpDay } from "@/lib/helpers/lookupname"
 import AdminTable from "@/components/admin/data/table"
+import ManageProjectActions from "@/components/admin/manage/project"
+import ManageRoomActions from "@/components/admin/manage/room"
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -31,18 +12,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  kickAccount,
+  queryProjects,
+  queryStudentsForProject,
+  queryTeachersForProject,
+} from "@/lib/actions/queries/projects"
+import { kickProjectFromRoom, queryRooms } from "@/lib/actions/queries/rooms"
+import { lookUpDay } from "@/lib/helpers/lookupname"
+import { RoomWithProjectsWithParticipants } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import { Role } from "@prisma/client"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { ChevronLeft, Link2Off } from "lucide-react"
+import { motion } from "motion/react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { title } from "process"
+import { useMemo, useState } from "react"
+import toast from "react-hot-toast"
 
 type Props = {
   params: {
-    accountId: string
+    roomId: string
   }
   searchParams: {
     queryKey: string
   }
 }
 
-const ManageAccount = ({
-  params: { accountId },
+const ManageProject = ({
+  params: { roomId },
   searchParams: { queryKey },
 }: Props) => {
   const [activeTab, setActiveTab] = useState(0)
@@ -51,51 +52,48 @@ const ManageAccount = ({
   const userLoading = useSession().status === "loading"
   const router = useRouter()
 
-  const { data: accounts, isPending } = useQuery({
+  const { data: rooms, isPending } = useQuery({
     queryKey: [queryKey],
-    queryFn: async () =>
-      queryKey === "students"
-        ? await queryStudents()
-        : queryKey === "teachers"
-        ? await queryTeachers()
-        : await queryAcccountsComplete(),
+    queryFn: async () => await queryRooms(),
   })
 
-  const account = useMemo(() => {
-    return accounts?.find((a) => a.id === accountId)
-  }, [accountId, accounts])
+  const room = useMemo(() => {
+    return rooms?.find((r) => r.id === roomId)
+  }, [roomId, rooms])
 
-  if (!account && !isPending) {
+  if (!room && !isPending) {
     router.push("/admin")
   }
 
-  const { mutateAsync: kickStudentAsync } = useMutation({
-    mutationFn: async (projectId: string) => {
-      return await kickAccount(projectId, accountId)
-    },
+  const { mutateAsync: kickProject } = useMutation({
+    mutationFn: async (projectId: string) =>
+      await kickProjectFromRoom(projectId, roomId),
     onMutate: (projectId: string) => {
-      toast.loading("Schüler wird entfernt...", {
-        id: "kick-student",
+      toast.loading("Projekt wird entfernt...", {
+        id: "kick-project",
       })
-      queryClient.setQueryData(["projects", accountId], (oldData: any) => {
+      queryClient.setQueryData(["projects", roomId], (oldData: any) => {
         return oldData.filter((p: any) => p.id !== projectId)
       })
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["projects", accountId],
+        queryKey: ["rooms"],
       })
-      toast.success("Schüler wurde entfernt!", {
-        id: "kick-student",
+      queryClient.invalidateQueries({
+        queryKey: ["projects", roomId],
+      })
+      toast.success("Projekt wurde entfernt!", {
+        id: "kick-project",
         icon: "👋",
       })
     },
     onError: (error) => {
-      toast.error("Fehler beim Entfernen des Schülers!", {
-        id: "kick-student",
+      toast.error("Fehler beim Entfernen des Projekts!", {
+        id: "kick-project",
       })
       queryClient.invalidateQueries({
-        queryKey: ["projects", accountId],
+        queryKey: ["rooms"],
       })
     },
   })
@@ -103,15 +101,15 @@ const ManageAccount = ({
   const tabs = [
     {
       title: "Verwalten",
-      content: <ManageAccountActions account={account} />,
+      content: room && <ManageRoomActions room={room} />,
     },
     {
       title: "Projekte",
       content: (
         <AdminTable
           title="Projekte"
-          queryKey={["projects", accountId]}
-          queryFn={() => queryProjectsForAccount(accountId)}
+          queryKey={["projects", roomId]}
+          queryFn={async () => room?.projects || []}
           columns={[
             {
               label: "Name",
@@ -135,7 +133,7 @@ const ManageAccount = ({
                     size="sm"
                     onClick={async (e) => {
                       e.stopPropagation()
-                      await kickStudentAsync(p.id)
+                      await kickProject(p.id)
                     }}
                   >
                     <Link2Off size={16} />
@@ -198,40 +196,19 @@ const ManageAccount = ({
             <ChevronLeft className="w-5 h-5" /> Zurück
           </Button>
           <motion.h1
-            layoutId={`account-h1-${accountId}`}
+            layoutId={`room-h1-${roomId}`}
             className="text-xl font-semibold flex flex-row gap-2 items-center"
           >
-            {account?.name ? (
+            {room?.name ? (
               <div className="flex flex-row gap-2 items-center">
-                <p
-                  className={cn(
-                    account.name === "Tobias Hackenberg" && "text-orange-500"
-                  )}
-                >
-                  {account?.name || `1`}
-                </p>
-                {account.role === Role.VIP && (
-                  <span className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-1 px-4 text-sm text-white font-extrabold flex items-center">
-                    👑 VIP
-                  </span>
-                )}
-                {account.name === "Tobias Hackenberg" && (
-                  <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-1 px-4 text-sm text-white font-extrabold flex items-center">
-                    App by ✨ Tobias ✨
-                  </span>
-                )}
-                {account.role === Role.ADMIN && (
-                  <span className="bg-gradient-to-r from-red-500 to-yellow-500 rounded-xl p-1 px-4 text-sm text-white font-extrabold flex items-center">
-                    💥 Admin 💥
-                  </span>
-                )}
+                <p className={cn()}>{room?.name || `Noname`}</p>
               </div>
             ) : (
               <Skeleton className="w-[146px] h-[25px] bg-slate-300" />
             )}
           </motion.h1>
           <p className="text-slate-400">
-            Hier kannst du {account?.name} verwalten.
+            Hier kannst du {room?.name} verwalten.
           </p>
         </div>
         <div className="mt-auto flex flex-row gap-4 text-slate-700 w-full max-w-6xl ml-16 2xl:mx-auto">
@@ -261,4 +238,4 @@ const ManageAccount = ({
   )
 }
 
-export default ManageAccount
+export default ManageProject

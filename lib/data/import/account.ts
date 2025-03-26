@@ -46,12 +46,10 @@ const onData = async (
   if (data.length === 0) {
     throw new Error("Keine Daten")
   }
-  if (res.meta.fields?.length !== 7 && res.meta.fields?.length !== 8) {
-    throw new Error("Falsche Anzahl an Spalten")
-  }
 
+  if (!res.meta.fields) throw new Error("Keine Spalten")
   if (
-    !res.meta.fields.includes("Id") ||
+    // Id is optional
     !res.meta.fields.includes("Name") ||
     !res.meta.fields.includes("Klasse") ||
     !(
@@ -62,13 +60,12 @@ const onData = async (
       )
     ) ||
     // [Initial_Password_Hash is optional]
-    !res.meta.fields.includes("Projekte") ||
-    !res.meta.fields.includes("Rolle") ||
-    !res.meta.fields.includes("Kürzel")
+    // [Projekte is optional]
+    !res.meta.fields.includes("Rolle")
+    // [Kürzel is optional]
   ) {
     throw new Error("Falsche Spalten")
   }
-
   let accounts: any
 
   try {
@@ -77,7 +74,7 @@ const onData = async (
       data
         .map((d) => {
           return {
-            id: d.Id,
+            ...(d.Id?.length > 0 && { id: d.Id }),
             name: d.Name,
             grade: d.Klasse,
             password:
@@ -96,11 +93,11 @@ const onData = async (
             role:
               (lookUpVip[d.Name] && Role.VIP) ??
               (Role[d.Rolle as Role] || Role.STUDENT),
-            short: d["Kürzel"],
+            short: d["Kürzel"] || "",
           }
-          // Filter out empty entries
         })
-        .filter((a) => a.id)
+        // Filter out empty entries
+        .filter((a) => a.name)
   } catch (error) {
     console.error(error)
     throw new Error("Fehler beim Verarbeiten der Daten")

@@ -26,7 +26,7 @@ export const updateAccounts = async (
     // Add students
     const { count } = await db.account.createMany({
       data: accounts.map((a) => ({
-        id: a.id,
+        ...(a.id && { id: a.id }),
         name: a.name || "",
         role: a.role,
         grade: a.grade,

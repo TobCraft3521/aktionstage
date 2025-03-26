@@ -5,12 +5,18 @@ import Link from "next/link"
 import { useEffect } from "react"
 import { confetti } from "@tsparticles/confetti"
 import "./styles.css"
+import { useSession } from "next-auth/react"
+import { Role } from "@prisma/client"
 
 interface FeedbackPageProps {
   searchParams: { [key: string]: string | undefined }
 }
 
 export default function FeedbackPage({ searchParams }: FeedbackPageProps) {
+  const {
+    data: { user },
+    status: sessionStatus,
+  } = useSession() as any
   const status = searchParams.status || "info" // Default to "info" if not provided
   const message = searchParams.msg || "No message provided."
 
@@ -66,25 +72,49 @@ export default function FeedbackPage({ searchParams }: FeedbackPageProps) {
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-6 py-12">
       {/* Content Wrapper */}
-      <div className="w-full max-w-3xl text-center drop-shadow-xl">
-        <div className={`text-4xl ${currentStyle.text} mb-4`}>
-          {currentStyle.emoji}
+      <div className="w-full max-w-3xl text-center">
+        <div className="drop-shadow-xl">
+          <div className={`text-4xl ${currentStyle.text} mb-4`}>
+            {currentStyle.emoji}
+          </div>
+          <h1
+            className={`text-2xl font-semibold tracking-tight ${currentStyle.text} mb-2`}
+          >
+            {message}
+          </h1>
         </div>
-        <h1
-          className={`text-2xl font-semibold tracking-tight ${currentStyle.text} mb-2`}
-        >
-          {message}
-        </h1>
 
-        <div className="mt-6">
-          <Link href={`/teachers/`}>
-            <Button
-              variant="default"
-              className={`flex items-center justify-center gap-2 mx-auto`}
-            >
-              Fertig <ArrowUpRight size={16} />
-            </Button>
-          </Link>
+        <div className="mt-6 flex flex-row gap-4 justify-center">
+          {user?.role === Role.TEACHER && (
+            <Link href={`/teachers/`}>
+              <Button
+                variant="default"
+                className={`flex items-center justify-center gap-2 mx-auto`}
+              >
+                Fertig <ArrowUpRight size={16} />
+              </Button>
+            </Link>
+          )}
+          {user?.role === Role.ADMIN && (
+            <>
+              <Link href={`/admin/`}>
+                <Button
+                  variant="default"
+                  className={`flex items-center justify-center gap-2 mx-auto`}
+                >
+                  Zu Admin <ArrowUpRight size={16} />
+                </Button>
+              </Link>
+              <Link href={`/`}>
+                <Button
+                  variant="secondary"
+                  className={`flex items-center justify-center gap-2 mx-auto`}
+                >
+                  Zu Entdecken <ArrowUpRight size={16} />
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -260,62 +260,6 @@ const ManageProject = ({
               noPadding: true,
             },
           ]}
-          filters={[
-            {
-              label: "Klasse",
-              render: (value, setValue) => (
-                <Select value={value} onValueChange={setValue}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Klasse" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Klassen</SelectLabel>
-                      {[...Array(12)].map((_, i) => {
-                        if (i < 5) return null // Assuming grades start from 5
-                        const base = i.toString()
-                        return (
-                          <>
-                            <SelectItem
-                              key={i}
-                              className="cursor-pointer"
-                              value={base}
-                            >
-                              {base}. Klasse
-                            </SelectItem>
-                            <SelectItem
-                              key={`${i}a`}
-                              className="cursor-pointer"
-                              value={`${base}a`}
-                            >
-                              {base}a
-                            </SelectItem>
-                            <SelectItem
-                              key={`${i}b`}
-                              className="cursor-pointer"
-                              value={`${base}b`}
-                            >
-                              {base}b
-                            </SelectItem>
-                            <SelectItem
-                              key={`${i}c`}
-                              className="cursor-pointer"
-                              value={`${base}c`}
-                            >
-                              {base}c
-                            </SelectItem>
-                          </>
-                        )
-                      })}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              ),
-              filterFn: (row, value) => {
-                return value ? row.grade?.includes(value) || false : true
-              },
-            },
-          ]}
           manageItem="accounts"
         />
       ),

@@ -19,7 +19,11 @@ export const queryProjects = async () => {
     },
   })
 
-  return projects
+  return projects.sort(
+    (a, b) =>
+      ["MON", "TUE", "WED"].indexOf(a.day) -
+      ["MON", "TUE", "WED"].indexOf(b.day)
+  )
 }
 
 export const queryProjectsWithStudentsAndTeachers = async () => {

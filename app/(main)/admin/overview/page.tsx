@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useAdminTabStore from "@/stores/admin-tab"
+import { lookUpDay } from "@/lib/helpers/lookupname"
 
 type Props = {}
 
@@ -214,6 +215,10 @@ const Overview = (props: Props) => {
               ),
             },
             {
+              label: "Tag",
+              render: (p) => lookUpDay[p.day],
+            },
+            {
               label: "Schüler",
               render: (p) =>
                 p.participants?.filter(
@@ -226,6 +231,31 @@ const Overview = (props: Props) => {
                 p.participants?.filter(
                   (t) => t.role === Role.TEACHER || t.role === Role.ADMIN
                 ).length,
+            },
+          ]}
+          filters={[
+            {
+              label: "Tag",
+              render: (value, setValue) => (
+                <Select value={value} onValueChange={setValue}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tag" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Tage</SelectLabel>
+                      {Object.keys(lookUpDay).map((day) => (
+                        <SelectItem key={day} value={day}>
+                          {lookUpDay[day as keyof typeof lookUpDay]}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              ),
+              filterFn: (row, value) => {
+                return value ? row.day === value : true
+              },
             },
           ]}
           importFn={(data) => {
@@ -247,7 +277,17 @@ const Overview = (props: Props) => {
           queryKey={["rooms"]}
           queryFn={() => queryRoomsWithProjectsWithTeachers()}
           columns={[
-            { label: "Name", render: (r) => r.name },
+            {
+              label: "Name",
+              render: (r) => (
+                <motion.h1
+                  layoutId={`room-h1-${r.id}`}
+                  className="flex flex-row gap-2 items-center"
+                >
+                  <p className="">{r?.name || `Noname`}</p>
+                </motion.h1>
+              ),
+            },
             { label: "Projekte", render: (r) => r.projects?.length },
           ]}
           importFn={(data) => {
@@ -257,7 +297,7 @@ const Overview = (props: Props) => {
             importRooms(data, queryClient, true)
           }}
           exportFn={(rooms) => exportRooms(rooms)}
-          manageItem=""
+          manageItem="rooms"
         />
       ),
     },

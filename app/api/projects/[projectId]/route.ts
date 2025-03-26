@@ -7,7 +7,6 @@ import { ProjectEditSchema } from "@/lib/form-schemas"
 type Params = {
   params: {
     projectId: string
-    redirectToAdmin?: boolean
   }
 }
 
