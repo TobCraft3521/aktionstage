@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { DM_Sans } from "next/font/google"
 import { cn } from "@/lib/utils"
 import { lookUpDay } from "@/lib/helpers/lookupname"
+import { useMutation } from "@tanstack/react-query"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -49,6 +50,11 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
       ).length,
     [project.participants]
   )
+
+  const { mutateAsync: signUp } = useMutation({
+    mutationFn: async () => {},
+  })
+
   return (
     <div className="relative h-full w-full">
       <motion.div
@@ -150,7 +156,10 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
               </ScrollArea>
               <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
                 {(studentsCount || 0) < (project.maxStudents || 0) ? (
-                  <Button className="w-full sm:w-[154px] h-[43px] rounded-xl">
+                  <Button
+                    className="w-full sm:w-[154px] h-[43px] rounded-xl"
+                    onClick={() => signUp()}
+                  >
                     Anmelden
                   </Button>
                 ) : (

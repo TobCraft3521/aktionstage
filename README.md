@@ -32,12 +32,13 @@ To clone and run locally, just run git clone ...; npm i; and set up the env:
 - Awesome multi-step form to not overwhelm users with tons of inputs (like in the edit form)
 - Edit form shows live changes and a summary of changes
 - Full room and teacher availability management
+- Faster lcp (largest contentful paint) through chunk loading projects on explore page (tanstack useInfiniteQuery)
+- Clean admin dashboard with fully functional importing/ adding/ exporting, optimistic ui for instant change reflection in the ui
 
 ### The login page has been redesigned.
 
 UX fixes such as
 
-- Faster lcp (largest contentful paint) through chunk loading projects on explore page (tanstack useInfiniteQuery)
 - Page redirected you to many times
 - Confirm form resubmission (php issues)
 
