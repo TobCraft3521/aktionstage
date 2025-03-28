@@ -225,7 +225,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
           {id && selectedProject && (
             <div className="">
               <motion.div
-                className="absolute top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white shadow-lg z-[120]"
+                className="absolute top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white shadow-lg z-[99]"
                 layoutId={`card-container-${id}`}
                 style={{
                   y,

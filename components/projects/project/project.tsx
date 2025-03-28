@@ -1,17 +1,18 @@
 // File: /components/ProjectComp.tsx
 
-import { useState, useEffect, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Account, Day, Project, Role } from "@prisma/client"
-import { AnimatePresence, motion, spring, useAnimation } from "motion/react"
-import Image from "next/image"
-import { ArrowDown, X } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { DM_Sans } from "next/font/google"
-import { cn } from "@/lib/utils"
 import { lookUpDay } from "@/lib/helpers/lookupname"
+import { cn } from "@/lib/utils"
+import { Account, Project, Role } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
+import { ArrowDown, X } from "lucide-react"
+import { AnimatePresence, motion, useAnimation } from "motion/react"
+import { DM_Sans } from "next/font/google"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import SignUpButton from "./sign-up"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -50,10 +51,6 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
       ).length,
     [project.participants]
   )
-
-  const { mutateAsync: signUp } = useMutation({
-    mutationFn: async () => {},
-  })
 
   return (
     <div className="relative h-full w-full">
@@ -155,21 +152,10 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 </div>
               </ScrollArea>
               <div className="w-full flex mx-auto gap-2 md:gap-4 px-8 md:px-20 flex-wrap">
-                {(studentsCount || 0) < (project.maxStudents || 0) ? (
-                  <Button
-                    className="w-full sm:w-[154px] h-[43px] rounded-xl"
-                    onClick={() => signUp()}
-                  >
-                    Anmelden
-                  </Button>
-                ) : (
-                  <Button
-                    className="w-full sm:w-[154px] h-[43px] rounded-xl"
-                    disabled
-                  >
-                    Voll 😭
-                  </Button>
-                )}
+                <SignUpButton
+                  project={project}
+                  studentsCount={studentsCount || 0}
+                />
                 {[
                   {
                     icon: "🙋🏻",

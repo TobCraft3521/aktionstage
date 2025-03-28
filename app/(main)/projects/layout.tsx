@@ -10,6 +10,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ScrollArea className="flex h-screen relative" id="projects-scroll">
+      {/* <div className="w-full h-8 bg-gradient-to-r from-lime-500 to-green-500 flex flex-row justify-center items-center font-semibold text-sm text-white">
+        Es geht los 🎉
+      </div> */}
+      {/* <div className="w-full h-8 bg-gradient-to-r from-yellow-500 to-amber-500 flex flex-row justify-center items-center font-semibold text-sm text-white">
+        Noch 53 Minuten
+      </div> */}
       <Header variant="main" />
       <ProjectsHeader />
       <ProjectsComp id={id} />
