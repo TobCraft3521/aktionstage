@@ -56,3 +56,27 @@ export const leaveProject = async (projectId: string) => {
     data: { participants: { disconnect: { id: user.id } } },
   })
 }
+
+export const signUpForProject = async (projectId: string) => {
+  const user = (await auth())?.user
+  if (!user) return { error: true }
+  // Check student
+  if (user.role !== Role.STUDENT && user.role !== Role.VIP)
+    return { error: true }
+  const project = await db.project.findUnique({
+    where: { id: projectId },
+    include: { participants: true },
+  })
+  if (!project) return { error: true }
+  // Check if project is full
+  const studentsCount = project.participants.filter(
+    (participant) =>
+      participant.role === Role.STUDENT || participant.role === Role.VIP
+  ).length
+  if (studentsCount >= (project.maxStudents || 0)) return { error: true }
+  await db.project.update({
+    where: { id: projectId },
+    data: { participants: { connect: { id: user.id } } },
+  })
+  return { error: false }
+}

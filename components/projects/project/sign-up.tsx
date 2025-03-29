@@ -4,6 +4,8 @@ import { useMutation } from "@tanstack/react-query"
 import React, { useEffect, useState } from "react"
 import { confetti } from "@tsparticles/confetti"
 import "./particles.css"
+import { signUpForProject } from "@/lib/actions/updates/project"
+import { useSession } from "next-auth/react"
 
 type Props = {
   project: Partial<ProjectWithParticipants>
@@ -30,7 +32,16 @@ export function getTimeLeft(targetTimestamp: number) {
 }
 
 const SignUpButton = ({ project, studentsCount }: Props) => {
-  const { mutateAsync: signUp } = useMutation({ mutationFn: async () => {} })
+  const { mutateAsync: signUp } = useMutation({
+    mutationFn: async () => {
+      const { error } = await signUpForProject(project.id || "")
+      if (error) throw new Error("Error signing up for project")
+    },
+  })
+
+  const user = useSession().data?.user
+  const isStudent = user?.role === "STUDENT" || user?.role === "VIP"
+
   const startDate = process.env.NEXT_PUBLIC_SIGNUP_START_DATE
   const endDate = process.env.NEXT_PUBLIC_SIGNUP_END_DATE
 
@@ -105,6 +116,8 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
       </Button>
     )
   }
+
+  if (!isStudent) return null
 
   return (
     <>
