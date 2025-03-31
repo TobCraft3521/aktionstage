@@ -3,9 +3,8 @@ import CreateProjectCard from "@/components/teachers/ownproject-card/create"
 import OwnProjectCard from "@/components/teachers/ownproject-card/ownproject-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { queryTeachersProjects } from "@/lib/actions/queries/projects"
-import {
-  ProjectWithParticipants
-} from "@/lib/types"
+import { ProjectWithParticipants } from "@/lib/types"
+import { Role } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
 
@@ -42,7 +41,9 @@ const TeacherProjects = (props: Props) => {
             teachers={project.participants
               .filter(
                 // Filter out the current user
-                (teacher) => teacher.id !== id || teacher.role !== "TEACHER"
+                (teacher) =>
+                  teacher.id !== id &&
+                  (teacher.role === Role.TEACHER || teacher.role === Role.ADMIN)
               )
               .map((teacher) => teacher.name)
               .join(", ")}

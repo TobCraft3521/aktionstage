@@ -122,6 +122,14 @@ export const queryProjectStudents = async (projectId: string) => {
           id: projectId,
         },
       },
+      OR: [
+        {
+          role: Role.STUDENT,
+        },
+        {
+          role: Role.VIP,
+        },
+      ],
     },
   })
   return students

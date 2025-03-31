@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table"
 import { queryProjectStudents } from "@/lib/actions/queries/accounts"
 import { cn } from "@/lib/utils"
+import { Role } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import { DM_Sans } from "next/font/google"
 import React from "react"
@@ -49,7 +50,28 @@ export const StudentsOverview = React.forwardRef<
                 <Checkbox />
               </TableCell>
               <TableCell>{i + 1}</TableCell>
-              <TableCell>{s.name}</TableCell>
+              <TableCell className={"h-12 p-0 pl-4"}>
+                <h1 className="flex flex-row gap-2 items-center">
+                  <p
+                    className={cn(
+                      s.name === "Tobias Hackenberg" &&
+                        "text-orange-500 font-extrabold"
+                    )}
+                  >
+                    {s?.name || `Noname`}
+                  </p>
+                  {s.role === Role.VIP && (
+                    <span className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
+                      👑 VIP
+                    </span>
+                  )}
+                  {s.name === "Tobias Hackenberg" && (
+                    <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
+                      App by ✨ Tobias ✨
+                    </span>
+                  )}
+                </h1>
+              </TableCell>
               <TableCell className="text-right">{s.grade}</TableCell>
             </TableRow>
           ))}
