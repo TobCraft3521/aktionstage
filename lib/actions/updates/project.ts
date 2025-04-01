@@ -35,7 +35,7 @@ export const addTeacherToProject = async (
   })
 }
 
-export const leaveProject = async (projectId: string) => {
+export const leaveProjectAsTeacher = async (projectId: string) => {
   const user = (await auth())?.user
   if (!user) return null
   const project = await db.project.findUnique({
@@ -74,9 +74,34 @@ export const signUpForProject = async (projectId: string) => {
       participant.role === Role.STUDENT || participant.role === Role.VIP
   ).length
   if (studentsCount >= (project.maxStudents || 0)) return { error: true }
+  // Check if user is already signed up
+  const isAlreadySignedUp = project.participants.some(
+    (participant) => participant.id === user.id
+  )
+  if (isAlreadySignedUp) return { error: "Bereits angemeldet" }
   await db.project.update({
     where: { id: projectId },
     data: { participants: { connect: { id: user.id } } },
+  })
+  return { error: false }
+}
+
+export const leaveProject = async (projectId: string) => {
+  const user = (await auth())?.user
+  if (!user) return { error: "Kein Benutzer angemeldet" }
+  const project = await db.project.findUnique({
+    where: { id: projectId },
+    include: { participants: true },
+  })
+  if (!project) return { error: "Projekt nicht gefunden" }
+  // Check if user is already signed up
+  const isAlreadySignedUp = project.participants.some(
+    (participant) => participant.id === user.id
+  )
+  if (!isAlreadySignedUp) return { error: "Nicht angemeldet" }
+  await db.project.update({
+    where: { id: projectId },
+    data: { participants: { disconnect: { id: user.id } } },
   })
   return { error: false }
 }

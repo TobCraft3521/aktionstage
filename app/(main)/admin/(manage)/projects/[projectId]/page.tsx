@@ -61,7 +61,7 @@ const ManageProject = ({
     router.push("/admin")
   }
 
-  const { mutateAsync: kickStudentAsync } = useMutation({
+  const { mutate: kickStudentAsync } = useMutation({
     mutationFn: async (accountId: string) => {
       return await kickAccount(projectId, accountId)
     },

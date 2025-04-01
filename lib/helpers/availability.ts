@@ -1,5 +1,8 @@
 // helpers.ts
 
+import { Day } from "@prisma/client"
+import { AccountWithProjects } from "../types"
+
 export const isTeacherAlreadyAdded = (
   teacherId: string,
   addedTeachers: { id: string }[]
@@ -26,7 +29,16 @@ export const isTeacherAvailable = (
   teacherLoads: Record<string, string[]>
 ) => {
   if (day === undefined) {
-    return false;
+    return false
   }
-  return !teacherLoads[teacherId]?.includes(day);
-};
+  return !teacherLoads[teacherId]?.includes(day)
+}
+
+export const getStudentAvailability = (s?: AccountWithProjects) => {
+  if (!s) return { [Day.MON]: false, [Day.TUE]: false, [Day.WED]: false }
+  return {
+    [Day.MON]: !s.projects.some((p) => p.day === Day.MON),
+    [Day.TUE]: !s.projects.some((p) => p.day === Day.TUE),
+    [Day.WED]: !s.projects.some((p) => p.day === Day.WED),
+  }
+}

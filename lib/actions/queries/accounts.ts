@@ -24,19 +24,17 @@ export const queryTeachers = async () => {
 
 export const queryUser = async () => {
   const id = (await auth())?.user?.id
-  if (!id) return null
+  if (!id) return
   const user = await db.account.findUnique({
     where: {
       id,
     },
+    include: {
+      projects: true,
+    },
   })
-  if (!user) return null
-  return {
-    id: user.id,
-    name: user.name,
-    role: user.role,
-    grade: user.grade,
-  }
+  if (!user) return
+  return user
 }
 
 // bulk query the teacher load for all teachers, for the teacher select, to front end show who is available

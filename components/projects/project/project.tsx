@@ -44,13 +44,11 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
     [project.participants]
   )
 
-  const studentsCount = useMemo(
-    () =>
-      project?.participants?.filter(
-        (p) => p.role === Role.STUDENT || p.role === Role.VIP
-      ).length,
-    [project.participants]
-  )
+  const studentsCount = useMemo(() => {
+    return project?.participants?.filter(
+      (p) => p.role === Role.STUDENT || p.role === Role.VIP
+    ).length
+  }, [project.participants])
 
   return (
     <div className="relative h-full w-full">

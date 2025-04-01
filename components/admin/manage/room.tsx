@@ -56,7 +56,7 @@ const ManageRoomActions = ({ room }: Props) => {
 
   const projectCount = room?.projects?.length
 
-  const { mutateAsync: deleteRoomFn } = useMutation({
+  const { mutate: deleteRoomFn } = useMutation({
     mutationFn: async () => {
       await deleteRoom(room.id)
     },

@@ -91,7 +91,7 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
     }
   }
 
-  const { mutateAsync: deleteAccountFn } = useMutation({
+  const { mutate: deleteAccountFn } = useMutation({
     mutationFn: () => deleteAccount(account?.id || ""),
     onSuccess: () => {
       toast.success("Account gelöscht", {
@@ -112,7 +112,7 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
     },
   })
 
-  const { mutateAsync: assignAccountFn } = useMutation({
+  const { mutate: assignAccountFn } = useMutation({
     mutationFn: async (projectId: string) => {
       if (!account?.id) return
       if (!projectId) return

@@ -21,7 +21,10 @@ import {
 import { deleteProject } from "@/lib/actions/delete/project"
 import { queryProjectParticipants } from "@/lib/actions/queries/accounts"
 import { queryTeachersProjects } from "@/lib/actions/queries/projects"
-import { leaveProject } from "@/lib/actions/updates/project"
+import {
+  leaveProject,
+  leaveProjectAsTeacher,
+} from "@/lib/actions/updates/project"
 import { cn } from "@/lib/utils"
 import { useConfirmModal } from "@/stores/confirm-modal"
 import { Role } from "@prisma/client"
@@ -64,7 +67,7 @@ const ProjectDetailView = () => {
     queryFn: () => queryProjectParticipants(project?.id || ""),
     refetchInterval: 5000,
   })
-  const { mutateAsync: deleteProjectMutation, isPending: isDeletingProject } =
+  const { mutate: deleteProjectMutation, isPending: isDeletingProject } =
     useMutation({
       mutationFn: async ({}: { projectName: string }) =>
         deleteProject(id as string),
@@ -94,9 +97,9 @@ const ProjectDetailView = () => {
     })
   }
 
-  const { mutateAsync: leaveProjectMutation } = useMutation({
+  const { mutate: leaveProjectMutation } = useMutation({
     mutationFn: async ({}: { projectName: string }) =>
-      leaveProject(id as string),
+      leaveProjectAsTeacher(id as string),
     onSuccess: () => {
       toast.success(`Projekt ${project?.name} erfolgreich verlassen`)
       router.push("/teachers/projects")

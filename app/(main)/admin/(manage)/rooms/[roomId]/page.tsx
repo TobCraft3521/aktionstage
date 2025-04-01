@@ -65,7 +65,7 @@ const ManageProject = ({
     router.push("/admin")
   }
 
-  const { mutateAsync: kickProject } = useMutation({
+  const { mutate: kickProject } = useMutation({
     mutationFn: async (projectId: string) =>
       await kickProjectFromRoom(projectId, roomId),
     onMutate: (projectId: string) => {

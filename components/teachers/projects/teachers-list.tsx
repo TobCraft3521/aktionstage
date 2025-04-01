@@ -57,46 +57,45 @@ const TeachersList = () => {
     )
   }, [project?.participants, user?.id])
 
-  const { mutateAsync: removeTeacher, isPending: isRemovingTeacher } =
-    useMutation({
-      mutationFn: async ({
-        teacherId,
-      }: {
-        teacherId: string
-        teacherName: string
-      }) => removeTeacherFromProject((id as string) || "", teacherId),
-      onMutate: async ({ teacherId }) => {
-        // Optimistically update the UI to remove the teacher
-        queryClient.setQueryData(["teacher-projects"], (oldData: any) => {
-          const updatedProjects = oldData.map((p: any) => {
-            if (p.id === id) {
-              // Remove the teacher from the project
-              const updatedTeachers = p.teachers.filter(
-                (teacher: any) => teacher.id !== teacherId
-              )
-              return { ...p, teachers: updatedTeachers }
-            }
-            return p
-          })
-          return updatedProjects
+  const { mutate: removeTeacher, isPending: isRemovingTeacher } = useMutation({
+    mutationFn: async ({
+      teacherId,
+    }: {
+      teacherId: string
+      teacherName: string
+    }) => removeTeacherFromProject((id as string) || "", teacherId),
+    onMutate: async ({ teacherId }) => {
+      // Optimistically update the UI to remove the teacher
+      queryClient.setQueryData(["teacher-projects"], (oldData: any) => {
+        const updatedProjects = oldData.map((p: any) => {
+          if (p.id === id) {
+            // Remove the teacher from the project
+            const updatedTeachers = p.teachers.filter(
+              (teacher: any) => teacher.id !== teacherId
+            )
+            return { ...p, teachers: updatedTeachers }
+          }
+          return p
         })
-      },
-      onError: (_error, _variables, context: any) => {
-        // Rollback the optimistic update
-        toast.error("Fehler beim Entfernen des Lehrers!")
-        queryClient.setQueryData(["teacher-projects"], context?.oldData)
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ["teacher-projects"] })
-        queryClient.invalidateQueries({ queryKey: ["teacher-loads"] })
-      },
-      onSuccess: (_data, { teacherName }) => {
-        // Display a success toast after the teacher is removed
-        toast.success(`${teacherName} erfolgreich entfernt!`)
-      },
-    })
+        return updatedProjects
+      })
+    },
+    onError: (_error, _variables, context: any) => {
+      // Rollback the optimistic update
+      toast.error("Fehler beim Entfernen des Lehrers!")
+      queryClient.setQueryData(["teacher-projects"], context?.oldData)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["teacher-projects"] })
+      queryClient.invalidateQueries({ queryKey: ["teacher-loads"] })
+    },
+    onSuccess: (_data, { teacherName }) => {
+      // Display a success toast after the teacher is removed
+      toast.success(`${teacherName} erfolgreich entfernt!`)
+    },
+  })
 
-  const { mutateAsync: addTeacher, isPending: isAddingTeacher } = useMutation({
+  const { mutate: addTeacher, isPending: isAddingTeacher } = useMutation({
     mutationFn: async ({
       teacherId,
     }: {

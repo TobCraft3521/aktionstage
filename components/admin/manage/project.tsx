@@ -76,7 +76,7 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
     ).length
   }, [accounts, project?.id])
 
-  const { mutateAsync: deleteProjectFn } = useMutation({
+  const { mutate: deleteProjectFn } = useMutation({
     mutationFn: () => deleteProject(project?.id || ""),
     onSuccess: () => {
       toast.success("Projekt gelöscht", {
@@ -97,7 +97,7 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
     },
   })
 
-  const { mutateAsync: assignAccountFn } = useMutation({
+  const { mutate: assignAccountFn } = useMutation({
     mutationFn: async (accountId: string) => {
       if (!project?.id) return
       if (!accountId) return
@@ -138,7 +138,7 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
     },
   })
 
-  const { mutateAsync: assignRoomFn } = useMutation({
+  const { mutate: assignRoomFn } = useMutation({
     mutationFn: async (roomId: string) => {
       if (!project?.id) return
       if (!roomId) return
