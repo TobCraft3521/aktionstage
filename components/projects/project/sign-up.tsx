@@ -11,29 +11,11 @@ import { LogOut } from "lucide-react"
 import { queryUser } from "@/lib/actions/queries/accounts"
 import { getStudentAvailability } from "@/lib/helpers/availability"
 import { lookUpDay } from "@/lib/helpers/lookupname"
+import { getTimeLeft } from "@/lib/helpers/time"
 
 type Props = {
   project: Partial<ProjectWithParticipants>
   studentsCount: number
-}
-
-// Optimized version of getTimeLeft
-export function getTimeLeft(targetTimestamp: number) {
-  const now = Date.now()
-  let delta = Math.max(0, targetTimestamp - now)
-
-  const days = Math.floor(delta / 86_400_000) // 1000 * 60 * 60 * 24
-  delta -= days * 86_400_000
-
-  const hours = Math.floor(delta / 3_600_000) // 1000 * 60 * 60
-  delta -= hours * 3_600_000
-
-  const minutes = Math.floor(delta / 60_000) // 1000 * 60
-  delta -= minutes * 60_000
-
-  const seconds = Math.floor(delta / 1000)
-
-  return { days, hours, minutes, seconds }
 }
 
 const SignUpButton = ({ project, studentsCount }: Props) => {
@@ -66,34 +48,6 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
 
     const syncToNextSecond = () => {
       const now = Date.now()
-      if (now >= startTimestamp) {
-        // time for ts particles confetti
-        const end = Date.now() + 3 * 1000
-        const colors = ["#bb0000", "#ffffff"]
-        const anotherTimeConfetti = () => {
-          confetti({
-            particleCount: 2,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 },
-            colors: colors,
-          })
-
-          confetti({
-            particleCount: 2,
-            angle: 120,
-            spread: 55,
-            origin: { x: 1 },
-            colors: colors,
-          })
-
-          if (Date.now() < end) {
-            requestAnimationFrame(anotherTimeConfetti)
-          }
-        }
-        anotherTimeConfetti()
-        return // Stop if the event has ended [no live update for end date (disable button), but backend will handle it]
-      }
       setTimeout(() => {
         setTimeLeft(getTimeLeft(startTimestamp))
         syncToNextSecond()

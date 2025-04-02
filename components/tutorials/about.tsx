@@ -3,6 +3,8 @@ import { finishTutorial } from "@/lib/actions/queries/tutorials"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 import { useState } from "react"
+import { Button } from "../ui/button"
+import { ArrowRight } from "lucide-react"
 const AboutTutorial = () => {
   const [fadeOut, setFadeOut] = useState(false)
   const finish = async () => {
@@ -23,8 +25,8 @@ const AboutTutorial = () => {
         >
           {/* Light Bulb Emoji */}
           <span
-            className="absolute text-5xl"
-            style={{ top: "-20px", right: "-20px" }}
+            className="absolute text-5xl rotate-6"
+            style={{ top: "-10px", right: "-10px" }}
           >
             💡
           </span>
@@ -41,15 +43,16 @@ const AboutTutorial = () => {
 
           {/* Buttons */}
           <div className="flex flex-col space-y-2 mt-auto">
-            <button
+            <Button
+              variant="outline"
               onClick={finish}
-              className="px-4 py-1.5 border border-slate-500 text-slate-800 font-semibold rounded-lg shadow-md hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50"
+              className="px-4 py-1.5 h-10 border border-slate-500 text-slate-800 font-semibold rounded-lg shadow-md hover:bg-slate-100 focus:outline-none focus:ring-slate-500 focus:ring-opacity-50"
             >
               Fertig
-            </button>
-            <button className="px-4 py-1.5 bg-slate-800 text-white font-semibold rounded-lg shadow-md hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50">
-              Mehr
-            </button>
+            </Button>
+            <Button className="px-4 py-1.5 h-10 bg-slate-800 text-white font-semibold rounded-lg shadow-md hover:bg-slate-700 focus:outline-none focus:ring-slate-500 focus:ring-opacity-50 flex items-center justify-center gap-2">
+              Mehr <ArrowRight size={16} />
+            </Button>
           </div>
         </motion.div>
       )}

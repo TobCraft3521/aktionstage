@@ -1,6 +1,3 @@
 - this one is for tutorials -> https://motion-primitives.com/docs/transition-panel
 - create tutorial for those who click the x button, that swiping also works
 - change aws cors under bucket/policies/ on the bottom in production
-
-- project sign up particles confetti.js.org random direction
-- env date fix millis/ seconds
