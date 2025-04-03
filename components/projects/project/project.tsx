@@ -7,11 +7,17 @@ import { cn } from "@/lib/utils"
 import { Account, Project, Role } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { ArrowDown, X } from "lucide-react"
-import { AnimatePresence, motion, useAnimation } from "motion/react"
+import {
+  AnimatePresence,
+  motion,
+  useAnimation,
+  useMotionValue,
+  useTransform,
+} from "motion/react"
 import { DM_Sans } from "next/font/google"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import SignUpButton from "./sign-up"
 
 const dmSans = DM_Sans({
@@ -36,6 +42,23 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
     setTimeout(() => setShowContents(true), 400)
   }, [controls])
 
+  let swipeDismissDistance = 0 // Default value for SSR
+
+  if (typeof window !== "undefined") {
+    swipeDismissDistance = window.innerHeight / 8 // Calculate the swipe dismiss distance in pixels
+  }
+  const y = useMotionValue(0)
+  const scale = useTransform(
+    y,
+    [-swipeDismissDistance, 0, swipeDismissDistance],
+    [0.2, 1, 0.2]
+  )
+  const borderRadius = useTransform(
+    y,
+    [-swipeDismissDistance, 0, swipeDismissDistance],
+    [96, 0, 96]
+  )
+
   const projectTeachers = useMemo(
     () =>
       project?.participants?.filter(
@@ -50,8 +73,38 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
     ).length
   }, [project.participants])
 
+  const id = project.id
+
   return (
-    <div className="relative h-full w-full">
+    <motion.div
+      className="absolute w-full h-full top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white z-[99]"
+      layoutId={`card-container-${id}`}
+      style={{
+        y,
+        scale,
+        willChange: "transform",
+        borderRadius,
+      }}
+      // reduced motion: enable this and add transition-all and remove layoutId
+      // initial={{ opacity: 0 }}
+      // animate={{ opacity: 1 }}
+      // exit={{
+      //   opacity: 0,
+      // }}
+      drag={
+        typeof window !== "undefined" && window.innerWidth > 768 ? "y" : false
+      }
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={0.2}
+      onDrag={(event, info) => {
+        if (
+          info.offset.y > swipeDismissDistance ||
+          info.offset.y < -swipeDismissDistance
+        ) {
+          router.push("/projects")
+        }
+      }}
+    >
       <motion.div
         // initial={{ opacity: 0 }}
         animate={controls}
@@ -71,18 +124,18 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
         {/* )} */}
         {/* lag */}
         {showContents && (
-          <div className="top-64 md:top-[40%] left-[0] h-[550px] w-[1028px] blur-[80px] bg-black opacity-80 absolute"></div>
+          <div className="top-16 md:top-[40%] left-[0] h-[550px] w-[1028px] blur-[80px] bg-black opacity-80 absolute"></div>
         )}
       </motion.div>
-      <motion.div className="absolute bottom-8 md:bottom-16 w-full">
+      <motion.div className="absolute md:bottom-16 w-full">
         <motion.h1
           layoutId={"title-" + project.id}
           className={cn(
-            "text-5xl md:text-6xl font-extrabold text-white md:leading-[96px] tracking-tighter flex items-center px-8 md:px-20 gap-4",
+            "text-4xl md:text-6xl font-extrabold text-white md:leading-[96px] tracking-tighter flex items-center px-8 md:px-20 gap-4",
             dmSans.className
           )}
         >
-          <div className="text-2xl md:text-4xl flex justify-center rounded-2xl items-center bg-slate-800 p-4 h-[72px] w-[72px] bg-opacity-65 border-2 border-slate-800">
+          <div className="text-2xl md:text-4xl flex justify-center rounded-2xl items-center bg-slate-800 p-4 h-[56px] w-[56px] sm:h-[72px] sm:w-[72px] bg-opacity-65 border-2 border-slate-800">
             {project.emoji}
           </div>
           {project?.name}
@@ -97,7 +150,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
               <motion.h2
                 className={cn(
                   dmSans.className,
-                  "text-base md:text-3xl px-8 md:px-24 text-white mb-4 md:mb-8"
+                  "text-lg md:text-3xl px-8 md:px-24 text-white mb-4 md:mb-8"
                 )}
               >
                 {projectTeachers?.map(
@@ -109,7 +162,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
                 )}
               </motion.h2>
               <ScrollArea
-                className="max-h-[25vh] h-auto text-wrap mb-8 relative ml-8 md:ml-20 inline-block"
+                className="max-h-[20vh] sm:max-h-[25vh] h-auto text-wrap mb-8 relative ml-8 md:ml-20 inline-block"
                 onScrollCapture={(e) => setShowScrollHint(false)}
               >
                 <div
@@ -194,7 +247,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
           <X className="text-white" size={24} strokeWidth={3} />
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

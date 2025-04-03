@@ -53,7 +53,7 @@ const FeatureTutorial = ({ show }: { show: boolean }) => {
                   🔍 Live Suchen
                 </span>
                 <span className="ml-4 md:ml-0 text-xl font-bold text-slate-700 relative drop-shadow-lg">
-                  ⌨️ Neueste Technologien
+                  ⏰ Countdown
                 </span>
               </div>
               <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-8 w-full mt-4">
@@ -72,7 +72,7 @@ const FeatureTutorial = ({ show }: { show: boolean }) => {
                   📦 Behind the scenes
                 </span>
                 <span className="ml-4 md:ml-0 text-xl font-bold text-slate-700 relative drop-shadow-lg hidden md:block">
-                  🪴 Customizable
+                  🪴 Sicherer (Hacken)
                 </span>
               </div>
             </div>

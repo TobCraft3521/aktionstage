@@ -44,7 +44,7 @@ export function Countdown() {
           }
         }
         anotherTimeConfetti()
-        return // Stop if the event has ended [no live update for end date (disable button), but backend will handle it]
+        return // Important: stop only call anotherTimeConfetti() once avoid infinite loop
       }
       setTimeout(() => {
         setTimeLeft(getTimeLeft(startTimestamp))
@@ -82,10 +82,7 @@ export function Countdown() {
   }
 
   return (
-    <div
-      className="z-[50] relative w-full h-8 bg-gradient-to-r from-lime-300 via-teal-500 to-lime-300
- flex flex-row justify-center items-center font-semibold text-sm text-white gap-2"
-    >
+    <div className="z-[50] relative w-full h-8 bg-gradient-to-r from-lime-400 to-green-500 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2">
       Los gehts 🎉
     </div>
   )

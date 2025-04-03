@@ -79,6 +79,18 @@ export const signUpForProject = async (projectId: string) => {
     (participant) => participant.id === user.id
   )
   if (isAlreadySignedUp) return { error: "Bereits angemeldet" }
+  // Check allowed timeframe
+  const now = Date.now()
+  if (
+    !process.env.NEXT_PUBLIC_SIGNUP_START_DATE ||
+    parseInt(process.env.NEXT_PUBLIC_SIGNUP_START_DATE) > now
+  )
+    return { error: "Abmeldung noch nicht möglich" }
+  if (
+    !process.env.NEXT_PUBLIC_SIGNUP_END_DATE ||
+    parseInt(process.env.NEXT_PUBLIC_SIGNUP_END_DATE) < now
+  )
+    return { error: "Abmeldung nicht mehr möglich" }
   await db.project.update({
     where: { id: projectId },
     data: { participants: { connect: { id: user.id } } },
@@ -99,6 +111,20 @@ export const leaveProject = async (projectId: string) => {
     (participant) => participant.id === user.id
   )
   if (!isAlreadySignedUp) return { error: "Nicht angemeldet" }
+
+  // Check allowed timeframe
+  const now = Date.now()
+  if (
+    !process.env.NEXT_PUBLIC_SIGNUP_START_DATE ||
+    parseInt(process.env.NEXT_PUBLIC_SIGNUP_START_DATE) > now
+  )
+    return { error: "Abmeldung noch nicht möglich" }
+  if (
+    !process.env.NEXT_PUBLIC_SIGNUP_END_DATE ||
+    parseInt(process.env.NEXT_PUBLIC_SIGNUP_END_DATE) < now
+  )
+    return { error: "Abmeldung nicht mehr möglich" }
+
   await db.project.update({
     where: { id: projectId },
     data: { participants: { disconnect: { id: user.id } } },

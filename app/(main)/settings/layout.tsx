@@ -1,3 +1,4 @@
+import { Countdown } from "@/components/global/countdown"
 import Header from "@/components/header/header"
 import SettingsSidebar from "@/components/settings/settings-sidebar"
 import { CreditCard, Lock, User, Users } from "lucide-react"
@@ -7,6 +8,7 @@ import Link from "next/link"
 const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col h-screen">
+      <Countdown />
       <Header variant="main" />
       <div className="flex flex-1">
         <div className="block">
