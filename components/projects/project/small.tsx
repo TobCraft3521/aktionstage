@@ -16,6 +16,7 @@ const dmSans = DM_Sans({
 const SmallCard = ({
   project,
   index,
+  routePrefix = "/projects/",
 }: {
   project: Partial<
     Project & {
@@ -23,6 +24,7 @@ const SmallCard = ({
     }
   >
   index: number
+  routePrefix?: string
 }) => {
   const router = useRouter()
   const cardRef = useRef<any>(null)
@@ -80,7 +82,7 @@ const SmallCard = ({
       layoutId={`card-container-${project.id}`}
       onClick={() => {
         cardRef.current.style.filter = "none"
-        router.push("/projects/" + project.id)
+        router.push(routePrefix + project.id)
       }}
       style={{
         borderRadius: "24px",

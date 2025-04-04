@@ -1,6 +1,6 @@
 "use client"
 import { cn } from "@/lib/utils"
-import { LogOut, Menu } from "lucide-react"
+import { ChevronRight, LogOut, Menu } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -11,6 +11,15 @@ import { auth } from "@/lib/auth/auth"
 import { queryUser } from "@/lib/actions/queries/accounts"
 import { Role } from "@prisma/client"
 import posthog from "posthog-js"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet"
+import { Button } from "../ui/button"
 
 const Header = ({ variant }: { variant: "main" | "login" }) => {
   const user = useSession().data?.user
@@ -33,7 +42,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
       ? [
           {
             name: "Ausgewählt",
-            link: "/projects",
+            link: "/chosen",
             current: pathName.toLowerCase().startsWith("/PLACEHOLDER"),
           },
         ]
@@ -133,7 +142,51 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
         )}
       </div>
       <div className="z-10 md:hidden">
-        <Menu size={24} />
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden text-slate-600"
+            >
+              <Menu size={24} />
+            </Button>
+          </SheetTrigger>
+
+          <SheetContent
+            side="right"
+            className="w-[280px] bg-slate-50/90 backdrop-blur-[2px] border-0" // Frosted glass effect
+          >
+            {/* Header with subtle underline */}
+            <div className="px-5 pt-5 pb-3 border-b border-slate-100">
+              <h2 className="text-lg font-semibold text-slate-800 tracking-tight">
+                Menu
+              </h2>
+            </div>
+
+            {/* Navigation Links - flat with tonal contrast */}
+            <nav className="flex flex-col px-2 py-3">
+              {TABS.map((tab, index) => (
+                <Link
+                  href={tab.link}
+                  key={index}
+                  className="px-4 py-3 mx-1 rounded-md
+                   text-slate-700 font-normal
+                   bg-slate-50/0 hover:bg-slate-100/50
+                   transition-colors duration-200"
+                >
+                  <span className="relative pl-3">
+                    <span
+                      className="absolute left-0 top-1/2 h-[60%] w-[3px] -translate-y-1/2 
+                           bg-slate-300/50 rounded-full"
+                    ></span>
+                    {tab.name}
+                  </span>
+                </Link>
+              ))}
+            </nav>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   )

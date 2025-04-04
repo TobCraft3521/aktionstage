@@ -57,6 +57,16 @@ export function Countdown() {
   if (!startTimestamp || !endTimestamp) return null
 
   const now = Date.now()
+
+  // If 1 day+ is left, show the countdown in days
+  if (timeLeft.days > 1) {
+    return (
+      <div className="z-[50] relative w-full h-8 bg-gradient-to-r from-yellow-300 via-amber-600 to-yellow-300 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2">
+        Noch {timeLeft.days} Tage
+      </div>
+    )
+  }
+
   if (now < startTimestamp) {
     return (
       <div className="z-[50] relative w-full h-8 bg-gradient-to-r from-yellow-300 via-amber-600 to-yellow-300 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2">

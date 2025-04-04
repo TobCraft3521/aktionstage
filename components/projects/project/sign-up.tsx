@@ -71,34 +71,45 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
     },
     onMutate: () => {
       // Optimistically remove the participant from the project [paginated data]
-      queryClient.setQueryData(
-        ["infinite-projects"],
-        (oldData: {
-          pages: {
-            items: ProjectWithParticipants[]
-          }[]
-        }) => {
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page: any) => {
-              return {
-                ...page,
-                items: page.items.map((project: ProjectWithParticipants) => {
-                  if (project.id === project.id) {
-                    return {
-                      ...project,
-                      participants: project.participants?.filter(
-                        (participant) => participant.id !== user?.id
-                      ),
+      if (queryClient.getQueryData(["infinite-projects"])) {
+        queryClient.setQueryData(
+          ["infinite-projects"],
+          (oldData: {
+            pages: {
+              items: ProjectWithParticipants[]
+            }[]
+          }) => {
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page: any) => {
+                return {
+                  ...page,
+                  items: page.items.map((project: ProjectWithParticipants) => {
+                    if (project.id === project.id) {
+                      return {
+                        ...project,
+                        participants: project.participants?.filter(
+                          (participant) => participant.id !== user?.id
+                        ),
+                      }
                     }
-                  }
-                  return project
-                }),
-              }
-            }),
+                    return project
+                  }),
+                }
+              }),
+            }
           }
-        }
-      )
+        )
+      }
+      if (queryClient.getQueryData(["chosen-projects"])) {
+        // Remove from chosen projects list
+        queryClient.setQueryData(
+          ["chosen-projects"],
+          (oldData: ProjectWithParticipants[]) => {
+            return oldData.filter((p) => p.id !== project.id)
+          }
+        )
+      }
       queryClient.setQueryData(["account", user?.id], (oldData: any) => {
         return {
           ...oldData,
@@ -125,35 +136,46 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
     },
     onMutate: () => {
       // Optimistically append the new participant to the project [paginated data]
-      queryClient.setQueryData(
-        ["infinite-projects"],
-        (oldData: {
-          pages: {
-            items: ProjectWithParticipants[]
-          }[]
-        }) => {
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page: any) => {
-              return {
-                ...page,
-                items: page.items.map((project: ProjectWithParticipants) => {
-                  if (project.id === project.id) {
-                    return {
-                      ...project,
-                      participants: [
-                        ...(project.participants || []),
-                        { id: user?.id, name: user?.name, role: user?.role },
-                      ],
+      if (queryClient.getQueryData(["infinite-projects"])) {
+        queryClient.setQueryData(
+          ["infinite-projects"],
+          (oldData: {
+            pages: {
+              items: ProjectWithParticipants[]
+            }[]
+          }) => {
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page: any) => {
+                return {
+                  ...page,
+                  items: page.items.map((project: ProjectWithParticipants) => {
+                    if (project.id === project.id) {
+                      return {
+                        ...project,
+                        participants: [
+                          ...(project.participants || []),
+                          { id: user?.id, name: user?.name, role: user?.role },
+                        ],
+                      }
                     }
-                  }
-                  return project
-                }),
-              }
-            }),
+                    return project
+                  }),
+                }
+              }),
+            }
           }
-        }
-      )
+        )
+      }
+      if (queryClient.getQueryData(["chosen-projects"])) {
+        // Append to chosen projects list
+        queryClient.setQueryData(
+          ["chosen-projects"],
+          (oldData: ProjectWithParticipants[]) => {
+            return [...oldData, project]
+          }
+        )
+      }
       setTempSignedUpHint(true)
       confetti({
         angle: 45,
@@ -177,6 +199,7 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
     onSettled: () => {
       // Refetch the projects after signing up
       queryClient.invalidateQueries({ queryKey: ["infinite-projects"] })
+      queryClient.invalidateQueries({ queryKey: ["chosen-projects"] })
       queryClient.invalidateQueries({ queryKey: ["account", user?.id] })
     },
     onError: (error) => {
@@ -246,7 +269,6 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
   }
 
   if (isSignedUp) {
-    // TODOS: add day availability check
     return (
       <Button
         className="w-full sm:w-[154px] h-[43px] rounded-xl flex flex-row items-center justify-center gap-2 bg-red-800"
@@ -264,7 +286,8 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
     return (
       <Button className="w-full sm:w-auto h-[43px] rounded-xl" disabled>
         Du hast {blockingProject?.name} am{" "}
-        {project.day && lookUpDay[project.day]}
+        {project.day && lookUpDay[project.day]}{" "}
+        {!blockingProject && "ein anderes Projekt"}
       </Button>
     )
 

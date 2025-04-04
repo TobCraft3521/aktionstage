@@ -65,11 +65,6 @@ export const StudentsOverview = React.forwardRef<
                       👑 VIP
                     </span>
                   )}
-                  {s.name === "Tobias Hackenberg" && (
-                    <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
-                      App by ✨ Tobias ✨
-                    </span>
-                  )}
                 </h1>
               </TableCell>
               <TableCell className="text-right">{s.grade}</TableCell>

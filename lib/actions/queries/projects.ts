@@ -9,6 +9,7 @@ import { cache } from "react"
 import { z } from "zod"
 import { serverSideUpload } from "../aws/upload"
 import { Prisma, Role } from "@prisma/client"
+import { error } from "console"
 
 type FormData = z.infer<typeof CreateProjectSchema>
 
@@ -238,6 +239,31 @@ export const queryProjectRoom = async (projectId: string) => {
   })
 
   return project?.room
+}
+
+export const queryChosenProjects = async () => {
+  const id = (await auth())?.user?.id
+  if (!id) return { error: "no id[ea] haha" }
+  const student = await db.account.findUnique({
+    where: {
+      id,
+      OR: [{ role: Role.STUDENT }, { role: Role.VIP }],
+    },
+    include: {
+      projects: {
+        include: {
+          participants: true,
+        },
+      },
+    },
+  })
+  if (!student) return { error: "no student" }
+  // Order for display
+  return student.projects.sort(
+    (a, b) =>
+      ["MON", "TUE", "WED"].indexOf(a.day) -
+      ["MON", "TUE", "WED"].indexOf(b.day)
+  )
 }
 
 export const createProject = async (formData: FormData & { room?: string }) => {

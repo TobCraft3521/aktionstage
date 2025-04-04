@@ -108,7 +108,7 @@ export function AboutTutorial() {
     },
   ]
 
-  const { data: done } = useQuery({
+  const { data: done, isPending } = useQuery({
     queryKey: ["about-tutorial"],
     queryFn: () => queryTutorialComplete(Tutorial.ABOUT),
   })
@@ -138,7 +138,7 @@ export function AboutTutorial() {
     if (activeIndex > FEATURES.length) setActiveIndex(FEATURES.length - 1)
   }, [activeIndex, FEATURES.length])
 
-  if (done) return null
+  if (done || isPending) return null
 
   return (
     <motion.div

@@ -30,9 +30,13 @@ interface ProjectCompProps {
       participants: Account[]
     }
   >
+  routePrefix?: string
 }
 
-const ProjectComp = ({ project }: ProjectCompProps) => {
+const ProjectComp = ({
+  project,
+  routePrefix = "/projects/",
+}: ProjectCompProps) => {
   const controls = useAnimation()
   const [showContents, setShowContents] = useState(false)
   const router = useRouter()
@@ -101,7 +105,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
           info.offset.y > swipeDismissDistance ||
           info.offset.y < -swipeDismissDistance
         ) {
-          router.push("/projects")
+          router.push(routePrefix)
         }
       }}
     >
@@ -241,7 +245,7 @@ const ProjectComp = ({ project }: ProjectCompProps) => {
           className="absolute top-8 md:top-12 right-8 md:right-12 border-slate-800 border-2 rounded-full p-2 cursor-pointer bg-slate-800 bg-opacity-65"
           onClick={() => {
             setShowContents(false)
-            router.push("/projects")
+            router.push(routePrefix)
           }}
         >
           <X className="text-white" size={24} strokeWidth={3} />

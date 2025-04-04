@@ -1,9 +1,7 @@
 import { Countdown } from "@/components/global/countdown"
 import Header from "@/components/header/header"
 import SettingsSidebar from "@/components/settings/settings-sidebar"
-import { CreditCard, Lock, User, Users } from "lucide-react"
 import { AnimatePresence } from "motion/react"
-import Link from "next/link"
 
 const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
