@@ -22,7 +22,7 @@ import {
   removeTeacherFromProject,
 } from "@/lib/actions/updates/project"
 import { cn } from "@/lib/utils"
-import { Account } from "@prisma/client"
+import { Account, Role } from "@prisma/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Check, Plus, Trash2 } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -52,9 +52,14 @@ const TeachersList = () => {
     [projects, id]
   )
   const teachers = useMemo(() => {
-    return project?.participants?.filter(
-      (teacher) => teacher.id !== user?.id && teacher.role === "TEACHER"
+    console.log("re", project?.participants)
+    const a = project?.participants?.filter(
+      (teacher) =>
+        teacher.id !== user?.id &&
+        (teacher.role === Role.TEACHER || teacher.role === Role.ADMIN)
     )
+    console.log(a)
+    return a
   }, [project?.participants, user?.id])
 
   const { mutate: removeTeacher, isPending: isRemovingTeacher } = useMutation({
@@ -70,10 +75,10 @@ const TeachersList = () => {
         const updatedProjects = oldData.map((p: any) => {
           if (p.id === id) {
             // Remove the teacher from the project
-            const updatedTeachers = p.teachers.filter(
-              (teacher: any) => teacher.id !== teacherId
+            const updatedTeachers = p.participants.filter(
+              (a: any) => a.id !== teacherId
             )
-            return { ...p, teachers: updatedTeachers }
+            return { ...p, participants: updatedTeachers }
           }
           return p
         })
@@ -109,18 +114,20 @@ const TeachersList = () => {
           if (p.id === id) {
             // Add the teacher to the project
             const updatedTeachers = [
-              ...p.teachers,
-              { id: teacherId, name: teacherName },
+              ...p.participants,
+              // role: Role.TEACHER was missing so I spent 2 hours to find the bug why it wouldnt optimistic ui update, it was filtered out because Role was not TEACHER...
+              { id: teacherId, name: teacherName, role: Role.TEACHER },
             ]
-            return { ...p, teachers: updatedTeachers }
+            return { ...p, participants: updatedTeachers }
           }
           return p
         })
-        return updatedProjects
+        return [...updatedProjects]
       })
     },
     onError: (_error, _variables, context: any) => {
       // Rollback the optimistic update
+      console.log(_error)
       toast.error("Fehler beim Hinzufügen des Lehrers!")
       queryClient.setQueryData(["teacher-projects"], context?.oldData)
     },
@@ -134,13 +141,15 @@ const TeachersList = () => {
     },
   })
 
+  console.log("render", teachers)
+
   return (
     <div className="mt-4 flex flex-row gap-4 items-center">
       <p className="text-base">mit</p>
       <div className="flex flex-wrap gap-2 justify-center">
         {teachers?.map((teacher) => (
           <Badge
-            key={1}
+            key={teacher.id}
             variant="outline"
             className="flex items-center border-slate-300 h-[25px] gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop"
             onClick={() => {

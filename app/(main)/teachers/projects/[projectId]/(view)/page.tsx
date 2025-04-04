@@ -291,7 +291,11 @@ const ProjectDetailView = () => {
 
       {/* printable students overview (only shown when clicking print) */}
       <div className="hidden">
-        <StudentsOverview ref={printableRef} projectId={project?.id || ""} />
+        <StudentsOverview
+          ref={printableRef}
+          projectId={project?.id || ""}
+          project={project}
+        />
       </div>
     </div>
   )

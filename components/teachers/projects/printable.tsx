@@ -9,6 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { queryProjectStudents } from "@/lib/actions/queries/accounts"
+import { lookUpDay } from "@/lib/helpers/lookupname"
+import { ProjectWithParticipants } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Role } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
@@ -22,8 +24,8 @@ const dmSans = DM_Sans({
 
 export const StudentsOverview = React.forwardRef<
   HTMLDivElement,
-  { projectId: string }
->(({ projectId }, ref) => {
+  { projectId: string; project?: Partial<ProjectWithParticipants> }
+>(({ projectId, project }, ref) => {
   const { data: students, isPending: isStudentsLoading } = useQuery({
     queryKey: ["students", projectId],
     queryFn: () => queryProjectStudents(projectId),
@@ -72,7 +74,10 @@ export const StudentsOverview = React.forwardRef<
           ))}
         </TableBody>
         <TableCaption className="text-slate-300">
-          <p>Bouldern Steinbock Montag -</p>
+          <p>
+            {project?.name}{" "}
+            {project?.day && lookUpDay[project.day as keyof typeof lookUpDay]} -
+          </p>
           Die Aktionstage Webseite <br />
           von Tobias Hackenberg 10a :)
         </TableCaption>
