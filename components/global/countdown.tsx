@@ -9,7 +9,7 @@ import { useEffect, useState } from "react"
 
 export function Countdown() {
   const user = useSession().data?.user
-  const { startDate, error, vipEarlyAccess } = getStartDate(
+  const { startDate, error, vipEarlyAccess, defaultStart } = getStartDate(
     user?.role === Role.VIP
   )
   const endDate = parseInt(process.env.NEXT_PUBLIC_SIGNUP_END_DATE || "0")
@@ -17,6 +17,12 @@ export function Countdown() {
   const [timeLeft, setTimeLeft] = useState(
     startDate
       ? getTimeLeft(startDate)
+      : { days: -1, hours: 0, minutes: 0, seconds: 0 }
+  )
+
+  const [defaultStartTimeLeft, setDefaultStartTimeLeft] = useState(
+    defaultStart
+      ? getTimeLeft(defaultStart)
       : { days: -1, hours: 0, minutes: 0, seconds: 0 }
   )
 
@@ -61,6 +67,19 @@ export function Countdown() {
     if (startDate > Date.now() && user) syncToNextSecond()
   }, [endDate, startDate, user])
 
+  useEffect(() => {
+    if (!defaultStart) return
+
+    const syncToNextSecond = () => {
+      const now = Date.now()
+      setTimeout(() => {
+        setDefaultStartTimeLeft(getTimeLeft(defaultStart))
+        syncToNextSecond()
+      }, 1000 - (now % 1000))
+    }
+    if (defaultStart > Date.now() && user) syncToNextSecond()
+  }, [defaultStart, user])
+
   if (!startDate || !endDate) return null
 
   const now = Date.now()
@@ -72,11 +91,19 @@ export function Countdown() {
 
   if (vipEarlyAccess)
     return (
-      <div
-        className="
-      z-[50] relative w-full h-8 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2"
-      >
+      <div className="z-[50] relative w-full h-8 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2">
         VIP EARLY ACCESS 🎉
+        {/* Visual Cue for Others Still Waiting */}
+        <div className="relative flex items-center gap-0.5 font-mono text-base bg-transparent p-1 rounded-lg">
+          {/* Centered Strikethrough */}
+          <div className="absolute left-0 w-full top-[50%] border-t-2 border-l-2 border-slate-500 opacity-80 z-[60]"></div>
+
+          <SlidingNumber value={defaultStartTimeLeft.hours} padStart={true} />
+          <span>:</span>
+          <SlidingNumber value={defaultStartTimeLeft.minutes} padStart={true} />
+          <span>:</span>
+          <SlidingNumber value={defaultStartTimeLeft.seconds} padStart={true} />
+        </div>
       </div>
     )
 

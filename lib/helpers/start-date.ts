@@ -8,5 +8,10 @@ export const getStartDate = (vip?: boolean) => {
   const hasStarted = Date.now() > startDate
   if (vip) startDate -= 1000 * 60 * 60 * 24 // 1 day earlier for VIPs
   const hasStarted2 = Date.now() > startDate
-  return { startDate, vipEarlyAccess: !hasStarted && hasStarted2, error: null }
+  return {
+    startDate,
+    vipEarlyAccess: !hasStarted && hasStarted2,
+    error: null,
+    defaultStart: parseInt(defaultStartDate),
+  }
 }
