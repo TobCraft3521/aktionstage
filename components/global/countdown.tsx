@@ -1,24 +1,31 @@
 "use client"
 import { SlidingNumber } from "@/components/motion-primitives/sliding-number"
+import { getStartDate } from "@/lib/helpers/start-date"
 import { getTimeLeft } from "@/lib/helpers/time"
+import { Role } from "@prisma/client"
 import { confetti } from "@tsparticles/confetti"
+import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 
 export function Countdown() {
-  const startDate = process.env.NEXT_PUBLIC_SIGNUP_START_DATE
-  const endDate = process.env.NEXT_PUBLIC_SIGNUP_END_DATE
+  const user = useSession().data?.user
+  const { startDate, error, vipEarlyAccess } = getStartDate(
+    user?.role === Role.VIP
+  )
+  const endDate = parseInt(process.env.NEXT_PUBLIC_SIGNUP_END_DATE || "0")
 
-  const startTimestamp = parseInt(startDate || "0")
-  const endTimestamp = parseInt(endDate || "0")
-
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(startTimestamp))
+  const [timeLeft, setTimeLeft] = useState(
+    startDate
+      ? getTimeLeft(startDate)
+      : { days: -1, hours: 0, minutes: 0, seconds: 0 }
+  )
 
   useEffect(() => {
-    if (!startTimestamp || !endTimestamp) return
+    if (!startDate || !endDate) return
 
     const syncToNextSecond = () => {
       const now = Date.now()
-      if (now >= startTimestamp) {
+      if (now >= startDate) {
         // time for ts particles confetti
         const end = Date.now() + 3 * 1000
         const colors = ["#bb0000", "#ffffff"]
@@ -47,19 +54,34 @@ export function Countdown() {
         return // Important: stop only call anotherTimeConfetti() once avoid infinite loop
       }
       setTimeout(() => {
-        setTimeLeft(getTimeLeft(startTimestamp))
+        setTimeLeft(getTimeLeft(startDate))
         syncToNextSecond()
       }, 1000 - (now % 1000))
     }
-    if (startTimestamp > Date.now()) syncToNextSecond()
-  }, [endTimestamp, startTimestamp])
+    if (startDate > Date.now() && user) syncToNextSecond()
+  }, [endDate, startDate, user])
 
-  if (!startTimestamp || !endTimestamp) return null
+  if (!startDate || !endDate) return null
 
   const now = Date.now()
 
+  if (error) return error
+  if (timeLeft.days === -1) return null
+
+  if (!user) return <div className="h-8"></div>
+
+  if (vipEarlyAccess)
+    return (
+      <div
+        className="
+      z-[50] relative w-full h-8 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2"
+      >
+        VIP EARLY ACCESS 🎉
+      </div>
+    )
+
   // If 1 day+ is left, show the countdown in days
-  if (timeLeft.days > 1) {
+  if (timeLeft.days >= 1) {
     return (
       <div className="z-[50] relative w-full h-8 bg-gradient-to-r from-yellow-300 via-amber-600 to-yellow-300 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2">
         Noch {timeLeft.days} Tage
@@ -67,7 +89,7 @@ export function Countdown() {
     )
   }
 
-  if (now < startTimestamp) {
+  if (now < startDate) {
     return (
       <div className="z-[50] relative w-full h-8 bg-gradient-to-r from-yellow-300 via-amber-600 to-yellow-300 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2">
         Noch
@@ -83,7 +105,7 @@ export function Countdown() {
       </div>
     )
   }
-  if (now > endTimestamp) {
+  if (now > endDate) {
     return (
       <div className="z-[50] relative w-full h-8 bg-gradient-to-r from-pink-300 via-red-500 to-orange-300 flex flex-row justify-center items-center font-semibold text-sm text-white gap-2">
         Geschlossen 🔒

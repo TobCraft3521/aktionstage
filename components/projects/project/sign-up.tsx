@@ -12,6 +12,9 @@ import { queryUser } from "@/lib/actions/queries/accounts"
 import { getStudentAvailability } from "@/lib/helpers/availability"
 import { lookUpDay } from "@/lib/helpers/lookupname"
 import { getTimeLeft } from "@/lib/helpers/time"
+import { getStartDate } from "@/lib/helpers/start-date"
+import { Role } from "@prisma/client"
+import { cn } from "@/lib/utils"
 
 type Props = {
   project: Partial<ProjectWithParticipants>
@@ -20,15 +23,18 @@ type Props = {
 
 const SignUpButton = ({ project, studentsCount }: Props) => {
   const user = useSession().data?.user
-  const isStudent = user?.role === "STUDENT" || user?.role === "VIP"
+  const isStudent = user?.role === Role.STUDENT || user?.role === Role.VIP
 
-  const startDate = process.env.NEXT_PUBLIC_SIGNUP_START_DATE
-  const endDate = process.env.NEXT_PUBLIC_SIGNUP_END_DATE
+  const { startDate, error, vipEarlyAccess } = getStartDate(
+    user?.role === Role.VIP
+  )
+  const endDate = parseInt(process.env.NEXT_PUBLIC_SIGNUP_END_DATE || "0")
 
-  const startTimestamp = parseInt(startDate || "0")
-  const endTimestamp = parseInt(endDate || "0")
-
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(startTimestamp))
+  const [timeLeft, setTimeLeft] = useState(
+    startDate
+      ? getTimeLeft(startDate)
+      : { days: -1, hours: 0, minutes: 0, seconds: 0 }
+  )
   const [tempSignedUpHint, setTempSignedUpHint] = useState(false)
   const queryClient = useQueryClient()
 
@@ -44,17 +50,17 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
   }, [project?.participants, user?.id])
 
   useEffect(() => {
-    if (!startTimestamp || !endTimestamp) return
+    if (!startDate || !endDate) return
 
     const syncToNextSecond = () => {
       const now = Date.now()
       setTimeout(() => {
-        setTimeLeft(getTimeLeft(startTimestamp))
+        setTimeLeft(getTimeLeft(startDate))
         syncToNextSecond()
       }, 1000 - (now % 1000))
     }
-    if (startTimestamp > Date.now()) syncToNextSecond()
-  }, [endTimestamp, startTimestamp])
+    if (startDate > Date.now()) syncToNextSecond()
+  }, [endDate, startDate])
 
   const displayTime = () => {
     const { days, hours, minutes, seconds } = timeLeft
@@ -244,6 +250,10 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
   //   anotherTimeConfetti()
   // }, [])
 
+  if (error) return error
+  if (timeLeft.days === -1) return null
+  if (!startDate || !endDate) return null
+
   if (tempSignedUpHint) {
     return (
       <Button className="w-full sm:w-[154px] h-[43px] rounded-xl" disabled>
@@ -252,7 +262,7 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
     )
   }
 
-  if (now < startTimestamp) {
+  if (now < startDate) {
     return (
       <Button className="w-full sm:w-[154px] h-[43px] rounded-xl" disabled>
         Noch {displayTime()}
@@ -260,7 +270,7 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
     )
   }
 
-  if (now > endTimestamp) {
+  if (now > endDate) {
     return (
       <Button className="w-full sm:w-[154px] h-[43px] rounded-xl" disabled>
         🔒 Geschlossen
@@ -294,12 +304,23 @@ const SignUpButton = ({ project, studentsCount }: Props) => {
   return (
     <>
       {(studentsCount || 0) < (project.maxStudents || 0) ? (
-        <Button
-          className="w-full sm:w-[154px] h-[43px] rounded-xl"
-          onClick={() => signUp()}
-        >
-          Anmelden
-        </Button>
+        vipEarlyAccess ? (
+          <div className="w-full sm:w-[154px] h-[43px] rounded-xl p-[2px] bg-gradient-to-r from-purple-500 to-blue-500">
+            <Button
+              className="w-full h-full rounded-xl"
+              onClick={() => signUp()}
+            >
+              Anmelden
+            </Button>
+          </div>
+        ) : (
+          <Button
+            className="w-full sm:w-[154px] h-[43px] rounded-xl"
+            onClick={() => signUp()}
+          >
+            Anmelden
+          </Button>
+        )
       ) : (
         <Button className="w-full sm:w-[154px] h-[43px] rounded-xl" disabled>
           Voll 😭

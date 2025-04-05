@@ -12,7 +12,8 @@ export function getTimeLeft(targetTimestamp: number) {
   const minutes = Math.floor(delta / 60_000) // 1000 * 60
   delta -= minutes * 60_000
 
-  const seconds = Math.floor(delta / 1000)
+  // ceil instead of floor to avoid 0 seconds left
+  const seconds = Math.ceil(delta / 1000)
 
   return { days, hours, minutes, seconds }
 }

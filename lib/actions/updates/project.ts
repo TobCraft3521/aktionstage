@@ -1,6 +1,7 @@
 "use server"
 import { auth } from "@/lib/auth/auth"
 import { db } from "@/lib/db"
+import { getStartDate } from "@/lib/helpers/start-date"
 import { Role } from "@prisma/client"
 
 export const removeTeacherFromProject = async (
@@ -81,11 +82,9 @@ export const signUpForProject = async (projectId: string) => {
   if (isAlreadySignedUp) return { error: "Bereits angemeldet" }
   // Check allowed timeframe
   const now = Date.now()
-  if (
-    !process.env.NEXT_PUBLIC_SIGNUP_START_DATE ||
-    parseInt(process.env.NEXT_PUBLIC_SIGNUP_START_DATE) > now
-  )
-    return { error: "Abmeldung noch nicht möglich" }
+  const { startDate, error } = getStartDate(user.role === Role.VIP)
+  if (error || startDate === null) return { error }
+  if (now < startDate) return { error: "Abmeldung noch nicht möglich" }
   if (
     !process.env.NEXT_PUBLIC_SIGNUP_END_DATE ||
     parseInt(process.env.NEXT_PUBLIC_SIGNUP_END_DATE) < now
@@ -114,11 +113,9 @@ export const leaveProject = async (projectId: string) => {
 
   // Check allowed timeframe
   const now = Date.now()
-  if (
-    !process.env.NEXT_PUBLIC_SIGNUP_START_DATE ||
-    parseInt(process.env.NEXT_PUBLIC_SIGNUP_START_DATE) > now
-  )
-    return { error: "Abmeldung noch nicht möglich" }
+  const { startDate, error } = getStartDate(user.role === Role.VIP)
+  if (error || startDate === null) return { error }
+  if (now < startDate) return { error: "Abmeldung noch nicht möglich" }
   if (
     !process.env.NEXT_PUBLIC_SIGNUP_END_DATE ||
     parseInt(process.env.NEXT_PUBLIC_SIGNUP_END_DATE) < now

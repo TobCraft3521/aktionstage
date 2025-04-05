@@ -72,7 +72,7 @@ const ChosenProjects = ({ id }: { id?: string }) => {
             dmSans.className
           )}
         >
-          Projekte
+          Deine Projekte
         </div>
         <div className="flex-1 w-full p-2 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
           {new Array(3).fill(0).map((_, i) => (
@@ -95,7 +95,7 @@ const ChosenProjects = ({ id }: { id?: string }) => {
                   dmSans.className
                 )}
               >
-                Projekte
+                Deine Projekte
               </h1>
             </div>
             <div className="w-full p-2 mb-16 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
