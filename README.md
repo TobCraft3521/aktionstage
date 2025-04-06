@@ -34,6 +34,8 @@ To clone and run locally, just run git clone ...; npm i; and set up the env:
 - Full room and teacher availability management
 - Faster lcp (largest contentful paint) through chunk loading projects on explore page (tanstack useInfiniteQuery)
 - Clean admin dashboard with fully functional importing/ adding/ exporting, optimistic ui for instant change reflection in the ui
+- Countdown with confetti
+- VIP early access for selected people as a reward for building this haha
 
 ### The login page has been redesigned.
 
