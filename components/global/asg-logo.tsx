@@ -14,7 +14,7 @@ const AsgLogo = () => {
       <Link
         href="/projects"
         className={cn(
-          "bg-slate-800 rounded-lg z-10 flex items-center gap-2 p-2 pr-4 text-white xs:text-lg cursor-pointer hover:bg-black/90 transition-all",
+          "bg-slate-800 dark:bg-black rounded-lg z-10 flex items-center gap-2 p-2 pr-4 text-white xs:text-lg cursor-pointer hover:bg-black/90 transition-all",
           dmSans.className
         )}
       >

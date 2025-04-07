@@ -53,7 +53,7 @@ const SmallCard = ({
       }}
       className={cn(
         styles.loadAni,
-        "w-full overflow-hidden flex items-center group h-[60vw] sm:h-64 justify-center shadow-2xl cursor-pointer bg-white group relative will-change-transform"
+        "w-full overflow-hidden flex items-center group h-[60vw] sm:h-64 justify-center shadow-2xl cursor-pointer group relative will-change-transform"
       )}
       onLayoutAnimationStart={() => {
         if (cardRef.current) {
@@ -95,7 +95,7 @@ const SmallCard = ({
         width={256}
         height={256}
         blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
-        className="brightness transition-all duration-300 w-full h-full object-cover pointer-events-none group-hover:brightness-75 group-hover:scale-[102%]"
+        className="transition-all duration-300 w-full h-full object-cover pointer-events-none group-hover:brightness-75 dark:group-hover:brightness-125 dark:brightness-100 bg-blend-soft-light group-hover:scale-[102%]"
         priority
         placeholder="blur"
         ref={imageRef}

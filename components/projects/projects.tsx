@@ -1,11 +1,7 @@
 "use client"
-import {
-  queryInfiniteProjects
-} from "@/lib/actions/queries/projects"
+import { queryInfiniteProjects } from "@/lib/actions/queries/projects"
 import { Project } from "@prisma/client"
-import {
-  AnimatePresence
-} from "motion/react"
+import { AnimatePresence } from "motion/react"
 import { useEffect, useMemo, useState } from "react"
 
 import { getRandomNoResultsJoke } from "@/lib/helpers/jokes"
@@ -110,7 +106,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
       <div className="flex flex-col flex-1">
         <div
           className={cn(
-            "w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl tracking-tighter font-bold mt-12 text-slate-800 drop-shadow-lg",
+            "w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl tracking-tighter font-bold mt-12 text-slate-800 dark:text-primary drop-shadow-lg",
             dmSans.className
           )}
         >
@@ -119,7 +115,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
         <div className="flex-1 w-full p-2 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
           {new Array(24).fill(0).map((_, i) => (
             <div className="w-full h-56 md:h-64" key={i}>
-              <Skeleton className="w-full h-full rounded-[24px] bg-slate-200" />
+              <Skeleton className="w-full h-full rounded-[24px] bg-slate-200 dark:bg-neutral-800" />
             </div>
           ))}
         </div>
@@ -134,7 +130,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
             <div className="w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12">
               <h1
                 className={cn(
-                  "tracking-tighter text-slate-800 ml-4 md:ml-0",
+                  "tracking-tighter text-slate-800 dark:text-primary ml-4 md:ml-0",
                   dmSans.className
                 )}
               >

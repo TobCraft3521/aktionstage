@@ -86,7 +86,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
         <div className="lg:flex font-medium hidden flex-row">
           <AnimatedBackground
             defaultValue={TABS.find((tab) => tab.current)?.name || "Projekte"}
-            className="rounded-lg bg-slate-100"
+            className="rounded-lg bg-slate-100 dark:bg-neutral-800"
             transition={{
               type: "spring",
               bounce: 0.2,
@@ -98,7 +98,7 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
               <Link
                 href={tab.link}
                 key={index}
-                className="px-4 py-1 transition-colors duration-300 flex items-center justify-center"
+                className="px-4 py-1 transition-colors duration-300 flex items-center justify-center dark:text-secondary"
                 data-id={tab.name}
                 type="button"
               >
@@ -113,25 +113,20 @@ const Header = ({ variant }: { variant: "main" | "login" }) => {
           <div className="flex gap-8 items-center">
             {user && (
               <>
-                <div className="font-medium hidden md:flex gap-2">
+                <div className="font-medium hidden md:flex gap-2 dark:text-secondary">
                   {user.name}
                   {user.role === Role.VIP && (
                     <span className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
                       👑 VIP
                     </span>
                   )}
-                  {/* {user.name === "Tobias Hackenberg" && (
-                    <span className="bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl p-0.5 px-2 text-xs text-white font-extrabold flex items-center">
-                      Aktionstage App by ✨ Tobias ✨
-                    </span>
-                  )} */}
                 </div>
                 <div className="font-medium md:hidden">
                   {user.name?.split(" ")[0]}
                 </div>
                 <div
                   onClick={logout}
-                  className="flex cursor-pointer hover:bg-slate-100 transition-all gap-4 font-medium items-center px-2 border border-slate-200 p-1 rounded-lg"
+                  className="flex cursor-pointer hover:bg-slate-100 transition-all gap-4 font-medium items-center px-2 border border-slate-200 p-1 rounded-lg dark:border-neutral-700 dark:hover:bg-neutral-800"
                 >
                   <p className="hidden md:block">Abmelden</p>
                   <LogOut size={20} />

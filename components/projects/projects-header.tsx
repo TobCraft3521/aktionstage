@@ -45,7 +45,7 @@ const ProjectsHeader = () => {
     <motion.div
       layoutId="projects-header"
       transition={{ duration: 0.1 }}
-      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b dark:border-b-0 border-slate-200 sticky top-0 items-center px-6 gap-4 dark:drop-shadow-none z-50 dark:bg-card"
+      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b dark:border-b-0 border-slate-200 sticky top-0 items-center px-6 gap-4 dark:drop-shadow-none z-50 dark:bg-neutral-800"
     >
       <div className="relative flex items-center">
         <Search className="absolute left-2 h-5 w-5 text-gray-500" />
@@ -53,7 +53,7 @@ const ProjectsHeader = () => {
           id="name"
           type="text"
           placeholder="Suchen"
-          className="w-[250px] bg-slate-200 dark:bg-foreground rounded-lg border-slate-300 dark:border-none py-2 pl-10 pr-4 text-gray-900 focus:outline-none focus:border-indigo-400"
+          className="w-[250px] bg-slate-200 dark:bg-background rounded-lg border-slate-300 dark:border-none py-2 pl-10 pr-4 text-gray-900 focus:outline-none dark:text-primary"
           value={search.query || ""}
           onChange={(e) =>
             setSearch({
@@ -81,15 +81,16 @@ const ProjectsHeader = () => {
             }
             value={search.grade?.toString() || ""}
           >
-            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 border-none">
+            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 border-slate-300 border-none dark:bg-background">
               <SelectValue placeholder="Jahrgangsstufe" />
             </SelectTrigger>
-            <SelectContent className="bg-white border-slate-200 cursor-pointer">
+            <SelectContent className="border-slate-200 cursor-pointer dark:bg-background dark:border-neutral-800 dark:text-secondary">
               <SelectItem
                 value="5"
                 className={cn(
-                  "cursor-pointer",
-                  search.grade === 5 && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.grade === 5 &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 5. Klasse
@@ -97,8 +98,9 @@ const ProjectsHeader = () => {
               <SelectItem
                 value="6"
                 className={cn(
-                  "cursor-pointer",
-                  search.grade === 6 && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.grade === 6 &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 6. Klasse
@@ -106,18 +108,20 @@ const ProjectsHeader = () => {
               <SelectItem
                 value="7"
                 className={cn(
-                  "cursor-pointer",
-                  search.grade === 7 && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.grade === 7 &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 7. Klasse
               </SelectItem>
-              <SelectSeparator />
+              <SelectSeparator className="dark:bg-neutral-800" />
               <SelectItem
                 value="8"
                 className={cn(
-                  "cursor-pointer",
-                  search.grade === 8 && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.grade === 8 &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 8. Klasse
@@ -125,8 +129,9 @@ const ProjectsHeader = () => {
               <SelectItem
                 value="9"
                 className={cn(
-                  "cursor-pointer",
-                  search.grade === 9 && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.grade === 9 &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 9. Klasse
@@ -134,18 +139,20 @@ const ProjectsHeader = () => {
               <SelectItem
                 value="10"
                 className={cn(
-                  "cursor-pointer",
-                  search.grade === 10 && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.grade === 10 &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 10. Klasse
               </SelectItem>
-              <SelectSeparator />
+              <SelectSeparator className="dark:bg-neutral-800" />
               <SelectItem
                 value="11"
                 className={cn(
-                  "cursor-pointer",
-                  search.grade === 11 && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.grade === 11 &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 11. Klasse
@@ -158,11 +165,11 @@ const ProjectsHeader = () => {
             }
             value={search.day ?? ""}
           >
-            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-foreground border-slate-300 border-none">
+            <SelectTrigger className="w-[150px] md:w-[250px] focus:ring-0 bg-slate-200 dark:bg-background border-slate-300 border-none">
               <SelectValue placeholder="Tag" />
             </SelectTrigger>
             <SelectContent
-              className="bg-white border-slate-200 cursor-pointer z-[60]"
+              className="border-slate-200 cursor-pointer z-[60] dark:bg-background dark:border-neutral-800 dark:text-secondary"
               onClick={(event) => {
                 event.stopPropagation()
               }}
@@ -178,14 +185,15 @@ const ProjectsHeader = () => {
                     <X className="w-6 h-6 p-1" />
                     Alle Tage
                   </div>
-                  <SelectSeparator />
+                  <SelectSeparator className="dark:bg-neutral-800" />
                 </>
               )}
               <SelectItem
                 value="MON"
                 className={cn(
-                  "cursor-pointer",
-                  search.day === Day.MON && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.day === Day.MON &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 Montag
@@ -193,8 +201,9 @@ const ProjectsHeader = () => {
               <SelectItem
                 value="TUE"
                 className={cn(
-                  "cursor-pointer",
-                  search.day === Day.TUE && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.day === Day.TUE &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 Dienstag
@@ -202,8 +211,9 @@ const ProjectsHeader = () => {
               <SelectItem
                 value="WED"
                 className={cn(
-                  "cursor-pointer",
-                  search.day === Day.WED && "bg-slate-100"
+                  "cursor-pointer dark:hover:bg-neutral-800",
+                  search.day === Day.WED &&
+                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
                 )}
               >
                 Mittwoch
@@ -213,7 +223,7 @@ const ProjectsHeader = () => {
           <Popover open={teachersOpen} onOpenChange={setTeachersOpen}>
             <PopoverTrigger asChild>
               <span
-                className="w-[250px] md:w-[250px] justify-between px-4 transition cursor-pointer text-sm items-center flex rounded-md h-10 bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+                className="w-[250px] md:w-[250px] justify-between px-4 transition cursor-pointer text-sm items-center flex rounded-md h-10 bg-slate-200 dark:bg-background hover:bg-slate-300 border text-gray-900 border-slate-300 border-none dark:text-secondary"
                 aria-label="Lehrer auswählen"
               >
                 {search.teacher
@@ -224,7 +234,7 @@ const ProjectsHeader = () => {
               </span>
             </PopoverTrigger>
             <PopoverContent className="w-[250px] p-0">
-              <Command>
+              <Command className="dark:bg-background dark:text-secondary">
                 <CommandInput placeholder="Lehrer suchen..." />
                 <CommandEmpty>Kein Lehrer gefunden.</CommandEmpty>
                 <CommandGroup>
