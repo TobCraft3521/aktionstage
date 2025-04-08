@@ -53,6 +53,7 @@ Bad alignment
 - Weird mobile menu behaviour
 - Over-/ undersized texts/titles
 - Better forms (eg. multi-step)
+- Now features dark mode 🌑
 
 ### Added "tutorials"
 
