@@ -1,20 +1,18 @@
 "use client"
 import { signOut, useSession } from "next-auth/react"
 import Link from "next/link"
-import AsgLogo from "./asg-logo"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip"
-import { useRouter } from "next/navigation"
+import AsgLogo from "./asg-logo"
 
 const Footer = () => {
   const profile = useSession().data?.user
-  // const router = useRouter()
   return (
-    <footer className="w-full min-h-[500px] bg-slate-50 border-slate-100 border-t-2 pt-16 pb-16">
+    <footer className="w-full min-h-[500px] bg-slate-50 border-slate-100 border-t-2 pt-16 pb-16 dark:bg-accent dark:border-neutral-800">
       <div className="flex justify-center w-full">
         <div className="flex flex-wrap gap-4">
           <div className="w-screen md:w-[30vw] p-8 items-center md:items-start flex flex-col">
@@ -29,7 +27,7 @@ const Footer = () => {
             </div>
             <Link
               href="https://tobcraft.xyz"
-              className="p-2 rounded-md bg-slate-200 mt-4 text-sm"
+              className="p-2 rounded-md bg-slate-200 mt-4 text-sm dark:bg-background"
             >
               Made with ❤️ by <span className="underline">Tobias</span>
             </Link>

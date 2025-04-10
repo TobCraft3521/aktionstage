@@ -45,7 +45,7 @@ const ProjectsHeader = () => {
     <motion.div
       layoutId="projects-header"
       transition={{ duration: 0.1 }}
-      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-50 border-b dark:border-b-0 border-slate-200 sticky top-0 items-center px-6 gap-4 dark:drop-shadow-none z-50 dark:bg-neutral-800"
+      className="w-full flex flex-wrap lg:flex-nowrap p-2 lg:py-0 lg:h-16 bg-slate-100/70 border-b dark:border-b-0 border-slate-200 sticky top-0 items-center px-6 gap-4 dark:drop-shadow-none z-50 dark:bg-[rgb(24,24,27,0.9)] backdrop-blur-lg"
     >
       <div className="relative flex items-center">
         <Search className="absolute left-2 h-5 w-5 text-gray-500" />

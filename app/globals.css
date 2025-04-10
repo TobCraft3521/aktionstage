@@ -36,7 +36,7 @@
   }
 
   .dark {
-    --background: 0 0% 8%;
+    --background: 240 5% 8%;
     --foreground: 0 0% 90%;
 
     --card: 219 23% 14%;
@@ -54,7 +54,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 240 6% 10%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -98,8 +98,6 @@ body {
 .popInAni {
   animation: popIn 0.5s ease-in-out normal backwards;
 }
-
-
 
 @layer base {
   * {
