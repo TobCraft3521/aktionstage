@@ -63,14 +63,14 @@ const TutorialSettings = () => {
 
   return (
     <div className="relative flex h-full w-full flex-1 items-center justify-center">
-      <div className="absolute top-0 left-0 h-[25vh] w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]"></div>
+      <div className="absolute top-0 left-0 h-[25vh] w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:bg-none dark:border-zinc-800 dark:bg-[#111015]"></div>
       <motion.div
         layoutId="animate-settings"
-        className="relative flex w-full max-w-lg flex-col gap-6 rounded-xl border border-gray-200 bg-gray-50 p-6 text-sm shadow-lg shadow-slate-200 dark:border-gray-800 dark:bg-[#111015] md:rounded-xl md:p-10"
+        className="relative flex w-full max-w-lg flex-col gap-6 rounded-xl border border-gray-200 bg-gray-50 p-6 text-sm shadow-lg shadow-slate-200 dark:shadow-background dark:border-neutral-800 dark:bg-background md:rounded-xl md:p-10"
       >
         <div className="space-y-1">
           <h1 className="text-xl font-semibold">Tutorials</h1>
-          <p className="text-slate-400">
+          <p className="text-slate-400 dark:text-neutral-400">
             Hier kannst du alle Tutorials-states wählen und damit z.B. die
             Tutorials (💡) erneut durchklicken. Aus heißt abgeschlossen, an
             heißt Tutorial (erneut) anzeigen.
@@ -80,7 +80,7 @@ const TutorialSettings = () => {
           {tutorials.map((tutorial) => (
             <div
               key={tutorial}
-              className="flex justify-between items-center font-medium p-4 py-2 rounded-lg bg-slate-100 border border-slate-200"
+              className="flex justify-between items-center font-medium p-4 py-2 rounded-lg bg-slate-100 border border-slate-200 dark:bg-accent dark:border-neutral-800"
             >
               {betterNamesMap[tutorial] || tutorial}
               <Switch
@@ -88,6 +88,7 @@ const TutorialSettings = () => {
                   tutorialsState[tutorial.toUpperCase() as Tutorial] || false
                 }
                 onCheckedChange={() => handleToggle(tutorial)}
+                className=""
               />
             </div>
           ))}

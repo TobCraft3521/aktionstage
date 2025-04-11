@@ -115,7 +115,7 @@ const ProjectsHeader = () => {
               >
                 7. Klasse
               </SelectItem>
-              <SelectSeparator className="dark:bg-neutral-800" />
+              <SelectSeparator className="dark:bg-neutral-800 h-[1px]" />
               <SelectItem
                 value="8"
                 className={cn(
@@ -146,7 +146,7 @@ const ProjectsHeader = () => {
               >
                 10. Klasse
               </SelectItem>
-              <SelectSeparator className="dark:bg-neutral-800" />
+              <SelectSeparator className="dark:bg-neutral-800 h-[1px]" />
               <SelectItem
                 value="11"
                 className={cn(
@@ -233,9 +233,9 @@ const ProjectsHeader = () => {
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </span>
             </PopoverTrigger>
-            <PopoverContent className="w-[250px] p-0">
+            <PopoverContent className="w-[250px] p-0 dark:border-neutral-800">
               <Command className="dark:bg-background dark:text-secondary">
-                <CommandInput placeholder="Lehrer suchen..." />
+                <CommandInput placeholder="Lehrer suchen..." className="placeholder:text-primary" />
                 <CommandEmpty>Kein Lehrer gefunden.</CommandEmpty>
                 <CommandGroup>
                   <CommandList>

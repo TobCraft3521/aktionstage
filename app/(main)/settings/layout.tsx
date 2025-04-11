@@ -12,7 +12,7 @@ const SettingsLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="block">
           <SettingsSidebar />
         </div>
-        <div className="flex-1 bg-slate-50 rounded-xl m-2 ml-0 relative overflow-hidden">
+        <div className="flex-1 bg-slate-50 rounded-xl m-2 ml-0 relative overflow-hidden dark:bg-accent">
           <AnimatePresence>{children}</AnimatePresence>
         </div>
       </div>
