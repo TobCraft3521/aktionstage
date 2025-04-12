@@ -54,7 +54,7 @@ const ProjectDetailView = () => {
     documentTitle: "Print Page Title",
   })
   const queryClient = useQueryClient()
-  const { data: projects } = useQuery({
+  const { data: projects, isPending } = useQuery({
     queryKey: ["teacher-projects"],
     queryFn: () => queryTeachersProjects(),
   })
@@ -62,11 +62,7 @@ const ProjectDetailView = () => {
     () => projects?.find((p) => p.id === id),
     [projects, id]
   )
-  const { data: participants, isPending: isParticipantsLoading } = useQuery({
-    queryKey: ["participants", project?.id],
-    queryFn: () => queryProjectParticipants(project?.id || ""),
-    refetchInterval: 5000,
-  })
+
   const { mutate: deleteProjectMutation, isPending: isDeletingProject } =
     useMutation({
       mutationFn: async ({}: { projectName: string }) =>
@@ -140,8 +136,8 @@ const ProjectDetailView = () => {
   }
 
   return (
-    <div className="w-full flex-1 min-h-0 left-0 top-0 bg-slate-50 flex flex-col">
-      <div className="top-0 left-0 h-[25vh] p-16 pt-12 w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]">
+    <div className="w-full flex-1 min-h-0 left-0 top-0 flex flex-col">
+      <div className="top-0 left-0 h-[25vh] p-16 pt-12 w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-none dark:bg-background">
         <Button
           variant="ghost"
           className="h-8"
@@ -157,7 +153,7 @@ const ProjectDetailView = () => {
               dmSans.className
             )}
           >
-            <div className="flex justify-center rounded-lg items-center bg-slate-800 p-2 bg-opacity-65 border-2 border-slate-800">
+            <div className="flex justify-center rounded-lg items-center bg-slate-800 p-2 bg-opacity-65 border-2 border-slate-800 dark:bg-accent dark:border-border">
               {project?.emoji}
             </div>
             {project?.name}
@@ -170,10 +166,10 @@ const ProjectDetailView = () => {
           <h1 className={cn(`${dmSans.className} text-2xl mb-4`)}>
             Anmeldungen ({projectStudents?.length || 0})
           </h1>
-          <ScrollArea className="bg-slate-100 h-full rounded-lg border border-slate-200 w-screen max-w-[400px]">
+          <ScrollArea className="bg-slate-200 h-full rounded-lg border border-slate-300 w-screen max-w-[400px] dark:bg-background dark:border-neutral-800">
             <Table>
-              <TableHeader>
-                <TableRow>
+              <TableHeader className="">
+                <TableRow className="border-slate-300 dark:border-border">
                   <TableHead className="">Nr.</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead className="text-right">Klasse</TableHead>
@@ -181,7 +177,7 @@ const ProjectDetailView = () => {
               </TableHeader>
               <TableBody>
                 {projectStudents?.map((s, i) => (
-                  <TableRow key={i} className={`animate-fade-in`}>
+                  <TableRow key={i} className={`animate-fade-in border-slate-300 dark:border-border`}>
                     <TableCell>{i + 1}</TableCell>
                     <TableCell className="h-12 p-0 pl-4">
                       <h1 className="flex flex-row gap-2 items-center">
@@ -208,21 +204,21 @@ const ProjectDetailView = () => {
                     <TableCell className="text-right">{s.grade}</TableCell>
                   </TableRow>
                 ))}
-                {isParticipantsLoading &&
+                {isPending &&
                   new Array(5).fill(0).map((_, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Skeleton className="bg-slate-200 w-[20px] h-[20px]" />
+                        <Skeleton className="bg-slate-200 w-[20px] h-[20px] dark:bg-accent" />
                       </TableCell>
                       <TableCell className="">
-                        <Skeleton className="bg-slate-200 w-full h-[20px]" />
+                        <Skeleton className="bg-slate-200 w-full h-[20px] dark:bg-accent" />
                       </TableCell>
                       <TableCell className="flex justify-end">
-                        <Skeleton className="bg-slate-200 w-[40px] h-[20px]" />
+                        <Skeleton className="bg-slate-200 w-[40px] h-[20px] dark:bg-accent" />
                       </TableCell>
                     </TableRow>
                   ))}
-                {!projectStudents?.length && !isParticipantsLoading && (
+                {!projectStudents?.length && !isPending && (
                   <TableRow>
                     <TableCell colSpan={3}>Keine Anmeldungen</TableCell>
                   </TableRow>
@@ -232,9 +228,9 @@ const ProjectDetailView = () => {
           </ScrollArea>
         </div>
         <div className="flex flex-col gap-2">
-          <h1 className={cn(`${dmSans.className} text-2xl mb-4`)}>Projekt</h1>
+          <h1 className={cn(`${dmSans.className} text-2xl mb-2`)}>Projekt</h1>
           <Button
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 dark:bg-secondary dark:hover:bg-secondary/80"
             variant="secondary"
             onClick={() => {
               posthog.capture("print_project_signups", {
@@ -246,7 +242,7 @@ const ProjectDetailView = () => {
             <Printer className="h-4 w-4" /> Ausdrucken
           </Button>
           <Button
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 dark:bg-secondary dark:hover:bg-secondary/80"
             variant="secondary"
             onClick={() =>
               router.push(`/teachers/projects/${project?.id}/edit`)
@@ -256,7 +252,7 @@ const ProjectDetailView = () => {
           </Button>
           {(projectTeachers?.length || 0) > 1 ? (
             <Button
-              className="flex items-center gap-2 w-full"
+              className="flex items-center gap-2 w-full bg-slate-200 hover:bg-slate-300 dark:bg-secondary dark:hover:bg-secondary/80"
               onClick={handleLeave}
               variant="secondary"
             >
@@ -266,7 +262,7 @@ const ProjectDetailView = () => {
             <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger className="w-full" asChild>
-                  <div className="flex items-center gap-2 w-full bg-slate-900/50 text-white justify-center rounded-md p-2 cursor-not-allowed">
+                  <div className="flex items-center gap-2 w-full bg-slate-200 text-foreground justify-center rounded-md p-2 cursor-not-allowed dark:bg-secondary opacity-50">
                     <DoorOpen className="h-4 w-4" /> Verlassen
                   </div>
                 </TooltipTrigger>

@@ -313,27 +313,27 @@ const Overview = (props: Props) => {
     )
   return (
     <div className="relative min-h-0 w-full flex-1 flex flex-col">
-      <div className="h-[25vh] w-full flex flex-col pt-16 border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]">
+      <div className="h-[25vh] w-full flex flex-col pt-16 border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-none dark:bg-background">
         <div className="w-full max-w-6xl ml-16 2xl:mx-auto space-y-2">
           <h1 className="text-xl font-semibold flex flex-row gap-2 items-center">
             <Layers className="w-5 h-5" />
             Übersicht
           </h1>
-          <p className="text-slate-400">
+          <p className="text-slate-400 dark:text-neutral-400">
             Hier siehst du alle Schüler, Lehrer und Projekte.
           </p>
         </div>
-        <div className="mt-auto flex flex-row gap-4 text-slate-700 w-full max-w-6xl ml-16 2xl:mx-auto">
+        <div className="mt-auto flex flex-row gap-4 text-slate-700 w-full max-w-6xl ml-16 2xl:mx-auto dark:text-primary">
           {tabs.map((t, i) => (
             <div
               key={i}
               className={cn(
                 "pb-1 select-none",
-                i === tab && "border-b-2 border-slate-500"
+                i === tab && "border-b-2 border-slate-500 dark:border-secondary"
               )}
             >
               <div
-                className="w-full h-full hover:bg-slate-200 p-1 px-4 rounded-md transition-all cursor-pointer"
+                className="w-full h-full hover:bg-slate-200 p-1 px-4 rounded-md transition-all cursor-pointer dark:hover:bg-accent"
                 onClick={() => setTab(i)}
               >
                 {t.title}

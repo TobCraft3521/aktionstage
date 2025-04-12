@@ -19,16 +19,16 @@ const TeacherProjects = (props: Props) => {
 
   return (
     <div className="relative h-full w-full flex-1">
-      <div className="absolute top-0 left-0 h-[25vh] w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]"></div>
+      <div className="absolute top-0 left-0 h-[25vh] w-full border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:bg-none dark:border-zinc-800 dark:bg-background"></div>
       <div className="relative p-16 flex flex-row gap-6 flex-wrap">
         {!projects &&
           new Array(3).fill(0).map((a, i) => (
             <Skeleton
-              className="w-56 h-[128px] bg-slate-100 rounded-lg shadow-lg"
+              className="w-56 h-[128px] bg-slate-100 rounded-lg shadow-lg dark:bg-accent"
               key={i}
             >
-              <Skeleton className="w-16 ml-2 mt-4 h-4 bg-slate-200" />
-              <Skeleton className="w-32 ml-2 mt-2 h-4 bg-slate-200" />
+              <Skeleton className="w-16 ml-2 mt-4 h-4 bg-slate-200 dark:bg-background" />
+              <Skeleton className="w-32 ml-2 mt-2 h-4 bg-slate-200 dark:bg-background" />
             </Skeleton>
           ))}
         {projects?.map((project: ProjectWithParticipants) => (

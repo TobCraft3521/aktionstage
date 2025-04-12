@@ -3,7 +3,6 @@ import Header from "@/components/header/header"
 import TeachersSidebar from "@/components/teachers/teachers-sidebar"
 import { queryTeachersProjects } from "@/lib/actions/queries/projects"
 import { ProjectWithParticipants } from "@/lib/types"
-import { Account, Project } from "@prisma/client"
 import { AnimatePresence } from "motion/react"
 import { useSession } from "next-auth/react"
 import { DM_Sans } from "next/font/google"
@@ -37,7 +36,7 @@ const Teachers = ({ children }: Props) => {
         <div className="block">
           <TeachersSidebar />
         </div>
-        <div className="flex-1 bg-slate-100 rounded-xl m-2 ml-0 relative overflow-hidden">
+        <div className="flex-1 bg-slate-100 dark:bg-accent rounded-xl m-2 ml-0 relative overflow-hidden">
           <AnimatePresence>{children}</AnimatePresence>
         </div>
       </div>

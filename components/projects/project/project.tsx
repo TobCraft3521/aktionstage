@@ -81,7 +81,7 @@ const ProjectComp = ({
 
   return (
     <motion.div
-      className="absolute w-full h-full top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-white z-[99]"
+      className="absolute w-full h-full top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-background z-[99]"
       layoutId={`card-container-${id}`}
       style={{
         y,

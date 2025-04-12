@@ -207,7 +207,6 @@ export const POST = async (request: Request) => {
       day: data.date,
       time: data.time,
       maxStudents: data.maxStudents,
-      studentsCount: 0,
       minGrade: data.minGrade,
       maxGrade: data.maxGrade,
       location: data.location,

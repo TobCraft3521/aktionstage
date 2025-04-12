@@ -36,7 +36,11 @@ export default async function RootLayout({
           <CSPostHogProvider>
             <ThemeProvider defaultTheme="light" enableSystem attribute="class">
               <NextAuthProvider>
-                <Toaster />
+                <Toaster
+                  toastOptions={{
+                    className: "dark:bg-accent dark:text-accent-foreground",
+                  }}
+                />
                 <ModalsProvider />
                 {children}
                 {/* requires page refresh for state update - can't be seen when changing login */}

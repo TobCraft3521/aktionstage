@@ -1,12 +1,23 @@
 #rangeSlider .range-slider__thumb {
-    background-color: #0f172a;
-  }
-  
-  #rangeSlider .range-slider__range {
-    background-color: #334155;
-  }
-  
-  #rangeSlider {
-      background-color: #e2e8f0;
-  }
-  
+  background-color: #0f172a;
+}
+
+#rangeSlider .range-slider__range {
+  background-color: #334155;
+}
+
+#rangeSlider {
+  background-color: #e2e8f0;
+}
+
+.dark #rangeSlider {
+  background-color: hsl(var(--secondary));
+}
+
+.dark #rangeSlider .range-slider__thumb {
+  background-color: hsl(var(--primary));
+}
+
+.dark #rangeSlider .range-slider__range {
+  background-color: hsl(var(--foreground));
+}

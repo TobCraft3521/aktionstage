@@ -38,9 +38,10 @@ const OwnProjectCard = ({ imageUrl, title, teachers, day, id }: Props) => {
         src={imageUrl}
         alt={title}
         fill
-        className="object-cover group-hover:brightness-75 transition-all"
+        className="object-cover group-hover:brightness-75 dark:group-hover:brightness-125 bg-blend-soft-light transition-all"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/90 to-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/90 to-black/10 dark:hidden" />
+      <div className="absolute bg-black/90 blur-2xl w-full h-24"></div>
       <motion.h1
         className={cn(
           "absolute top-4 left-4 right-4 text-white font-semibold z-10 drop-shadow-lg"

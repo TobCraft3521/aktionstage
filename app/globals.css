@@ -39,20 +39,20 @@
     --background: 240 5% 8%;
     --foreground: 0 0% 90%;
 
-    --card: 219 23% 14%;
-    --card-foreground: 221 12% 40%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 221 12% 40%;
+    --popover: 240 5% 8%;
+    --popover-foreground: 0 0% 90%;
 
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
 
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
     --accent: 240 6% 10%;
     --accent-foreground: 210 40% 98%;
@@ -97,13 +97,4 @@ body {
 
 .popInAni {
   animation: popIn 0.5s ease-in-out normal backwards;
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }

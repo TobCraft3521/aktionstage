@@ -68,7 +68,7 @@ const ChosenProjects = ({ id }: { id?: string }) => {
       <div className="flex flex-col flex-1">
         <div
           className={cn(
-            "w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl tracking-tighter font-bold mt-12 text-slate-800 dark:text-secondary drop-shadow-lg",
+            "w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl tracking-tighter font-bold mt-12 text-slate-800 dark:text-foreground drop-shadow-lg",
             dmSans.className
           )}
         >
@@ -91,7 +91,7 @@ const ChosenProjects = ({ id }: { id?: string }) => {
             <div className="w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12">
               <h1
                 className={cn(
-                  "tracking-tighter text-slate-800 ml-4 md:ml-0 dark:text-secondary",
+                  "tracking-tighter text-slate-800 ml-4 md:ml-0 dark:text-foreground",
                   dmSans.className
                 )}
               >

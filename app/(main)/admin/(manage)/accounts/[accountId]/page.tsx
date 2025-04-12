@@ -131,7 +131,7 @@ const ManageAccount = ({
                 <div className="flex flex-row gap-2">
                   <Button
                     variant="secondary"
-                    className="hover:bg-red-500 hover:text-white bg-slate-200"
+                    className="hover:bg-red-500 hover:text-white bg-slate-200 dark:bg-accent dark:text-foreground"
                     size="sm"
                     onClick={async (e) => {
                       e.stopPropagation()
@@ -188,7 +188,7 @@ const ManageAccount = ({
 
   return (
     <div className="relative min-h-0 w-full flex-1 flex flex-col">
-      <div className="h-[25vh] w-full flex flex-col pt-16 border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-[#111015]">
+      <div className="h-[25vh] w-full flex flex-col pt-16 border-b border-zinc-300 from-[#e7e7eb] to-[#f0f2ff] bg-gradient-to-br dark:border-zinc-800 dark:bg-none dark:bg-background">
         <div className="w-full max-w-6xl ml-16 2xl:mx-auto space-y-2">
           <Button
             variant="secondary"
@@ -230,21 +230,21 @@ const ManageAccount = ({
               <Skeleton className="w-[146px] h-[25px] bg-slate-300" />
             )}
           </motion.h1>
-          <p className="text-slate-400">
+          <p className="text-slate-400 dark:text-neutral-400">
             Hier kannst du {account?.name} verwalten.
           </p>
         </div>
-        <div className="mt-auto flex flex-row gap-4 text-slate-700 w-full max-w-6xl ml-16 2xl:mx-auto">
+        <div className="mt-auto flex flex-row gap-4 text-slate-700 w-full max-w-6xl ml-16 2xl:mx-auto dark:text-primary">
           {tabs.map((t, i) => (
             <div
               key={i}
               className={cn(
                 "pb-1 select-none",
-                i === activeTab && "border-b-2 border-slate-500"
+                i === activeTab && "border-b-2 border-slate-500 dark:border-border"
               )}
             >
               <div
-                className="w-full h-full hover:bg-slate-200 p-1 px-4 rounded-md transition-all cursor-pointer"
+                className="w-full h-full hover:bg-slate-200 p-1 px-4 rounded-md transition-all cursor-pointer dark:hover:bg-accent" 
                 onClick={() => setActiveTab(i)}
               >
                 {t.title}

@@ -204,7 +204,7 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
           <PopoverTrigger asChild className="w-full">
             <Button
               role="combobox"
-              className="w-[250px] md:w-full justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+              className="w-[250px] md:w-full justify-between bg-slate-200 dark:bg-background hover:bg-slate-300 border text-gray-900 border-slate-300 border-none dark:text-foreground"
             >
               Accounts zuweißen
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -247,7 +247,7 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
           <PopoverTrigger asChild className="w-full">
             <Button
               role="combobox"
-              className="w-[250px] md:w-full justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+              className="w-[250px] md:w-full justify-between bg-slate-200 hover:bg-slate-300 border text-gray-900 border-slate-300 border-none dark:bg-background dark:text-foreground"
             >
               Raum zuweißen
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -288,6 +288,7 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
 
         <Button
           className="flex flex-row items-center gap-2"
+          variant="secondary"
           onClick={() => router.push(`/teachers/projects/${project?.id}/edit`)}
         >
           <Edit className="h-4" />
@@ -312,39 +313,39 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
       </div>
       <div className="flex flex-row gap-4">
         <div className="">
-          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36 h-full">
-            <div className="text-2xl font-black text-slate-800">
+          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36 h-full dark:bg-background dark:text-foreground">
+            <div className="text-2xl font-black text-slate-800 dark:text-primary">
               {studentCount || 0}
             </div>
-            <Separator className="bg-slate-300 w-full" />
-            <div className="text-sm text-slate-600 font-medium">Schüler</div>
+            <Separator className="bg-slate-300 dark:bg-border w-full" />
+            <div className="text-sm text-slate-600 font-medium dark:text-foreground">Schüler</div>
           </div>
         </div>
         <div className="">
-          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36 h-full">
-            <div className="text-2xl font-black text-slate-800">
+          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36 h-full dark:bg-background dark:text-foreground">
+            <div className="text-2xl font-black text-slate-800 dark:text-primary">
               {teacherCount || 0}
             </div>
-            <Separator className="bg-slate-300 w-full" />
-            <div className="text-sm text-slate-600 font-medium">Lehrer</div>
+            <Separator className="bg-slate-300 dark:bg-border w-full" />
+            <div className="text-sm text-slate-600 font-medium dark:text-foreground">Lehrer</div>
           </div>
         </div>
         <div className="">
-          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 w-36 h-full">
-            <div className="font-black text-slate-800">
+          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 w-36 h-full dark:bg-background dark:text-foreground">
+            <div className="font-black text-slate-800 dark:text-primary">
               {project?.day ? lookUpDay[project.day] : "Kein Tag"}
             </div>
-            <Separator className="bg-slate-300 w-full" />
-            <div className="text-sm text-slate-600 font-medium">Tag</div>
+            <Separator className="bg-slate-300 dark:bg-border w-full" />
+            <div className="text-sm text-slate-600 font-medium dark:text-foreground">Tag</div>
           </div>
         </div>
         <div className="">
-          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 w-36 h-full">
-            <div className="font-black text-slate-800 text-center">
+          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 w-36 h-full dark:bg-background dark:text-foreground">
+            <div className="font-black text-slate-800 text-center dark:text-primary">
               {room?.name || project.location}
             </div>
-            <Separator className="bg-slate-300 w-full" />
-            <div className="text-sm text-slate-600 font-medium">
+            <Separator className="bg-slate-300 dark:bg-border w-full" />
+            <div className="text-sm text-slate-600 font-medium dark:text-foreground">
               {room?.name ? "Raum" : "Ort"}
             </div>
           </div>

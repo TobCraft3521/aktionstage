@@ -103,12 +103,12 @@ const ManageRoomActions = ({ room }: Props) => {
       </div>
       <div className="flex flex-row gap-4">
         <div className="">
-          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36 h-full">
-            <div className="text-2xl font-black text-slate-800">
+          <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36 h-full dark:bg-background">
+            <div className="text-2xl font-black text-slate-800 dark:text-primary">
               {projectCount || 0}
             </div>
-            <Separator className="bg-slate-300 w-full" />
-            <div className="text-sm text-slate-600 font-medium">Projekte</div>
+            <Separator className="bg-slate-300 w-full dark:bg-border" />
+            <div className="text-sm text-slate-600 font-medium dark:text-primary">Projekte</div>
           </div>
         </div>
       </div>

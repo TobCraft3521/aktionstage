@@ -389,7 +389,9 @@ const MultiStepForm = () => {
     const date = getValues("date") || "" // Default to empty string
     const price = getValues("price") >= 0 ? getValues("price") : 0 // Ensure price is valid
     const banner = getValues("banner") || "" // Default to empty string
-    if (Object.entries(errors).length > 0) return false
+    // Doesnt work because of multi step form - future errors can interfere with current step validation, when going back (and forth)
+    // Therefore we need to check the zod schema as well as possible below
+    // if (Object.entries(errors).length > 0) return false
     if (step === 0) {
       // Front end validation for the name is enough - only teachers have access to this page and they can be trusted or at least blamed for hacking.
       const valid = name.length > 0 && name.length <= 32
@@ -459,8 +461,8 @@ const MultiStepForm = () => {
               index === step
                 ? "font-extrabold"
                 : validPages.current[index]
-                ? "font-bold text-slate-700"
-                : "text-slate-500"
+                ? "font-bold text-slate-700 dark:text-foreground"
+                : "text-slate-500 dark:text-muted-foreground"
             }`}
             onClick={() => handleStepClick(index)}
           >
@@ -473,8 +475,8 @@ const MultiStepForm = () => {
       <form onSubmit={(e) => e.preventDefault()}>
         {step === 0 && (
           <div>
-            <h2 className="text-lg font-semibold mb-2">Name des Projekts</h2>
-            <p className="text-gray-500 mb-4">
+            <h2 className="text-lg font-semibold mb-2 dark:text-foreground">Name des Projekts</h2>
+            <p className="text-gray-500 mb-4 dark:text-neutral-400">
               Bitte auf eine schöne Formatierung achten und kürzere Namen
               bevorzugen <u>(Am besten nur ein Wort, zB Tennis)</u>. In der
               Beschreibung ist genug Platz.
@@ -536,7 +538,7 @@ const MultiStepForm = () => {
             </div>
 
             <h2 className="text-lg font-semibold mb-2">Bild Upload</h2>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 mb-4 dark:text-neutral-400">
               Bitte Mühe geben,{" "}
               <u>ein schönes, buntes und scharfes Bild zu wählen</u>, die Bilder
               stellen einen großen Teil der Seite dar.
@@ -595,7 +597,7 @@ const MultiStepForm = () => {
 
             {/* Preview of title + image */}
             {previewUrl && (
-              <div className="w-[200px] h-[256px] bg-slate-900 rounded-[24px] mt-8 mx-auto drop-shadow-lg relative overflow-hidden">
+              <div className="w-[200px] h-[256px] bg-accent rounded-[24px] mt-8 mx-auto drop-shadow-lg relative overflow-hidden">
                 <Image
                   // hard coded example banner
                   src={previewUrl}
@@ -631,13 +633,13 @@ const MultiStepForm = () => {
         {step === 2 && (
           <div>
             <h2 className="text-lg font-semibold mb-2">Wähle einen Emoji</h2>
-            <p className="text-gray-500 mb-8">
+            <p className="text-gray-500 mb-8 dark:text-neutral-400">
               Oder wähle den, den die KI gewählt hat
             </p>
             <div className="relative flex justify-center items-center mb-4">
               <Popover>
                 <PopoverTrigger>
-                  <div className="cursor-pointer border-2 rounded-xl p-4 flex items-center justify-center bg-gray-100">
+                  <div className="cursor-pointer border-2 rounded-xl p-4 flex items-center justify-center bg-gray-100 dark:bg-accent">
                     <span className="text-3xl">{emoji || "⌛"}</span>
                   </div>
                 </PopoverTrigger>
@@ -665,7 +667,7 @@ const MultiStepForm = () => {
           <div>
             {/* TODO: custom MON / TUE / WED picker */}
             <h2 className="text-lg font-semibold mt-4 mb-2">Tag</h2>
-            <div className="p-4 border-slate-200 border rounded-lg inline-block mb-2">
+            <div className="p-4 border-slate-200 border rounded-lg inline-block mb-2 dark:border-border">
               <ToggleGroup
                 type="single"
                 onValueChange={(value) => {
@@ -759,7 +761,7 @@ const MultiStepForm = () => {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="room">
-                <Card className="w-[400px]">
+                <Card className="w-[400px] bg-accent">
                   <CardHeader>
                     <CardTitle>Raum</CardTitle>
                     <CardDescription>Wähle einen Raum am ASG</CardDescription>
@@ -772,7 +774,7 @@ const MultiStepForm = () => {
                       <PopoverTrigger asChild className="w-full">
                         <Button
                           role="combobox"
-                          className="w-[250px] md:w-full justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+                          className="w-[250px] md:w-full justify-between bg-slate-200 hover:bg-slate-300 border text-gray-900 border-slate-300 border-none dark:border-border dark:bg-background dark:text-foreground"
                         >
                           {room
                             ? rooms.find((cRoom) => cRoom.name === room.name)
@@ -887,7 +889,7 @@ const MultiStepForm = () => {
                   <Badge
                     key={teacher.id}
                     variant="outline"
-                    className="flex items-center gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop"
+                    className="flex items-center gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop dark:bg-accent dark:hover:bg-red-500/10"
                     onClick={() => removeTeacher(teacher.id || "")}
                   >
                     {teacher.name}
@@ -897,7 +899,7 @@ const MultiStepForm = () => {
                   </Badge>
                 ))
               ) : (
-                <p className="text-slate-500">Noch keine anderen Lehrer.</p>
+                <p className="text-slate-500 dark:text-neutral-400">Noch keine anderen Lehrer.</p>
               )}
             </div>
             {/* Teacher Search Popover */}
@@ -910,12 +912,12 @@ const MultiStepForm = () => {
                 disabled={addedTeachers.length >= 2}
               >
                 {addedTeachers.length < 2 ? (
-                  <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer hover:bg-slate-200">
-                    <Plus className="text-slate-500" />
+                  <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer hover:bg-slate-200 dark:bg-accent">
+                    <Plus className="text-slate-500 dark:text-primary" />
                   </Button>
                 ) : (
                   // 2/2 reached
-                  <span className="bg-slate-100 p-2 mt-2 rounded-lg text-sm">
+                  <span className="bg-slate-100 p-2 mt-2 rounded-lg text-sm dark:bg-accent">
                     ⚠️ 2/2 weiteren Lehrern
                   </span>
                 )}
@@ -978,7 +980,7 @@ const MultiStepForm = () => {
           <div>
             {/* min/max grade */}
             <h2 className="text-lg font-semibold mt-4 mb-2">Jahrgangsstufen</h2>
-            <p className="text-gray-500 mb-8">
+            <p className="text-gray-500 mb-8 dark:text-neutral-400">
               Wähle die Jahrgangsstufen für dein Projekt
             </p>
             <div className="w-full max-w-lg mx-auto flex flex-col gap-4">

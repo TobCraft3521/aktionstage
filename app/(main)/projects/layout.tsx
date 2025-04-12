@@ -10,7 +10,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const id = useParams().id as string
 
   return (
-    <ScrollArea className="flex h-screen relative">
+    <ScrollArea className="flex h-screen relative" id="projects-scroll"> {/* id for scroll top on filter */}
+      
       <Countdown />
       <Header variant="main" />
       <ProjectsHeader />

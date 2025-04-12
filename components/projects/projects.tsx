@@ -104,13 +104,15 @@ const ProjectsComp = ({ id }: { id?: string }) => {
   if (isPending)
     return (
       <div className="flex flex-col flex-1">
-        <div
-          className={cn(
-            "w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl tracking-tighter font-bold mt-12 text-slate-800 dark:text-primary drop-shadow-lg",
-            dmSans.className
-          )}
-        >
-          Projekte
+        <div className="w-full sm:max-w-2xl md:max-w-5xl lg:max-w-4xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12 px-6 sm:px-0">
+          <h1
+            className={cn(
+              "tracking-tighter text-slate-800 dark:text-primary",
+              dmSans.className
+            )}
+          >
+            Projekte
+          </h1>
         </div>
         <div className="flex-1 w-full p-2 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
           {new Array(24).fill(0).map((_, i) => (
@@ -127,17 +129,17 @@ const ProjectsComp = ({ id }: { id?: string }) => {
       <div className="flex flex-1 flex-col">
         {searchedProjects.length > 0 && projects.length > 0 ? (
           <div className="w-full">
-            <div className="w-full sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12">
+            <div className="w-full sm:max-w-2xl md:max-w-5xl lg:max-w-4xl xl:max-w-6xl mx-auto text-4xl drop-shadow-lg font-bold mt-12 px-6 sm:px-0">
               <h1
                 className={cn(
-                  "tracking-tighter text-slate-800 dark:text-primary ml-4 md:ml-0",
+                  "tracking-tighter text-slate-800 dark:text-primary",
                   dmSans.className
                 )}
               >
                 Projekte
               </h1>
             </div>
-            <div className="w-full p-2 mb-32 mt-6 gap-4 md:gap-10 px-4 md:px-8 sm:max-w-2xl md:max-w-5xl xl:px-0 lg:max-w-5xl xl:max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+            <div className="w-full mt-8 mb-16 sm:mb-32 px-6 sm:px-0 sm:max-w-2xl md:max-w-5xl lg:max-w-4xl xl:max-w-6xl mx-auto gap-4 md:gap-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
               <AboutTutorial />
 
               {searchedProjects.map((project, i) => (
@@ -147,7 +149,7 @@ const ProjectsComp = ({ id }: { id?: string }) => {
               ))}
             </div>
             {isFetchingNextPage && (
-              <div className="flex justify-center font-bold text-slate-800 mb-16">
+              <div className="flex justify-center font-bold text-slate-800 mb-16 dark:text-foreground drop-shadow-lg">
                 Läd mehr Projekte...
               </div>
             )}

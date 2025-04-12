@@ -83,7 +83,7 @@ const LoginForm = () => {
           <div className="">
             <h1
               className={cn(
-                "text-2xl font-bold tracking-tighter drop-shadow-lg",
+                "text-2xl font-bold tracking-tighter drop-shadow-lg dark:text-foreground",
                 dmSans.className
               )}
             >

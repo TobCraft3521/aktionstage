@@ -167,7 +167,7 @@ const AdminTable = <T extends { id: string; name: string }>({
 
       {(rows?.length || 0) > 0 || isPending ? (
         /* Table */
-        <ScrollArea className="bg-slate-100 h-full rounded-lg border border-slate-200 w-full">
+        <ScrollArea className="bg-slate-100 h-full rounded-lg border border-slate-200 w-full dark:bg-background dark:border-neutral-800">
           <Table>
             <TableHeader>
               <TableRow>
@@ -195,18 +195,18 @@ const AdminTable = <T extends { id: string; name: string }>({
                 new Array(5).fill(0).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell>
-                      <Skeleton className="bg-slate-200 w-[20px] h-[20px]" />
+                      <Skeleton className="bg-slate-200 w-[20px] h-[20px] dark:bg-accent" />
                     </TableCell>
                     {columns.map(
                       (_, j) =>
-                        j !== 0 /* not the id collumn */ && (
+                        j !== 0 /* not the last collumn (who cares which one) */ && (
                           <TableCell key={j}>
-                            <Skeleton className="bg-slate-200 w-full h-[20px]" />
+                            <Skeleton className="bg-slate-200 w-full h-[20px] dark:bg-accent" />
                           </TableCell>
                         )
                     )}
                     <TableCell>
-                      <Skeleton className="bg-slate-200 w-[40px] h-[20px]" />
+                      <Skeleton className="bg-slate-200 w-[40px] h-[20px] dark:bg-accent" />
                     </TableCell>
                   </TableRow>
                 ))
@@ -214,7 +214,7 @@ const AdminTable = <T extends { id: string; name: string }>({
                 filteredRows?.map((row) => (
                   <TableRow
                     key={row.id}
-                    className="hover:brightness-95 transition-all bg-slate-100 cursor-pointer"
+                    className="hover:brightness-95 transition-all bg-slate-100 cursor-pointer dark:bg-background dark:hover:brightness-125"
                     onClick={
                       manageItem
                         ? () => {
@@ -257,7 +257,7 @@ const AdminTable = <T extends { id: string; name: string }>({
           </Table>
         </ScrollArea>
       ) : (
-        <div className="bg-slate-100 h-full rounded-lg flex border border-slate-200 w-full justify-center items-center flex-col gap-4">
+        <div className="bg-slate-100 h-full rounded-lg flex border border-slate-200 w-full justify-center items-center flex-col gap-4 dark:bg-background dark:border-border">
           <div className="flex-col flex items-center justify-center text-lg drop-shadow-xl gap-4">
             <div className="text-7xl">🫗</div>
             Nichts im Angebot für dich...

@@ -14,9 +14,10 @@ interface FeedbackPageProps {
 
 export default function FeedbackPage({ searchParams }: FeedbackPageProps) {
   const {
-    data: { user },
+    data,
     status: sessionStatus,
-  } = useSession() as any
+  } = useSession()
+  const user = data?.user
   const status = searchParams.status || "info" // Default to "info" if not provided
   const message = searchParams.msg || "No message provided."
 

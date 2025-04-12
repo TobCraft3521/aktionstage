@@ -151,7 +151,7 @@ const TeachersList = () => {
           <Badge
             key={teacher.id}
             variant="outline"
-            className="flex items-center border-slate-300 h-[25px] gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop"
+            className="flex items-center border-slate-300 h-[25px] gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 dark:border-neutral-800 dark:text-foreground cursor-no-drop dark:hover:bg-red-500/10"
             onClick={() => {
               removeTeacher({
                 teacherId: teacher.id || "",
@@ -173,7 +173,7 @@ const TeachersList = () => {
             <Badge
               variant="outline"
               className={cn(
-                "hover:bg-slate-100 border-slate-300 h-[25px]",
+                "hover:bg-slate-100 border-slate-300 h-[25px] dark:hover:bg-accent dark:border-neutral-800 dark:text-foreground",
                 (teachers?.length || 0) < 2
                   ? "cursor-pointer"
                   : "cursor-no-drop"

@@ -481,9 +481,8 @@ const ProjectEditor = ({}: Props) => {
           {previewUrl && (
             <div className="w-[200px] h-[256px] bg-slate-900 rounded-[24px] mt-8 mx-auto drop-shadow-lg relative overflow-hidden">
               <Image
-                // hard coded example banner
                 src={previewUrl}
-                alt="Example banner"
+                alt="Image Preview"
                 width={200}
                 height={256}
                 className="object-cover rounded-[24px] w-full h-full"
@@ -518,6 +517,7 @@ const ProjectEditor = ({}: Props) => {
                   setPreviewUrl(undefined)
                 }}
                 className="mt-4 w-32"
+                variant="secondary"
               >
                 Bild ersetzen
               </Button>
@@ -534,7 +534,7 @@ const ProjectEditor = ({}: Props) => {
           <div className="relative flex justify-center items-center mb-4">
             <Popover>
               <PopoverTrigger>
-                <div className="cursor-pointer border-2 rounded-xl p-4 flex items-center justify-center bg-gray-100">
+                <div className="cursor-pointer border-2 rounded-xl p-4 flex items-center justify-center bg-gray-100 dark:bg-accent">
                   <span className="text-3xl">{getValues("emoji") || "⌛"}</span>
                 </div>
               </PopoverTrigger>
@@ -561,7 +561,7 @@ const ProjectEditor = ({}: Props) => {
           <h2 className="text-lg font-semibold mt-4 mb-2 flex items-center justify-between">
             Tag {changedFields?.date && <ChangeHint>Änderung</ChangeHint>}
           </h2>
-          <div className="p-4 border-slate-200 border rounded-lg inline-block mb-2">
+          <div className="p-4 border-slate-200 border rounded-lg inline-block mb-2 dark:border-border">
             <ToggleGroup
               type="single"
               onValueChange={(value) => {
@@ -802,7 +802,7 @@ const ProjectEditor = ({}: Props) => {
             </TabsContent>
           </Tabs>
         ) : (
-          <Button onClick={() => setReplacingLocation(true)}>Ort ändern</Button>
+          <Button onClick={() => setReplacingLocation(true)} variant="secondary">Ort ändern</Button>
         )}
         <Separator className="my-8 h-[0.5px]" />
         <div className="">
@@ -817,7 +817,7 @@ const ProjectEditor = ({}: Props) => {
                 <Badge
                   key={teacher.id}
                   variant="outline"
-                  className="flex items-center gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 cursor-no-drop"
+                  className="flex items-center gap-2 px-3 py-1 transition-all hover:bg-red-100 hover:border-red-500 dark:bg-accent cursor-no-drop"
                   onClick={() => removeTeacher(teacher.id || "")}
                 >
                   {teacher.name}
@@ -827,7 +827,7 @@ const ProjectEditor = ({}: Props) => {
                 </Badge>
               ))
             ) : (
-              <p className="text-slate-500">Keine anderen Lehrer mehr.</p>
+              <p className="text-slate-500 dark:text-neutral-400">Keine anderen Lehrer mehr.</p>
             )}
           </div>
           {/* Teacher Search Popover */}
@@ -840,8 +840,8 @@ const ProjectEditor = ({}: Props) => {
               disabled={addedTeachers.length >= 2}
             >
               {addedTeachers.length < 2 ? (
-                <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer hover:bg-slate-200">
-                  <Plus className="text-slate-500" />
+                <Button className="rounded-lg px-4 bg-slate-100 p-2 cursor-pointer hover:bg-slate-200 dark:bg-secondary">
+                  <Plus className="text-slate-500 dark:text-secondary-foreground" />
                 </Button>
               ) : (
                 // 2/2 reached
@@ -996,7 +996,7 @@ const ProjectEditor = ({}: Props) => {
         )}
 
         <div className="flex justify-between mt-8">
-          <Button variant={"secondary"}>Abbrechen</Button>
+          <Button variant="secondary" onClick={() => router.push(`/teachers/projects/${projectId}`)}>Abbrechen</Button>
           <Button
             className="flex items-center gap-2"
             onClick={() => {

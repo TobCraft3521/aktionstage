@@ -13,7 +13,7 @@ const Layout = ({ children }: Props) => {
       <Header variant="main" />
       <div className="flex flex-1 min-h-0 m-2">
         <AdminSidebar />
-        <div className="flex flex-1 bg-slate-50 relative min-h-0 rounded-xl overflow-hidden flex-col">
+        <div className="flex flex-1 bg-slate-50 relative min-h-0 rounded-xl overflow-hidden flex-col dark:bg-accent">
           <AnimatePresence>{children}</AnimatePresence>
         </div>
       </div>

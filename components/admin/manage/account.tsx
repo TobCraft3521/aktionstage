@@ -164,7 +164,7 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
           <PopoverTrigger asChild className="w-full">
             <Button
               role="combobox"
-              className="w-[250px] md:w-full justify-between bg-slate-200 dark:bg-foreground hover:bg-slate-300 border text-gray-900 border-slate-300 border-none"
+              className="w-[250px] md:w-full justify-between bg-slate-200 dark:bg-background hover:bg-slate-300 border text-gray-900 border-slate-300 border-none dark:text-foreground"
             >
               Projekte zuweißen
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -206,7 +206,7 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
           </PopoverContent>
         </Popover>
         <Button
-          className="flex items-center gap-2 bg-slate-200 hover:bg-slate-300"
+          className="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 dark:bg-background dark:hover:bg-background"
           variant="secondary"
           onClick={() =>
             openConfirmModal({
@@ -241,12 +241,12 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
         </Button>
       </div>
       <div className="">
-        <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36">
-          <div className="text-3xl font-extrabold text-slate-800">
+        <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36 dark:bg-background dark:text-foreground">
+          <div className="text-3xl font-extrabold text-slate-800 dark:text-foreground">
             {projectsCount}
           </div>
-          <Separator className="bg-slate-300 w-full" />
-          <div className="text-sm text-slate-600 font-medium">Projekte</div>
+          <Separator className="bg-slate-300 w-full dark:bg-border" />
+          <div className="text-sm text-slate-600 font-medium dark:text-foreground">Projekte</div>
         </div>
       </div>
     </div>
