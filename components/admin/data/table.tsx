@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -118,52 +118,55 @@ const AdminTable = <T extends { id: string; name: string }>({
   return (
     <div className="w-full space-y-8 flex-1 flex flex-col">
       {/* Header */}
-      <div className="w-full flex flex-row items-center gap-4 h-8">
-        <Input
-          placeholder={`Suche ${title}`}
-          className="flex-1"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        {filters?.map((filter, index) => (
-          <div key={index}>
-            {filter.render(filterValues[filter.label], (val) =>
-              setFilterValue(filter.label, val)
-            )}
-          </div>
-        ))}
-        {/* Reset Filters Button */}
-        <Button variant="default" onClick={resetFilters}>
-          Reset
-        </Button>
-        <Separator orientation="vertical" className="h-full" />
-        {importFn && (
-          <Button className="p-0">
-            <label
-              htmlFor="import-csv"
-              className="flex items-center gap-2 p-2 px-4 cursor-pointer"
-            >
-              <Upload size={16} /> Importieren
-            </label>
+      <ScrollArea className="w-full h-12">
+        <div className="flex flex-row items-center gap-4">
+          <Input
+            placeholder={`Suche ${title}`}
+            className="flex-1 min-w-64"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {filters?.map((filter, index) => (
+            <div key={index}>
+              {filter.render(filterValues[filter.label], (val) =>
+                setFilterValue(filter.label, val)
+              )}
+            </div>
+          ))}
+          {/* Reset Filters Button */}
+          <Button variant="default" onClick={resetFilters}>
+            Reset
           </Button>
-        )}
+          <Separator orientation="vertical" className="h-full" />
+          {importFn && (
+            <Button className="p-0">
+              <label
+                htmlFor="import-csv"
+                className="flex items-center gap-2 p-2 px-4 cursor-pointer"
+              >
+                <Upload size={16} /> Importieren
+              </label>
+            </Button>
+          )}
 
-        {addFn && (
-          <Button variant="secondary" className="p-0">
-            <label
-              htmlFor="add-csv"
-              className="flex items-center gap-2 p-2 px-4 cursor-pointer"
-            >
-              Hinzufügen
-            </label>
-          </Button>
-        )}
-        {exportFn && (
-          <Button variant="secondary" onClick={() => exportFn(rows || [])}>
-            Exportieren
-          </Button>
-        )}
-      </div>
+          {addFn && (
+            <Button variant="secondary" className="p-0">
+              <label
+                htmlFor="add-csv"
+                className="flex items-center gap-2 p-2 px-4 cursor-pointer"
+              >
+                Hinzufügen
+              </label>
+            </Button>
+          )}
+          {exportFn && (
+            <Button variant="secondary" onClick={() => exportFn(rows || [])}>
+              Exportieren
+            </Button>
+          )}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       {(rows?.length || 0) > 0 || isPending ? (
         /* Table */
@@ -199,7 +202,8 @@ const AdminTable = <T extends { id: string; name: string }>({
                     </TableCell>
                     {columns.map(
                       (_, j) =>
-                        j !== 0 /* not the last collumn (who cares which one) */ && (
+                        j !==
+                          0 /* not the last collumn (who cares which one) */ && (
                           <TableCell key={j}>
                             <Skeleton className="bg-slate-200 w-full h-[20px] dark:bg-accent" />
                           </TableCell>
@@ -255,6 +259,7 @@ const AdminTable = <T extends { id: string; name: string }>({
               )}
             </TableBody>
           </Table>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       ) : (
         <div className="bg-slate-100 h-full rounded-lg flex border border-slate-200 w-full justify-center items-center flex-col gap-4 dark:bg-background dark:border-border">

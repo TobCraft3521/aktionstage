@@ -3,7 +3,7 @@ import Link from "next/link"
 
 const TeachersSidebar = () => {
   return (
-    <div className="h-full w-[260px] border-zinc-300">
+    <div className="h-full w-[260px] border-zinc-300 hidden md:block">
       <h1 className="p-12 pb-1 text-xl font-semibold">Für Lehrer</h1>
       <h2 className="mt-4 w-full px-12 text-sm font-semibold">
         Eigene Projekte

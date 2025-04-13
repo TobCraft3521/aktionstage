@@ -254,7 +254,7 @@ const ManageAccount = ({
         </div>
       </div>
       {/* content */}
-      <div className="w-full max-w-6xl px-16 2xl:px-0 2xl:mx-auto flex-1 flex py-8 min-h-0">
+      <div className="w-full max-w-6xl px-8 md:px-16 2xl:px-0 2xl:mx-auto flex-1 flex py-8 min-h-0">
         {tabs[activeTab].content}
       </div>
     </div>

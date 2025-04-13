@@ -21,7 +21,7 @@ import { Role } from "@prisma/client"
 import { useQueryClient } from "@tanstack/react-query"
 import { Layers } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { useState } from "react"
+import React, { useState } from "react"
 import { motion } from "motion/react"
 import { Filter } from "@/lib/types"
 import {
@@ -99,36 +99,29 @@ const Overview = (props: Props) => {
                         if (i < 5) return null // Assuming grades start from 5
                         const base = i.toString()
                         return (
-                          <>
-                            <SelectItem
-                              key={i}
-                              className="cursor-pointer"
-                              value={base}
-                            >
+                          <React.Fragment key={base}>
+                            <SelectItem className="cursor-pointer" value={base}>
                               {base}. Klasse
                             </SelectItem>
                             <SelectItem
-                              key={`${i}a`}
                               className="cursor-pointer"
                               value={`${base}a`}
                             >
                               {base}a
                             </SelectItem>
                             <SelectItem
-                              key={`${i}b`}
                               className="cursor-pointer"
                               value={`${base}b`}
                             >
                               {base}b
                             </SelectItem>
                             <SelectItem
-                              key={`${i}c`}
                               className="cursor-pointer"
                               value={`${base}c`}
                             >
                               {base}c
                             </SelectItem>
-                          </>
+                          </React.Fragment>
                         )
                       })}
                     </SelectGroup>
@@ -323,7 +316,7 @@ const Overview = (props: Props) => {
             Hier siehst du alle Schüler, Lehrer und Projekte.
           </p>
         </div>
-        <div className="mt-auto flex flex-row gap-4 text-slate-700 w-full max-w-6xl ml-16 2xl:mx-auto dark:text-primary">
+        <div className="mt-auto flex flex-row gap-4 text-slate-700 w-full max-w-6xl px-16 2xl:px-0 2xl:mx-auto dark:text-primary overflow-y-auto">
           {tabs.map((t, i) => (
             <div
               key={i}
@@ -343,7 +336,7 @@ const Overview = (props: Props) => {
         </div>
       </div>
       {/* content */}
-      <div className="w-full max-w-6xl px-16 2xl:px-0 2xl:mx-auto flex-1 flex py-8 min-h-0">
+      <div className="w-full max-w-6xl px-8 md:px-16 2xl:px-0 2xl:mx-auto flex-1 flex py-8 min-h-0">
         {tabs[tab].content}
       </div>
     </div>

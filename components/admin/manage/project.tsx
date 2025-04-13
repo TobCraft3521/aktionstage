@@ -198,8 +198,8 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
   }, [accounts, project?.day])
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-row gap-2">
+    <div className="space-y-4 w-full">
+      <div className="flex flex-row gap-2 w-min max-w-full overflow-y-auto">
         <Popover open={isAddToProjectOpen} onOpenChange={setIsAddToProjectOpen}>
           <PopoverTrigger asChild className="w-full">
             <Button
@@ -311,7 +311,7 @@ const ManageProjectActions: React.FC<Props> = ({ project }) => {
           Löschen
         </Button>
       </div>
-      <div className="flex flex-row gap-4">
+      <div className="flex flex-row gap-4 flex-wrap">
         <div className="">
           <div className="bg-slate-200 rounded-2xl p-4 flex flex-col items-center gap-3 w-36 h-full dark:bg-background dark:text-foreground">
             <div className="text-2xl font-black text-slate-800 dark:text-primary">

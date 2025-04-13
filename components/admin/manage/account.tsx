@@ -158,8 +158,8 @@ const ManageAccountActions: React.FC<Props> = ({ account }) => {
   })
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-row gap-2">
+    <div className="space-y-4 w-full">
+      <div className="flex flex-row gap-2 overflow-y-auto w-min max-w-full">
         <Popover open={isAddToProjectOpen} onOpenChange={setIsAddToProjectOpen}>
           <PopoverTrigger asChild className="w-full">
             <Button

@@ -162,11 +162,11 @@ const ProjectsComp = ({ id }: { id?: string }) => {
         ) : (
           noProjectsFound && (
             <div className="flex-1 flex-col mb-16 flex items-center justify-center text-lg min-h-[40vh] gap-4">
-              <div className="flex-col drop-shadow-xl flex items-center justify-center gap-4">
+              <div className="flex-col drop-shadow-xl flex items-center justify-center gap-4 px-8">
                 <div className="text-7xl">{randomNothingFoundJoke.emoji}</div>
                 <div className="flex flex-col items-center">
                   {randomNothingFoundJoke.text}
-                  <div className="flex flex-col items-end w-full text-slate-500">
+                  <div className="flex flex-col items-end w-full text-slate-500 dark:text-neutral-400">
                     -ChatGPT
                   </div>
                   {/* <Link

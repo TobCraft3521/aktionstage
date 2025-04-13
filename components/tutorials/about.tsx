@@ -143,7 +143,7 @@ export function AboutTutorial() {
   return (
     <motion.div
       className={cn(
-        "relative bg-white rounded-3xl shadow-2xl flex flex-col justify-between h-[60vw] sm:h-64",
+        "relative bg-white rounded-3xl shadow-2xl flex flex-col justify-between h-[60vw] sm:h-64 dark:bg-accent",
         styles.loadAni
       )}
     >
@@ -193,7 +193,7 @@ export function AboutTutorial() {
             >
               {/* Light Bulb Emoji */}
               {/* Card Content */}
-              <h2 className="text-xl md:text-2xl font-black tracking-tight text-gray-900 drop-shadow-md mb-4">
+              <h2 className="text-xl md:text-2xl font-black tracking-tight text-gray-900 drop-shadow-md mb-4 dark:text-foreground">
                 {/* Gradient text highlighter */}
                 Über die
                 <span className="relative inline-block ml-2">
@@ -206,12 +206,12 @@ export function AboutTutorial() {
                 <ShadButton
                   variant="outline"
                   onClick={() => finish()}
-                  className="w-full px-4 py-1.5 h-10 border border-slate-500 text-slate-800 font-semibold rounded-lg shadow-md hover:bg-slate-100 focus:outline-none focus:ring-slate-500 focus:ring-opacity-50"
+                  className="w-full px-4 py-1.5 h-10 border font-semibold rounded-lg shadow-md"
                 >
                   Fertig
                 </ShadButton>
                 <ShadButton
-                  className="w-full px-4 py-1.5 h-10 bg-slate-800 text-white font-semibold rounded-lg shadow-md hover:bg-slate-700 focus:outline-none focus:ring-slate-500 focus:ring-opacity-50 flex items-center justify-center gap-2"
+                  className="w-full px-4 py-1.5 h-10 font-semibold rounded-lg shadow-md focus:ring-opacity-50 flex items-center justify-center gap-2"
                   onClick={() => handleSetActiveIndex(activeIndex + 1)}
                 >
                   Mehr <ArrowRight size={16} />

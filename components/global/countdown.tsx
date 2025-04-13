@@ -80,14 +80,12 @@ export function Countdown() {
     if (defaultStart > Date.now() && user) syncToNextSecond()
   }, [defaultStart, user])
 
-  if (!startDate || !endDate) return null
+  if (!startDate || !endDate) return <div className="h-8"></div>
 
   const now = Date.now()
 
   if (error) return error
-  if (timeLeft.days === -1) return null
-
-  if (!user) return <div className="h-8"></div>
+  if (timeLeft.days === -1) return <div className="h-8"></div>
 
   if (vipEarlyAccess)
     return (
