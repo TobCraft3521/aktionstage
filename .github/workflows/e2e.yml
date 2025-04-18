@@ -1,0 +1,50 @@
+name: Cypress Tests using Cypress Docker Image
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-24.04
+    container:
+      image: cypress/browsers:22.12.0
+      options: --user root
+
+    services:
+      postgres:
+        image: postgres:14
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+        options: --health-cmd="pg_isready -U testuser" --health-timeout=30s --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Prisma Database
+        run: |
+          echo "DATABASE_URL=postgresql://testuser:testpassword@postgres:5432/testdb?schema=public" >> .env
+          npm i -D typescript tsx @types/node
+          npm i prisma --save-dev
+          npx prisma migrate deploy
+          npm run db:seed
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          build: npm run build
+          start: npm start
+          browser: chrome
+        env:
+          AUTH_SECRET: ChuGZQWLjsUJ/O3XRo/35hOtS9CvhW+skp1NXh3JI3Y= # Secret used to sign JWT tokens: this one is for testing only, use a different one in production
+          AUTH_TRUST_HOST: true # Trust the host for JWT token signing
+      - name: Upload Cypress Screenshots and Videos
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-artifacts
+          path: |-
+            cypress/screenshots
+        if: ${{ failure() }}
