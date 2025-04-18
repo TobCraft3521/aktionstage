@@ -40,7 +40,7 @@ jobs:
           browser: chrome
         env:
           AUTH_SECRET: ChuGZQWLjsUJ/O3XRo/35hOtS9CvhW+skp1NXh3JI3Y= # Secret used to sign JWT tokens: this one is for testing only, use a different one in production
-#          AUTH_TRUST_HOST: true # Trust the host for JWT token signing
+          AUTH_TRUST_HOST: true # Trust the host for JWT token signing
       - name: Upload Cypress Screenshots and Videos
         uses: actions/upload-artifact@v4
         with:
