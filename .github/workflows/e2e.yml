@@ -40,3 +40,10 @@ jobs:
           browser: chrome
         env:
           AUTH_SECRET: ChuGZQWLjsUJ/O3XRo/35hOtS9CvhW+skp1NXh3JI3Y= # Secret used to sign JWT tokens: this one is for testing only, use a different one in production
+      - name: Upload Cypress Screenshots and Videos
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress-artifacts
+          path: |-
+            cypress/screenshots
+        if: ${{ failure() }}
