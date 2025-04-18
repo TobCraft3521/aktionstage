@@ -49,7 +49,7 @@ const TeacherProjects = (props: Props) => {
               .join(", ")}
           />
         ))}
-        {(projects?.length || 3) < 3 && <CreateProjectCard />}
+        {(projects?.length || 0) < 3 && <CreateProjectCard />}
       </div>
     </div>
   )

@@ -475,7 +475,9 @@ const MultiStepForm = () => {
       <form onSubmit={(e) => e.preventDefault()}>
         {step === 0 && (
           <div>
-            <h2 className="text-lg font-semibold mb-2 dark:text-foreground">Name des Projekts</h2>
+            <h2 className="text-lg font-semibold mb-2 dark:text-foreground">
+              Name des Projekts
+            </h2>
             <p className="text-gray-500 mb-4 dark:text-neutral-400">
               Bitte auf eine schöne Formatierung achten und kürzere Namen
               bevorzugen <u>(Am besten nur ein Wort, zB Tennis)</u>. In der
@@ -899,7 +901,9 @@ const MultiStepForm = () => {
                   </Badge>
                 ))
               ) : (
-                <p className="text-slate-500 dark:text-neutral-400">Noch keine anderen Lehrer.</p>
+                <p className="text-slate-500 dark:text-neutral-400">
+                  Noch keine anderen Lehrer.
+                </p>
               )}
             </div>
             {/* Teacher Search Popover */}
@@ -937,9 +941,8 @@ const MultiStepForm = () => {
                           // Check if the teacher is unavailable, already added, or assigned
                           const isDisabled =
                             isTeacherAlreadyAdded(id, addedTeachers) ||
-                            !isTeacherAvailable(id, day, allTeacherLoads)
-                          // Using the isTeacherFreeOnDay helper
-                          isCurrentUser(id, user.data?.user.id)
+                            !isTeacherAvailable(id, day, allTeacherLoads) ||
+                            isCurrentUser(id, user.data?.user.id)
 
                           return (
                             <CommandItem
