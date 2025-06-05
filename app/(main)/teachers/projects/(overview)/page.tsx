@@ -50,17 +50,9 @@ const TeacherProjects = (props: Props) => {
               .join(", ")}
           />
         ))}
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-        {(projects?.length || 3) < 3 && <CreateProjectCard />}
-=======
         {(projects?.length || 0) < getAktionstageDays().length && (
           <CreateProjectCard />
         )}
->>>>>>> Stashed changes
-=======
-        {(projects?.length || 0) < 3 && <CreateProjectCard />}
->>>>>>> 00ec37fdb56f261eb8e7d0619de3cb75620bc374
       </div>
     </div>
   )
