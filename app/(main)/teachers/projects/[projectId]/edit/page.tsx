@@ -803,7 +803,12 @@ const ProjectEditor = ({}: Props) => {
             </TabsContent>
           </Tabs>
         ) : (
-          <Button onClick={() => setReplacingLocation(true)} variant="secondary">Ort ändern</Button>
+          <Button
+            onClick={() => setReplacingLocation(true)}
+            variant="secondary"
+          >
+            Ort ändern
+          </Button>
         )}
         <Separator className="my-8 h-[0.5px]" />
         <div className="">
@@ -828,7 +833,9 @@ const ProjectEditor = ({}: Props) => {
                 </Badge>
               ))
             ) : (
-              <p className="text-slate-500 dark:text-neutral-400">Keine anderen Lehrer mehr.</p>
+              <p className="text-slate-500 dark:text-neutral-400">
+                Keine anderen Lehrer mehr.
+              </p>
             )}
           </div>
           {/* Teacher Search Popover */}
@@ -997,7 +1004,12 @@ const ProjectEditor = ({}: Props) => {
         )}
 
         <div className="flex justify-between mt-8">
-          <Button variant="secondary" onClick={() => router.push(`/teachers/projects/${projectId}`)}>Abbrechen</Button>
+          <Button
+            variant="secondary"
+            onClick={() => router.push(`/teachers/projects/${projectId}`)}
+          >
+            Abbrechen
+          </Button>
           <Button
             className="flex items-center gap-2"
             onClick={() => {

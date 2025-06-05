@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "cypress open",
+    "test:cli": "cypress run",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "db:seed": "tsx lib/seed/seed.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.609.0",
@@ -63,6 +68,7 @@
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "tsx": "^4.19.3",
     "uuid": "^10.0.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.4"
@@ -70,17 +76,23 @@
   "devDependencies": {
     "@types/lodash": "^4.17.6",
     "@types/md5": "^2.3.5",
-    "@types/node": "^20",
+    "@types/node": "^20.17.30",
     "@types/papaparse": "^5.3.15",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
+    "@vitest/coverage-v8": "^3.1.1",
+    "@vitest/ui": "^3.1.1",
+    "cypress": "^14.3.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
+    "jsdom": "^26.1.0",
     "msw": "^2.7.3",
     "postcss": "^8",
     "prisma": "^6.2.1",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.1",
+    "vitest-mock-extended": "^3.1.0"
   }
 }

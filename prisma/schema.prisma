@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,40 +7,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  TEACHER
-  STUDENT
-  VIP
-}
-
 model Account {
-  id       String @id @default(cuid())
-  userName String @unique
-  name     String
-
-  role  Role    @default(STUDENT)
-  short String  @default("")
-  grade String?
-
-  projects            Project[]            @relation("ProjectAccount")
+  id                  String               @id @default(cuid())
+  userName            String               @unique
+  name                String
+  role                Role                 @default(STUDENT)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  short               String               @default("")
+  grade               String?
+  authDetails         AuthDetails?
   toturialCompletions TutorialCompletion[]
-
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  authDetails AuthDetails?
+  projects            Project[]            @relation("ProjectAccount")
 
   @@index([userName])
   @@index([role])
 }
 
 model AuthDetails {
-  // to not expose the password on the account object, now require include auth details
   id              String  @id @default(cuid())
   accountId       String  @unique
-  account         Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   password        String
   initialPassword String
+  account         Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id           String    @id @default(cuid())
+  name         String
+  description  String
+  imageUrl     String
+  time         String    @default("7:55-12.55")
+  location     String    @default("ASG")
+  day          Day       @default(MON)
+  minGrade     Int       @default(5)
+  maxGrade     Int       @default(11)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  roomId       String?
+  emoji        String    @default("🤗")
+  maxStudents  Int       @default(10)
+  price        Float     @default(0)
+  room         Room?     @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  participants Account[] @relation("ProjectAccount")
+
+  @@index([id])
+  @@index([name])
+}
+
+model TutorialCompletion {
+  id        String   @id @default(cuid())
+  accountId String
+  createdAt DateTime @default(now())
+  tutorial  Tutorial
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Room {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  projects  Project[]
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  VIP
 }
 
 enum Day {
@@ -55,53 +84,7 @@ enum Day {
   WED
 }
 
-model Project {
-  id          String @id @default(cuid())
-  name        String
-  description String
-  imageUrl    String
-  maxStudents Int    @default(10)
-  price       Float  @default(0)
-  time        String @default("7:55-12.55")
-  emoji       String @default("🤗")
-  // custom location or room rendered to string
-  location    String @default("ASG")
-  day         Day    @default(MON)
-  minGrade    Int    @default(5)
-  maxGrade    Int    @default(11)
-
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  // max 3 teachers
-  participants Account[] @relation("ProjectAccount")
-
-  room   Room?   @relation(fields: [roomId], references: [id], onDelete: SetNull)
-  roomId String?
-
-  @@index([id])
-  @@index([name])
-}
-
 enum Tutorial {
   ABOUT
   FEATURES
-}
-
-model TutorialCompletion {
-  id        String   @id @default(cuid())
-  tutorial  Tutorial
-  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  accountId String
-  createdAt DateTime @default(now())
-}
-
-// Rooms including their status (free, taken)
-model Room {
-  id       String    @id @default(cuid())
-  name     String
-  // taken variable now represented simply by whether it has a project or not
-  projects Project[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
