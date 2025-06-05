@@ -69,6 +69,7 @@ import { z } from "zod"
 import "./range-slider-styles.css"
 import { RoomWithProjectsWithParticipants } from "@/lib/types"
 import { lookUpDay } from "@/lib/helpers/lookupname"
+import { getAktionstageDays } from "@/lib/config/days"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -682,7 +683,7 @@ const MultiStepForm = () => {
                 }} // non empty
                 value={getValues("date")}
               >
-                {Object.values(Day).map((day) => {
+                {getAktionstageDays().map((day) => {
                   return (
                     <div
                       key={day}

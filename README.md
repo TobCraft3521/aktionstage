@@ -36,6 +36,7 @@ To clone and run locally, just run git clone ...; npm i; and set up the env:
 - Clean admin dashboard with fully functional importing/ adding/ exporting, optimistic ui for instant change reflection in the ui
 - Countdown with confetti
 - VIP early access for selected people as a reward for building this haha
+- Custom day range, etc MON,TUE or MON,TUE,WED, extendable system
 
 ### The login page has been redesigned.
 

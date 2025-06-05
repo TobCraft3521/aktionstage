@@ -127,4 +127,7 @@ const lookUpVip: Record<string, boolean> = {
   "Sebastian Zillner": true,
   "Elisa Granitzer": true,
   "Alexa Zimmermann": true,
+  "Thomas Kopfinger": true,
+  "Raffael Kellermann": true,
+  "Niklas Stockinger": true,
 }

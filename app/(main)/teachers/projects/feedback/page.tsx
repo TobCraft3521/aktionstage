@@ -71,7 +71,7 @@ export default function FeedbackPage({ searchParams }: FeedbackPageProps) {
   const currentStyle = styles[status] || styles.info
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-6 py-12">
+    <div className="min-h-screen flex flex-col justify-center items-center px-6 py-12 bg-gradient-to-t from-background to-neutral-200 dark:to-secondary/50">
       {/* Content Wrapper */}
       <div className="w-full max-w-3xl text-center">
         <div className="drop-shadow-xl">

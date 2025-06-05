@@ -8,7 +8,7 @@ const CreateProjectCard = (props: Props) => {
     <div className="">
       <Link
         href="/teachers/projects/create"
-        className="group flex h-[128px] w-56 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-gradient-to-r from-gray-100 to-gray-200 shadow-neutral-200 dark:shadow-neutral-900 shadow-lg transition-all hover:border-slate-300 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:border-[1.5px] dark:border-border dark:bg-gradient-to-r dark:from-zinc-900 dark:to-neutral-800 dark:hover:border-slate-800 dark:hover:bg-gradient-to-r dark:hover:from-gray-800 dark:hover:to-gray-700"
+        className="group flex h-[128px] w-56 cursor-pointer overflow-hidden rounded-lg border border-slate-200 bg-gradient-to-r from-gray-100 to-gray-200 shadow-neutral-20 shadow-lg transition-all hover:border-slate-300 hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-300 dark:border-[1.5px] dark:border-border dark:bg-gradient-to-r dark:from-zinc-900 dark:to-neutral-800 dark:hover:border-slate-800 dark:hover:bg-gradient-to-r dark:hover:from-gray-800 dark:hover:to-gray-700"
       >
         <div className="relative flex h-full w-1/3 flex-shrink-0 items-center justify-center overflow-hidden rounded-l-lg bg-neutral-300 transition-all dark:bg-accent">
           <div className="absolute -bottom-[175%] left-[-30%] h-[160%] w-[160%] rotate-12 transform bg-slate-600 transition-all duration-500 group-hover:bottom-[-10%] dark:bg-[#ea5234]"></div>

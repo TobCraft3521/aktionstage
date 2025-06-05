@@ -200,7 +200,7 @@ export const queryStudentsForProject = async (projectId: string) => {
           id: projectId,
         },
       },
-      OR: [{ role: Role.VIP }, { role: Role.VIP }],
+      OR: [{ role: Role.STUDENT }, { role: Role.VIP }],
     },
     include: {
       projects: true,

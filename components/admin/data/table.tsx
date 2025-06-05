@@ -232,10 +232,10 @@ const AdminTable = <T extends { id: string; name: string }>({
                     {/* Render ID column first */}
                     <TableCell className="h-12 p-0 pl-4">
                       {copiedId === row.id ? (
-                        <Check className="hover:bg-slate-200 h-8 w-8 p-2 rounded-lg" />
+                        <Check className="hover:bg-slate-200 dark:hover:bg-zinc-600 h-8 w-8 p-2 rounded-lg" />
                       ) : (
                         <Copy
-                          className="hover:bg-slate-200 h-8 w-8 p-2 rounded-lg"
+                          className="hover:bg-slate-200 dark:hover:bg-zinc-700 h-8 w-8 p-2 rounded-lg"
                           onClick={(e) => {
                             e.stopPropagation()
                             setCopiedId(row.id)

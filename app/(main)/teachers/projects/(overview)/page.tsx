@@ -3,6 +3,7 @@ import CreateProjectCard from "@/components/teachers/ownproject-card/create"
 import OwnProjectCard from "@/components/teachers/ownproject-card/ownproject-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { queryTeachersProjects } from "@/lib/actions/queries/projects"
+import { getAktionstageDays } from "@/lib/config/days"
 import { ProjectWithParticipants } from "@/lib/types"
 import { Role } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
@@ -49,7 +50,13 @@ const TeacherProjects = (props: Props) => {
               .join(", ")}
           />
         ))}
+<<<<<<< Updated upstream
         {(projects?.length || 3) < 3 && <CreateProjectCard />}
+=======
+        {(projects?.length || 0) < getAktionstageDays().length && (
+          <CreateProjectCard />
+        )}
+>>>>>>> Stashed changes
       </div>
     </div>
   )

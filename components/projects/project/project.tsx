@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { lookUpDay } from "@/lib/helpers/lookupname"
 import { cn } from "@/lib/utils"
-import { Account, Project, Role } from "@prisma/client"
+import { Account, Day, Project, Role } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
-import { ArrowDown, X } from "lucide-react"
+import { ArrowDown, CircleAlert, Siren, X } from "lucide-react"
 import {
   AnimatePresence,
   motion,
@@ -17,8 +17,9 @@ import {
 import { DM_Sans } from "next/font/google"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 import SignUpButton from "./sign-up"
+import { getAktionstageDays } from "@/lib/config/days"
 
 const dmSans = DM_Sans({
   weight: "800",
@@ -78,6 +79,116 @@ const ProjectComp = ({
   }, [project.participants])
 
   const id = project.id
+
+  const days = useMemo(() => getAktionstageDays(), [])
+  if (!days.includes(project.day as Day))
+    return (
+      <motion.div
+        className="absolute w-full h-full top-0 left-0 right-0 bottom-0 flex items-center overflow-hidden justify-center bg-background z-[99]"
+        layoutId={`card-container-${id}`}
+        style={{
+          y,
+          scale,
+          willChange: "transform",
+          borderRadius,
+        }}
+        // reduced motion: enable this and add transition-all and remove layoutId
+        // initial={{ opacity: 0 }}
+        // animate={{ opacity: 1 }}
+        // exit={{
+        //   opacity: 0,
+        // }}
+        drag={
+          typeof window !== "undefined" && window.innerWidth > 768 ? "y" : false
+        }
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0.2}
+        onDrag={(event, info) => {
+          if (
+            info.offset.y > swipeDismissDistance ||
+            info.offset.y < -swipeDismissDistance
+          ) {
+            router.push(routePrefix)
+          }
+        }}
+      >
+        <motion.div
+          // initial={{ opacity: 0 }}
+          animate={controls}
+          className="absolute inset-0"
+        >
+          {/* {showContents && ( */}
+          <Image
+            src={project?.imageUrl || "/imgs/asg-logo.jpg"}
+            alt={project?.name || "project-image"}
+            width={1028}
+            height={1028}
+            blurDataURL={project?.imageUrl || "/imgs/asg-logo.jpg"}
+            className="brightness transition-all w-full h-full object-cover group-hover:brightness-75 pointer-events-none"
+            priority
+            placeholder="blur"
+          />
+          {/* )} */}
+          {/* lag */}
+          {showContents && (
+            <div className="top-16 md:top-[40%] left-[0] h-[550px] w-[1028px] blur-[80px] bg-black opacity-80 absolute"></div>
+          )}
+        </motion.div>
+        <motion.div className="absolute md:bottom-16 w-full">
+          <motion.h1
+            layoutId={"title-" + project.id}
+            className={cn(
+              "text-4xl md:text-6xl font-extrabold text-white md:leading-[96px] tracking-tighter flex items-center px-8 md:px-20 gap-4",
+              dmSans.className
+            )}
+          >
+            <div className="text-2xl md:text-4xl flex justify-center rounded-2xl items-center bg-white/5 backdrop-blur-md border-slate-200/10 shadow-xl p-4 h-[56px] w-[56px] sm:h-[72px] sm:w-[72px] bg-opacity-65 border">
+              {project.emoji}
+            </div>
+            {project?.name}
+          </motion.h1>
+          {showContents && (
+            <div className="relative max-w-xl mx-8 md:mx-20 text-secondary-foreground mb-4 md:mb-8 p-6 mt-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/30 dark:border-neutral-700 shadow-xl">
+              <div className="flex flex-row gap-4 justify-between">
+                <CircleAlert className="text-red-400 h-12 w-12" />
+                <div>
+                  <h2 className="text-lg font-semibold text-secondary dark:text-secondary-foreground">
+                    Unerwarteter Projekttag 🫣
+                  </h2>
+                  <p className="text-sm mt-1 text-secondary dark:text-secondary-foreground">
+                    Dieses Projekt ist für{" "}
+                    <strong>{lookUpDay[project.day as Day]}</strong> vorgesehen
+                    – in diesem Jahr finden die Aktionstage jedoch nur am{" "}
+                    {days.map((d, i) => (
+                      <Fragment key={d}>
+                        <strong>{lookUpDay[d]}</strong>
+                        {i < days.length - 2
+                          ? ", "
+                          : i === days.length - 2
+                          ? " und "
+                          : ""}
+                      </Fragment>
+                    ))}{" "}
+                    statt.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+        {showContents && (
+          <div
+            className="absolute top-8 md:top-12 right-8 md:right-12 border-slate-800 border-2 rounded-full p-2 cursor-pointer bg-slate-800 bg-opacity-65"
+            onClick={() => {
+              setShowContents(false)
+              router.push(routePrefix)
+            }}
+          >
+            <X className="text-white" size={24} strokeWidth={3} />
+          </div>
+        )}
+      </motion.div>
+    )
 
   return (
     <motion.div
@@ -139,7 +250,7 @@ const ProjectComp = ({
             dmSans.className
           )}
         >
-          <div className="text-2xl md:text-4xl flex justify-center rounded-2xl items-center bg-slate-800 p-4 h-[56px] w-[56px] sm:h-[72px] sm:w-[72px] bg-opacity-65 border-2 border-slate-800">
+          <div className="text-2xl md:text-4xl flex justify-center rounded-2xl items-center bg-white/5 backdrop-blur-md border-slate-200/10 shadow-xl p-4 h-[56px] w-[56px] sm:h-[72px] sm:w-[72px] bg-opacity-65 border">
             {project.emoji}
           </div>
           {project?.name}
@@ -225,7 +336,7 @@ const ProjectComp = ({
                 ].map((item, index) => (
                   <div
                     key={index}
-                    className="w-full sm:w-[154px] h-[43px] bg-slate-800 gap-2 flex items-center justify-center text-white rounded-xl border-2 border-slate-800 bg-opacity-75 hover:bg-opacity-90 transition-all"
+                    className="w-full sm:w-auto sm:min-w-[154px] h-[43px] px-4 bg-slate-800/70 backdrop-blur-sm border-slate-200/10 border shadow-xl gap-2 flex items-center justify-center text-white rounded-xl bg-opacity-75 hover:bg-opacity-90 transition-all"
                   >
                     {item.icon}
                     <div

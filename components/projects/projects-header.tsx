@@ -5,7 +5,7 @@ import { useSearchState } from "@/stores/use-app-state"
 import { Account, Day } from "@prisma/client"
 import { motion } from "framer-motion"
 import { Check, ChevronsUpDown, ChevronUp, Plus, Search, X } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import AnimatedButton from "../global/some-button"
 import {
   Command,
@@ -24,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select"
+import { lookUpDay } from "@/lib/helpers/lookupname"
+import { getAktionstageDays } from "@/lib/config/days"
 
 const ProjectsHeader = () => {
   const { search, setSearch } = useSearchState()
@@ -42,6 +44,7 @@ const ProjectsHeader = () => {
       behavior: "smooth",
     })
   }
+  const days = useMemo(() => getAktionstageDays(), [])
   return (
     <motion.div
       layoutId="projects-header"
@@ -196,36 +199,19 @@ const ProjectsHeader = () => {
                   <SelectSeparator className="dark:bg-neutral-800" />
                 </>
               )}
-              <SelectItem
-                value="MON"
-                className={cn(
-                  "cursor-pointer dark:hover:bg-neutral-800",
-                  search.day === Day.MON &&
-                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
-                )}
-              >
-                Montag
-              </SelectItem>
-              <SelectItem
-                value="TUE"
-                className={cn(
-                  "cursor-pointer dark:hover:bg-neutral-800",
-                  search.day === Day.TUE &&
-                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
-                )}
-              >
-                Dienstag
-              </SelectItem>
-              <SelectItem
-                value="WED"
-                className={cn(
-                  "cursor-pointer dark:hover:bg-neutral-800",
-                  search.day === Day.WED &&
-                    "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
-                )}
-              >
-                Mittwoch
-              </SelectItem>
+              {days.map((day) => (
+                <SelectItem
+                  key={day}
+                  value={day}
+                  className={cn(
+                    "cursor-pointer dark:hover:bg-neutral-800",
+                    search.day === day &&
+                      "bg-slate-100 dark:bg-primary dark:text-primary-foreground"
+                  )}
+                >
+                  {lookUpDay[day as Day]}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Popover open={teachersOpen} onOpenChange={setTeachersOpen}>
