@@ -1,14 +1,7 @@
 name: Unit tests with Vitest
 on:
-<<<<<<< HEAD
-  push:
-    branches:
-      - main
-  pull_request:
-=======
   - push
   - pull_request
->>>>>>> 00ec37fdb56f261eb8e7d0619de3cb75620bc374
 
 jobs:
   unit-tests:
@@ -23,8 +16,4 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run Vitest tests
-<<<<<<< HEAD
         run: npm run test:unit
-=======
-        run: npm run test:unit
->>>>>>> 00ec37fdb56f261eb8e7d0619de3cb75620bc374
