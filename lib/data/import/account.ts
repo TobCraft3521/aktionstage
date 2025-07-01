@@ -121,9 +121,10 @@ const onData = async (
 }
 
 const lookUpVip: Record<string, boolean> = {
+  "Mika Sonntag" : true,
   "Michael Pawlik": true,
   "Tobias Hackenberg": true,
-  "Peter Häussler": true,
+  "Peter Häußler": true,
   "Sebastian Zillner": true,
   "Elisa Granitzer": true,
   "Alexa Zimmermann": true,
